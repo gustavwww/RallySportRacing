@@ -1,0 +1,43 @@
+﻿# CMakeList.txt : CMake project for RallySportRacing, include source and define
+# project specific logic here.
+#
+cmake_minimum_required (VERSION 3.8)
+
+
+
+file(GLOB_RECURSE SHADERS
+    "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/*.vert"
+    "${CMAKE_CURRENT_SOURCE_DIR}/Shaders/*.frag"
+)
+
+source_group("Shaders" FILES ${SHADERS})
+
+# Add source to this project's executable.
+add_executable (RallySportRacing
+    "main.cpp"
+    "SDLWindowHandler.cpp"
+    "SDLWindowHandler.h"
+    ${SHADERS}
+)
+
+find_package(OpenGL REQUIRED)
+
+target_include_directories(RallySportRacing PUBLIC
+                            "${CMAKE_BINARY_DIR}"
+                            "${OpenGL_INCLUDE_DIR}"
+                            "${CMAKE_SOURCE_DIR}/External/GLEW/include"
+                            "${CMAKE_SOURCE_DIR}/External/SDL/include"
+                            "${CMAKE_SOURCE_DIR}/External/glm"
+                          )
+
+target_link_libraries(RallySportRacing PUBLIC 
+                            "${CMAKE_SOURCE_DIR}/External/GLEW/lib/Release/x64/glew32.lib"
+                            "${CMAKE_SOURCE_DIR}/External/SDL/lib/x64/SDL2.lib"
+                            "${CMAKE_SOURCE_DIR}/External/SDL/lib/x64/SDL2main.lib"
+                            "${OPENGL_LIBRARIES}"
+)
+
+add_custom_command(TARGET RallySportRacing POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/External/bin"
+        $<TARGET_FILE_DIR:RallySportRacing>)

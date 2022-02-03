@@ -1,0 +1,10 @@
+# Ignore windows build files
+/bin/
+/build/
+/out/
+
+.vs
+
+# Linux ignores
+build/
+.ycm_extra_conf.py*
