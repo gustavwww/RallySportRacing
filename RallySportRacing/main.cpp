@@ -12,7 +12,7 @@ int main(int argc, char* argv[]) {
 	SDLWindowHandler windowHandler;
 	windowHandler.initSDLWindow("OpenGL", WIDTH, HEIGHT);
 
-	GLint programID = windowHandler.loadShader("../../../RallySportRacing/Shaders/Shader.vert", "../../../RallySportRacing/Shaders/Shader.frag");
+	GLint programID = windowHandler.loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
 
 	const GLfloat cubeVerticies[] = {
 	-1.0f,-1.0f,-1.0f, // triangle 1 : begin
