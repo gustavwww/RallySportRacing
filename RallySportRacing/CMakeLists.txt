@@ -15,10 +15,10 @@ source_group("Shaders" FILES ${SHADERS})
 # Add source to this project's executable.
 add_executable (RallySportRacing
     "main.cpp"
-    "SDLWindowHandler.cpp"
-    "SDLWindowHandler.h"
+    "Rendering/SDLWindowHandler.cpp"
+    "Rendering/SDLWindowHandler.h"
     ${SHADERS}
-)
+    "Rendering/Model.h" "Rendering/Model.cpp"   "Game/GameManager.h" "Game/GameManager.cpp")
 
 find_package(OpenGL REQUIRED)
 
