@@ -1,5 +1,6 @@
 #include "Model.h";
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
@@ -24,7 +25,15 @@ namespace Rendering {
 		glBufferData(GL_ARRAY_BUFFER, this->colors.size() * sizeof(glm::vec3), &this->colors[0].x, GL_STATIC_DRAW);
 	}
 
-	void Model::render() {
+	void Model::render(GLuint matrixID, glm::mat4 projection, glm::mat4 view) {
+
+		// Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), 3.14f/2, glm::vec3(1.0f, 1.0f, 1.0f));
+
+		glm::mat4 mvp = projection * view * model;
+
+		// Send matrix to shader
+		glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
 
 		glBindVertexArray(vertexArrayID);
 

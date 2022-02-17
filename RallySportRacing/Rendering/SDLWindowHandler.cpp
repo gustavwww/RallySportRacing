@@ -134,13 +134,7 @@ namespace Rendering {
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
-		glm::mat4 view = glm::lookAt(glm::vec3(4, 3, 3), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-
-		// Create identity matrix. (Model will be at origin)
-		glm::mat4 model = glm::mat4(1.0f);
-
-		// First move/scale model -> move camera -> justify cam perspective.
-		glm::mat4 mvp = projection * view * model;
+		glm::mat4 view = glm::lookAt(glm::vec3(0, 0, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 		// Send to GLSL shader
 		GLuint matrixID = glGetUniformLocation(programID, "MVP");
@@ -164,12 +158,9 @@ namespace Rendering {
 			// Choose shader program to use
 			glUseProgram(programID);
 
-			// Send matrix to shader
-			glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
-
 			for (Model* m : models) {
 				auto x = *m;
-				m->render();
+				m->render(matrixID, projection, view);
 			}
 
 			SDL_GL_SwapWindow(window);

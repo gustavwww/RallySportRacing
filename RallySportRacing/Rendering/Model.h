@@ -13,7 +13,7 @@ namespace Rendering {
 	class Model {
 	public:
 		Model(vector<glm::vec3> verticies, vector<glm::vec3> colors);
-		void render();
+		void render(GLuint matrixID, glm::mat4 projection, glm::mat4 view);
 		static Model* createCube();
 
 	private:
