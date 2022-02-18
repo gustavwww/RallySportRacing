@@ -11,9 +11,8 @@ int main(int argc, char* argv[]) {
 	SDLWindowHandler windowHandler(WIDTH, HEIGHT);
 	windowHandler.initSDLWindow("OpenGL");
 
-	Model* cube = Model::createCube();
+	Game::setupGame(&windowHandler);
 
-	windowHandler.addModel(cube);
 	windowHandler.beginRenderingLoop(Game::update);
 
 	windowHandler.Destroy();

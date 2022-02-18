@@ -1,4 +1,4 @@
-#include "Model.h";
+#include "Model.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
@@ -25,10 +25,29 @@ namespace Rendering {
 		glBufferData(GL_ARRAY_BUFFER, this->colors.size() * sizeof(glm::vec3), &this->colors[0].x, GL_STATIC_DRAW);
 	}
 
+	Model::~Model() {
+
+		//glDeleteBuffers(1, &vertexBuffer);
+		//glDeleteBuffers(1, &colorBuffer);
+		//glDeleteVertexArrays(1, &vertexArrayID);
+	}
+
+	void Model::setTranslationMatrix(glm::mat4 translationMat) {
+		this->translationMat = translationMat;
+	}
+
+	void Model::setScaleMatrix(glm::mat4 scaleMat) {
+		this->scaleMat = scaleMat;
+	}
+
+	void Model::setRotationMatrix(glm::mat4 rotationMat) {
+		this->rotationMat = rotationMat;
+	}
+
 	void Model::render(GLuint matrixID, glm::mat4 projection, glm::mat4 view) {
 
 		// Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, 0.0f)) * glm::rotate(glm::mat4(1.0f), 3.14f/2, glm::vec3(1.0f, 1.0f, 1.0f));
+		glm::mat4 model = translationMat * rotationMat * scaleMat;
 
 		glm::mat4 mvp = projection * view * model;
 

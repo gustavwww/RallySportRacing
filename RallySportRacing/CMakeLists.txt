@@ -18,7 +18,7 @@ add_executable (RallySportRacing
     "Rendering/SDLWindowHandler.cpp"
     "Rendering/SDLWindowHandler.h"
     ${SHADERS}
-    "Rendering/Model.h" "Rendering/Model.cpp"   "Game/GameManager.h" "Game/GameManager.cpp")
+    "Rendering/Model.h" "Rendering/Model.cpp"   "Game/GameManager.h" "Game/GameManager.cpp" "Game/GameObject.h" "Game/GameObject.cpp")
 
 find_package(OpenGL REQUIRED)
 
