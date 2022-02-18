@@ -12,6 +12,7 @@ namespace Game {
 		~GameObject();
 
 		void translate(glm::vec3 speedVector);
+		glm::vec3 getPosition();
 	private:
 		Rendering::Model* model;
 		glm::vec3 position;
