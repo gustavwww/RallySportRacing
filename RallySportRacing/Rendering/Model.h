@@ -18,7 +18,7 @@ namespace Rendering {
 		void setTranslationMatrix(glm::mat4 translationMat);
 		void setScaleMatrix(glm::mat4 scaleMat);
 		void setRotationMatrix(glm::mat4 rotationMat);
-		void render(GLuint matrixID, glm::mat4 projection, glm::mat4 view);
+		void render(GLuint matrixID, GLuint modelViewMatrixID, GLuint normalMatrixID, glm::mat4 projection, glm::mat4 view);
 
 		static Model* createCube();
 

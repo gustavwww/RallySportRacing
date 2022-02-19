@@ -44,15 +44,19 @@ namespace Rendering {
 		this->rotationMat = rotationMat;
 	}
 
-	void Model::render(GLuint matrixID, glm::mat4 projection, glm::mat4 view) {
+	void Model::render(GLuint matrixID, GLuint modelViewMatrixID, GLuint normalMatrixID, glm::mat4 projection, glm::mat4 view) {
 
 		// Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
 		glm::mat4 model = translationMat * rotationMat * scaleMat;
-
-		glm::mat4 mvp = projection * view * model;
+		
+		glm::mat4 modelViewMatrix = view * model;
+		glm::mat4 mvp = projection * modelViewMatrix;
+		glm::mat4 normalMatrix = inverse(transpose(modelViewMatrix));
 
 		// Send matrix to shader
 		glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
+		glUniformMatrix4fv(modelViewMatrixID, 1, GL_FALSE, &modelViewMatrix[0][0]);
+		glUniformMatrix4fv(normalMatrixID, 1, GL_FALSE, &normalMatrix[0][0]);
 
 		glBindVertexArray(vertexArrayID);
 
