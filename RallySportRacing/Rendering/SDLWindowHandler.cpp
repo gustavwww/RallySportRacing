@@ -169,7 +169,6 @@ namespace Rendering {
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
 
 			for (Model* m : models) {
-				auto x = *m;
 				m->render(matrixID, modelViewMatrixID, normalMatrixID, projection, view);
 			}
 
