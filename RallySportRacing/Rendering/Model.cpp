@@ -44,10 +44,16 @@ namespace Rendering {
 		this->rotationMat = rotationMat;
 	}
 
+	/*void Model::setViewMatrix(glm::mat4 viewMat) {
+		this->viewMat = viewMat;
+	}*/
+
 	void Model::render(GLuint matrixID, glm::mat4 projection, glm::mat4 view) {
 
 		// Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
 		glm::mat4 model = translationMat * rotationMat * scaleMat;
+
+		//glm::mat4 view = viewMat;
 
 		glm::mat4 mvp = projection * view * model;
 

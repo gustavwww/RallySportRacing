@@ -25,12 +25,18 @@ namespace Rendering {
 		SDL_Window* getSDLWindow();
 		void Destroy();
 
+		void setCamPosition(glm::vec3 camPos);
+		void setCamDirection(glm::vec3 camDir);
+
 	private:
 		SDL_Window* window = nullptr;
 		SDL_GLContext context = NULL;
 		int width;
 		int height;
 		unordered_set<Model*> models;
+
+		glm::vec3 camPosition = glm::vec3(0, 0, 20);
+		glm::vec3 camDirection = glm::vec3(0, 0, 0);
 	};
 
 }
