@@ -28,6 +28,7 @@ target_include_directories(RallySportRacing PUBLIC
                             "${CMAKE_SOURCE_DIR}/External/GLEW/include"
                             "${CMAKE_SOURCE_DIR}/External/SDL/include"
                             "${CMAKE_SOURCE_DIR}/External/glm"
+                            "${CMAKE_SOURCE_DIR}/External/tinygltf"
                           )
 
 target_link_libraries(RallySportRacing PUBLIC 

@@ -149,8 +149,14 @@ namespace Rendering {
 		glm::mat4 view = glm::lookAt(camPosition, camDirection, glm::vec3(0, 1, 0)); // currently not used
 		// cam pos, pointing direction, and glm::vec3(0, 1, 0)
 
+		glm::vec4 viewSpaceLightPos = view * glm::vec4(1.0f,1.0f ,1.0f ,1.0f);
+
+		glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
+
 		// Send to GLSL shader
 		GLuint matrixID = glGetUniformLocation(programID, "MVP");
+		GLuint modelViewMatrixID = glGetUniformLocation(programID, "modelViewMatrix");
+		GLuint normalMatrixID = glGetUniformLocation(programID, "normalMatrix");
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
@@ -174,9 +180,12 @@ namespace Rendering {
 			// Choose shader program to use
 			glUseProgram(programID);
 
+			//Set uniforms for light source.
+			glUniform3fv(glGetUniformLocation(programID, "viewSpaceLightPos"), 1, &viewSpaceLightPos[0]);
+			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
+
 			for (Model* m : models) {
-				auto x = *m;
-				m->render(matrixID, projection, view);
+				m->render(matrixID, modelViewMatrixID, normalMatrixID, projection, view);
 			}
 
 			SDL_GL_SwapWindow(window);

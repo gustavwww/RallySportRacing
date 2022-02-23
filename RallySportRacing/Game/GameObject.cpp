@@ -14,7 +14,7 @@ namespace Game {
 
 	void GameObject::translate(glm::vec3 speedVector) {
 		position += speedVector;
-		(*model).setTranslationMatrix(glm::translate(glm::mat4(1.0f), position));
+		model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), position));
 	}
 
 	void GameObject::rotate(glm::vec3 angleVector) {
