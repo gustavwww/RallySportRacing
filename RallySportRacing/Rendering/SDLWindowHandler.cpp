@@ -164,7 +164,7 @@ namespace Rendering {
 		SDL_Event windowEvent; 
 		while (true) {
 			view = glm::lookAt(camPosition, camDirection, glm::vec3(0, 1, 0));
-			cout << camPosition.x;
+			//cout << camPosition.x;
 
 			if (preRender) {
 				(*preRender)();
