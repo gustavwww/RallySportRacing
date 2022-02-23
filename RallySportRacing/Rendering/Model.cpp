@@ -1,28 +1,47 @@
+#define TINYGLTF_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+
 #include "Model.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
 #include <SDL.h>
 #include <SDL_opengl.h>
+#include <tiny_gltf.h>
 
 using namespace std;
+using namespace tinygltf;
 
 namespace Rendering {
 
-	Model::Model(vector<glm::vec3> verticies, vector<glm::vec3> colors) {
-		this->verticies = verticies;
+	Model::Model(vector<glm::vec3> vertices, vector<glm::vec3> colors) {
+
+		this->vertices = vertices;
 		this->colors = colors;
+		//this->indices = indices;
+
+		/*std::string text = get_file_contents(file);
+		JSON = json::parse(text);
+
+		Model::file = file;
+		data = getData();*/
 
 		glGenVertexArrays(1, &vertexArrayID);
 		glBindVertexArray(vertexArrayID);
 
 		glGenBuffers(1, &vertexBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glBufferData(GL_ARRAY_BUFFER, this->verticies.size() * sizeof(glm::vec3), &this->verticies[0].x, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, this->vertices.size() * sizeof(glm::vec3), &this->vertices[0].x, GL_STATIC_DRAW);
 
 		glGenBuffers(1, &colorBuffer);
 		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 		glBufferData(GL_ARRAY_BUFFER, this->colors.size() * sizeof(glm::vec3), &this->colors[0].x, GL_STATIC_DRAW);
+
+		/*glGenBuffers(1, &indexBuffer);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(unsigned int), &this->indices[0], GL_STATIC_DRAW);
+		*/
 	}
 
 	Model::~Model() {
@@ -31,6 +50,120 @@ namespace Rendering {
 		//glDeleteBuffers(1, &colorBuffer);
 		//glDeleteVertexArrays(1, &vertexArrayID);
 	}
+
+	//Code for importing gltf without tinygltf library (Not currently used)
+
+	/*std::vector<unsigned char> Model::getData() {
+		std::string bytesText;
+		std::string uri = JSON["buffers"][0]["uri"];
+	}
+
+	std::vector<float> Model::getFloats(json accessor) {
+		std::vector<float> floatVec;
+
+		unsigned int buffViewInd = accessor.value("bufferView", 1);
+		unsigned int count = accessor["count"];
+		unsigned int accByteOffset = accessor.value("byteOffset", 0);
+		std::string type = accessor["type"];
+
+		json bufferView = JSON["bufferViews"][buffViewInd];
+		unsigned int byteOffset = bufferView["byteOffset"];
+
+		unsigned int numPerVert;
+		if (type == "SCALAR") numPerVert = 1;
+		else if (type == "VEC2") numPerVert = 2;
+		else if (type == "VEC3") numPerVert = 3;
+		else if (type == "VEC4") numPerVert = 4;
+		else throw std::invalid_argument("Type is invalid");
+
+		unsigned int beginningOfData = byteOffset + accByteOffset;
+		unsigned int lengthOfData = count * 4 * numPerVert;
+		for (unsigned int i = beginningOfData; i < beginningOfData + lengthOfData; i) {
+			unsigned char bytes[] = { data[i++], data[i++], data[i++], data[i++] };
+			float value;
+			std::memcpy(&value, bytes, sizeof(float));
+			floatVec.push_back(value);
+		}
+
+		return floatVec;
+	}
+
+	std::vector<GLuint> Model::getIndices(json accessor) {
+		std::vector<GLuint> indices;
+
+		unsigned int buffViewInd = accessor.value("bufferView", 0);
+		unsigned int count = accessor["count"];
+		unsigned int accByteOffset = accessor.value("byteOffset", 0);
+
+		json bufferView = JSON["bufferView"][buffViewInd];
+		unsigned int byteOffset = bufferView["byteOffset"];
+
+		unsigned int beginningOfData = byteOffset + accByteOffset;
+
+		if (componentType == 5125) {
+			for (unsigned int i = beginningOfData; i < beginningOfData + count * 4; i) {
+				unsigned char bytes[] = { data[i++], data[i++], data[i++], data[i++] };
+				unsigned int value;
+				std::memcpy(&value, bytes, sizeof(unsigned int));
+				indices.push_back((GLuint)value);
+			}
+		}
+		else if (componentType == 5123) {
+			for (unsigned int i = beginningOfData; i < beginningOfData + count * 2; i) {
+				unsigned char bytes[] = { data[i++], data[i++] };
+				unsigned short value;
+				std::memcpy(&value, bytes, sizeof(unsigned short));
+				indices.push_back((GLuint)value);
+			}
+		}
+		else if (componentType == 5122) {
+			for (unsigned int i = beginningOfData; i < beginningOfData + count * 2; i) {
+				unsigned char bytes[] = { data[i++], data[i++] };
+				short value;
+				std::memcpy(&value, bytes, sizeof(short));
+				indices.push_back((GLuint)value);
+			}
+		}
+
+		return indices;
+	}
+
+	std::vector<Vertex> Model::assembleVertices(std::vector<glm::vec3> positions, std::vector<glm::vec2> texUVs, std::vector<glm::vec3> normals) {
+		std::vector<Vertex> vertices;
+		for (int i = 0; i < positions.size(); i++) {
+			vertices.push_back(
+				Vertex{
+					positions[i],
+					texUVs[i],
+					normals[i]
+				}
+			);
+		}
+	}
+
+	std::vector<glm::vec2> Model::groupFloatsVec2(std::vector<float> floatVec) {
+		std::vector<glm::vec2> vectors;
+		for (int i = 0; i < floatVec.size(); i) {
+			vectors.push_back(glm::vec2(floatVec[i++], floatVec[i++]));
+		}
+		return vectors;
+	}
+
+	std::vector<glm::vec3> Model::groupFloatsVec3(std::vector<float> floatVec) {
+		std::vector<glm::vec3> vectors;
+		for (int i = 0; i < floatVec.size(); i) {
+			vectors.push_back(glm::vec3(floatVec[i++], floatVec[i++], floatVec[i++]));
+		}
+		return vectors;
+	}
+
+	std::vector<glm::vec4> Model::groupFloatsVec4(std::vector<float> floatVec) {
+		std::vector<glm::vec4> vectors;
+		for (int i = 0; i < floatVec.size(); i) {
+			vectors.push_back(glm::vec4(floatVec[i++], floatVec[i++], floatVec[i++], floatVec[i++]));
+		}
+		return vectors;
+	}*/
 
 	void Model::setTranslationMatrix(glm::mat4 translationMat) {
 		this->translationMat = translationMat;
@@ -70,13 +203,59 @@ namespace Rendering {
 		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
-		glDrawArrays(GL_TRIANGLES, 0, this->verticies.size() * 3);
+		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+
+		glDrawArrays(GL_TRIANGLES, 0, this->vertices.size() * 3);
+		//glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
 		glDisableVertexAttribArray(1);
 	}
 
-	Model* Model::createCube() {
+	Model* Model::createModel(const char* file) {
 
-		vector<glm::vec3> verticies = {
+		tinygltf::Model gltfmodel;
+		TinyGLTF loader;
+		std::string err;
+		std::string warn;
+		vector<glm::vec3> vertices;
+		vector<glm::vec3> colors;
+		//vector<unsigned int> indices;
+		
+		bool res = loader.LoadASCIIFromFile(&gltfmodel, &err, &warn, file);
+		for each (Mesh mesh in gltfmodel.meshes) {
+			for each (Primitive primitive in mesh.primitives) {
+				const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.attributes["POSITION"]];
+				const tinygltf::BufferView& bufferView = gltfmodel.bufferViews[accessor.bufferView];
+				const tinygltf::Buffer& buffer = gltfmodel.buffers[bufferView.buffer];
+				const float* positions = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
+
+				for (size_t i = 0; i < accessor.count; i++) {
+					vertices.push_back(glm::vec3(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]));
+					if(i > accessor.count/2)
+						colors.push_back(glm::vec3(0.f, 1.f, 0.f));
+					else
+						colors.push_back(glm::vec3(1.f, 0.f, 0.f));
+				}
+			}
+			/*
+			for each (Primitive primitive in mesh.primitives) {
+				const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.indices];
+				const tinygltf::BufferView& bufferView = gltfmodel.bufferViews[accessor.bufferView];
+				const tinygltf::Buffer& buffer = gltfmodel.buffers[bufferView.buffer];
+				const float* indicesgltf = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
+
+				for (size_t i = 0; i < accessor.count; i++) {
+					indices.push_back(unsigned int(indicesgltf[i]));
+				}
+			}*/
+		}
+
+		Model* model = new Model(vertices, colors);
+
+		return model;
+	}
+
+	Model* Model::createCube() {
+		vector<glm::vec3> vertices = {
 			{-1.0f,-1.0f,-1.0f}, // triangle 1 : begin
 			{-1.0f,-1.0f, 1.0f},
 			{-1.0f, 1.0f, 1.0f}, // triangle 1 : end
@@ -154,8 +333,9 @@ namespace Rendering {
 			{0.982f,  0.099f,  0.879f}
 		};
 
-		Model* model = new Model(verticies, rgb);
-		return model;
-	}
+		Model* model = new Model(vertices, rgb);
 
+		return model;
+
+	}
 }
