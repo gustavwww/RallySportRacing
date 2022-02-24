@@ -15,11 +15,12 @@ using namespace tinygltf;
 
 namespace Rendering {
 
-	Model::Model(vector<glm::vec3> vertices, vector<glm::vec3> colors, vector<unsigned int> indices) {
+	Model::Model(vector<glm::vec3> vertices, vector<glm::vec3> colors, vector<unsigned int> indices, vector<glm::vec3> normals) {
 
 		this->vertices = vertices;
 		this->colors = colors;
 		this->indices = indices;
+		this->normals = normals;
 
 		/*std::string text = get_file_contents(file);
 		JSON = json::parse(text);
@@ -42,6 +43,10 @@ namespace Rendering {
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(unsigned int), &this->indices[0], GL_STATIC_DRAW);
 
+		glGenBuffers(1, &normalBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+		glBufferData(GL_ARRAY_BUFFER, this->normals.size() * sizeof(glm::vec3), &this->normals[0].x, GL_STATIC_DRAW);
+
 		glEnableVertexAttribArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 		// Pointer to which attribute to fill in vertex shader. (location=0)
@@ -51,6 +56,10 @@ namespace Rendering {
 		glEnableVertexAttribArray(1);
 		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+		glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 		
@@ -221,6 +230,7 @@ namespace Rendering {
 		vector<glm::vec3> vertices;
 		vector<glm::vec3> colors;
 		vector<unsigned int> indices;
+		vector<glm::vec3> normals;
 		
 		bool res = loader.LoadASCIIFromFile(&gltfmodel, &err, &warn, file);
 		unsigned int offset = 0;
@@ -251,11 +261,21 @@ namespace Rendering {
 					}
 				}
 				offset = vertices.size();
+				{
+					const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.attributes["NORMALS"]];
+					const tinygltf::BufferView& bufferView = gltfmodel.bufferViews[accessor.bufferView];
+					const tinygltf::Buffer& buffer = gltfmodel.buffers[bufferView.buffer];
+					const float* normalsgltf = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
+
+					for (size_t i = 0; i < accessor.count; i++) {
+						normals.push_back(glm::vec3(normalsgltf[i * 3 + 0], normalsgltf[i * 3 + 1], normalsgltf[i * 3 + 2]));
+					}
+				}
 			}
 			
 		}
 
-		Model* model = new Model(vertices, colors, indices);
+		Model* model = new Model(vertices, colors, indices, normals);
 
 		return model;
 	}
@@ -339,7 +359,7 @@ namespace Rendering {
 			{0.982f,  0.099f,  0.879f}
 		};
 
-		Model* model = new Model(vertices, rgb, {});
+		Model* model = new Model(vertices, rgb, {}, {});
 
 		return model;
 

@@ -7,8 +7,8 @@ using namespace std;
 
 namespace Game {
 
-	GameObject* cube;
-	GameObject* cube2;
+	GameObject* car1;
+	GameObject* car2;
 	Rendering::SDLWindowHandler* handler;
 
 
@@ -16,15 +16,13 @@ namespace Game {
 
 		handler = windowHandler;
 
-		// Cube 1
-		Rendering::Model* cubeModel = Rendering::Model::createCube();
-		windowHandler->addModel(cubeModel);
-		cube = new GameObject(cubeModel);
+		Rendering::Model* carModel1 = Rendering::Model::createModel("../Models/SimpleCarAppliedTransforms.gltf");
+		windowHandler->addModel(carModel1);
+		car1 = new GameObject(carModel1);
 
-		// Cube 2
-		Rendering::Model* cubeModel2 = Rendering::Model::createCube();
-		windowHandler->addModel(cubeModel2);
-		cube2 = new GameObject(cubeModel2);
+		Rendering::Model* carModel2 = Rendering::Model::createModel("../Models/SimpleCarAppliedTransforms.gltf");
+		windowHandler->addModel(carModel2);
+		car2 = new GameObject(carModel2);
 	}
 
 	bool toScreen = true;
@@ -62,44 +60,32 @@ namespace Game {
 		SDL_PumpEvents();
 		if (keyboard_state_array[SDL_SCANCODE_W])
 		{
-			cube->translate(directionVector * deltaTime * speed);
+			car1->translate(directionVector * deltaTime * speed);
 		}
 		if (keyboard_state_array[SDL_SCANCODE_S])
 		{
-			cube->translate(directionVector * glm::vec3(-1, 1, -1) * deltaTime * speed);
+			car1->translate(directionVector * glm::vec3(-1, 1, -1) * deltaTime * speed);
 		}
 		if (keyboard_state_array[SDL_SCANCODE_D])
 		{
 			angleVector.x -= 3.14159f / 2.0f * deltaTime;
-			cube->rotate(angleVector);
+			car1->rotate(angleVector);
 		}
 		if (keyboard_state_array[SDL_SCANCODE_A])
 		{
 			angleVector.x += 3.14159f / 2.0f * deltaTime;
-			cube->rotate(angleVector);
+			car1->rotate(angleVector);
 		}
 		directionVector.x = sin(angleVector.x);
 		directionVector.z = cos(angleVector.x);
 		adjustCamPosition();
-
-		if (cube2->getPosition().x >= 5 || cube2->getPosition().x <= -5) {
-			toScreen = !toScreen;
-		}
-
-		if (toScreen) {
-			//cube->translate(glm::vec3(7.0f, -7.0f, 5.0f) * deltaTime());
-			//cube2->translate(glm::vec3(-7.0f, 7.0f, 5.0f) * deltaTime);
-		} else {
-			//cube->translate(glm::vec3(-7.0f, 7.0f, -5.0f) * deltaTime());
-			//cube2->translate(glm::vec3(7.0f, -7.0f, -5.0f) * deltaTime);
-		}
 	}
 
 	void adjustCamPosition() {
 		camOffsetVector = directionVector * glm::vec3(-1, 1, -1);
 		camOffset = glm::vec3(20 * camOffsetVector.x, 5, 20 * camOffsetVector.z); //offset 20. Height 5
-		camPosition = camOffset + cube->getPosition();
-		camDirection = cube->getPosition();
+		camPosition = camOffset + car1->getPosition();
+		camDirection = car1->getPosition();
 		handler->setCamPosition(camPosition);
 		handler->setCamDirection(camDirection);
 	}
