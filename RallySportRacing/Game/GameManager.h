@@ -8,8 +8,7 @@ namespace Game {
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler);
 	void update();
-	float deltaTime();
-
+	void adjustCamPosition();
 }
 
 #endif
