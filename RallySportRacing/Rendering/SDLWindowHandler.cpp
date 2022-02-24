@@ -146,8 +146,7 @@ namespace Rendering {
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
-		glm::mat4 view = glm::lookAt(camPosition, camDirection, glm::vec3(0, 1, 0)); // currently not used
-		// cam pos, pointing direction, and glm::vec3(0, 1, 0)
+		glm::mat4 view;
 
 		glm::vec4 viewSpaceLightPos = view * glm::vec4(1.0f,1.0f ,1.0f ,1.0f);
 
@@ -164,7 +163,6 @@ namespace Rendering {
 		SDL_Event windowEvent; 
 		while (true) {
 			view = glm::lookAt(camPosition, camDirection, glm::vec3(0, 1, 0));
-			//cout << camPosition.x;
 
 			if (preRender) {
 				(*preRender)();

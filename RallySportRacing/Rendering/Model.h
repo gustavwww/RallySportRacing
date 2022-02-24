@@ -36,8 +36,6 @@ namespace Rendering {
 		glm::mat4 translationMat = glm::mat4(1.0f);
 		glm::mat4 scaleMat = glm::mat4(1.0f);
 		glm::mat4 rotationMat = glm::mat4(1.0f);
-		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
-		//glm::mat4 viewMat = glm::lookAt(glm::vec3(0, 5, 20), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0)); //start values
 
 		vector<glm::vec3> vertices;
 		vector<glm::vec3> colors;
