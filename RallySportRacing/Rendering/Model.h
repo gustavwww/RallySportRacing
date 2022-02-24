@@ -19,7 +19,7 @@ namespace Rendering {
 
 	class Model {
 	public:
-		Model(vector<glm::vec3> vertices, vector<glm::vec3> colors);
+		Model(vector<glm::vec3> vertices, vector<glm::vec3> colors, vector<unsigned int> indices);
 		~Model();
 
 		void setTranslationMatrix(glm::mat4 translationMat);
@@ -41,11 +41,11 @@ namespace Rendering {
 
 		vector<glm::vec3> vertices;
 		vector<glm::vec3> colors;
-		//vector<unsigned int> indices;
+		vector<unsigned int> indices;
 		GLuint vertexArrayID;
 		GLuint vertexBuffer;
 		GLuint colorBuffer;
-		//GLuint indexBuffer;
+		GLuint indexBuffer;
 		/*
 		const char* file;
 		std::vector<unsigned char> data;

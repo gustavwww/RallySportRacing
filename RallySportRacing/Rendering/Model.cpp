@@ -15,11 +15,11 @@ using namespace tinygltf;
 
 namespace Rendering {
 
-	Model::Model(vector<glm::vec3> vertices, vector<glm::vec3> colors) {
+	Model::Model(vector<glm::vec3> vertices, vector<glm::vec3> colors, vector<unsigned int> indices) {
 
 		this->vertices = vertices;
 		this->colors = colors;
-		//this->indices = indices;
+		this->indices = indices;
 
 		/*std::string text = get_file_contents(file);
 		JSON = json::parse(text);
@@ -38,10 +38,22 @@ namespace Rendering {
 		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 		glBufferData(GL_ARRAY_BUFFER, this->colors.size() * sizeof(glm::vec3), &this->colors[0].x, GL_STATIC_DRAW);
 
-		/*glGenBuffers(1, &indexBuffer);
+		glGenBuffers(1, &indexBuffer);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->indices.size() * sizeof(unsigned int), &this->indices[0], GL_STATIC_DRAW);
-		*/
+
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		// Pointer to which attribute to fill in vertex shader. (location=0)
+		// Params: Attribute ID, size (x,y,z), type, normalized?, stride, array buffer offset.
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+		
 	}
 
 	Model::~Model() {
@@ -195,21 +207,9 @@ namespace Rendering {
 
 		glBindVertexArray(vertexArrayID);
 
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		// Pointer to which attribute to fill in vertex shader. (location=0)
-		// Params: Attribute ID, size (x,y,z), type, normalized?, stride, array buffer offset.
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
-
-		//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-
-		glDrawArrays(GL_TRIANGLES, 0, this->vertices.size() * 3);
-		//glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
-		glDisableVertexAttribArray(1);
+		//glDrawArrays(GL_TRIANGLES, 0, this->vertices.size() * 3);
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
+		//glDisableVertexAttribArray(1);
 	}
 
 	Model* Model::createModel(const char* file) {
@@ -220,38 +220,42 @@ namespace Rendering {
 		std::string warn;
 		vector<glm::vec3> vertices;
 		vector<glm::vec3> colors;
-		//vector<unsigned int> indices;
+		vector<unsigned int> indices;
 		
 		bool res = loader.LoadASCIIFromFile(&gltfmodel, &err, &warn, file);
+		unsigned int offset = 0;
 		for each (Mesh mesh in gltfmodel.meshes) {
 			for each (Primitive primitive in mesh.primitives) {
-				const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.attributes["POSITION"]];
-				const tinygltf::BufferView& bufferView = gltfmodel.bufferViews[accessor.bufferView];
-				const tinygltf::Buffer& buffer = gltfmodel.buffers[bufferView.buffer];
-				const float* positions = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
+				{
+					const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.attributes["POSITION"]];
+					const tinygltf::BufferView& bufferView = gltfmodel.bufferViews[accessor.bufferView];
+					const tinygltf::Buffer& buffer = gltfmodel.buffers[bufferView.buffer];
+					const float* positions = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
 
-				for (size_t i = 0; i < accessor.count; i++) {
-					vertices.push_back(glm::vec3(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]));
-					if(i > accessor.count/2)
+					for (size_t i = 0; i < accessor.count; i++) {
+						vertices.push_back(glm::vec3(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]));
+						//if(i > accessor.count/2)
 						colors.push_back(glm::vec3(0.f, 1.f, 0.f));
-					else
-						colors.push_back(glm::vec3(1.f, 0.f, 0.f));
+						//else
+							//colors.push_back(glm::vec3(1.f, 0.f, 0.f));
+					}
 				}
-			}
-			/*
-			for each (Primitive primitive in mesh.primitives) {
-				const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.indices];
-				const tinygltf::BufferView& bufferView = gltfmodel.bufferViews[accessor.bufferView];
-				const tinygltf::Buffer& buffer = gltfmodel.buffers[bufferView.buffer];
-				const float* indicesgltf = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
+				{
+					const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.indices];
+					const tinygltf::BufferView& bufferView = gltfmodel.bufferViews[accessor.bufferView];
+					const tinygltf::Buffer& buffer = gltfmodel.buffers[bufferView.buffer];
+					const unsigned short* indicesgltf = reinterpret_cast<const unsigned short*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
 
-				for (size_t i = 0; i < accessor.count; i++) {
-					indices.push_back(unsigned int(indicesgltf[i]));
+					for (size_t i = 0; i < accessor.count; i++) {
+						indices.push_back(offset + unsigned int(indicesgltf[i]));
+					}
 				}
-			}*/
+				offset = vertices.size();
+			}
+			
 		}
 
-		Model* model = new Model(vertices, colors);
+		Model* model = new Model(vertices, colors, indices);
 
 		return model;
 	}
@@ -335,7 +339,7 @@ namespace Rendering {
 			{0.982f,  0.099f,  0.879f}
 		};
 
-		Model* model = new Model(vertices, rgb);
+		Model* model = new Model(vertices, rgb, {});
 
 		return model;
 
