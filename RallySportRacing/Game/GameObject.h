@@ -13,7 +13,7 @@ namespace Game {
 
 		void translate(glm::vec3 speedVector);
 		void rotate(glm::vec3 angleVector);
-		void changeView(glm::vec3 angleVector);
+
 		glm::vec3 getPosition();
 		glm::vec3 getOrientation();
 	private:

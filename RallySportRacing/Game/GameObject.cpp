@@ -17,7 +17,8 @@ namespace Game {
 	}
 
 	void GameObject::rotate(glm::vec3 angleVector) {
-		(*model).setRotationMatrix(glm::eulerAngleYXZ(angleVector.x, angleVector.y, angleVector.z));
+		orientation += angleVector;
+		(*model).setRotationMatrix(glm::eulerAngleYXZ(orientation.x, orientation.y, orientation.z));
 	}
 
 	glm::vec3 GameObject::getPosition() {

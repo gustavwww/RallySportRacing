@@ -1,6 +1,7 @@
 #include "GameManager.h"
 #include <chrono>
 #include <iostream>
+#include <cmath>
 #include "Rendering/SDLWindowHandler.h"
 
 using namespace std;
@@ -33,7 +34,6 @@ namespace Game {
 
 	const Uint8* keyboard_state_array = SDL_GetKeyboardState(NULL);
 
-	glm::vec3 angleVector;
 	glm::vec3 directionVector;
 	float speed = 10;
 
@@ -43,6 +43,7 @@ namespace Game {
 	glm::vec3 camOffset;
 
 	void update() {
+		// Called before every render.
 
 		// Calculate deltaTime
 		if (firstTime) {
@@ -53,31 +54,28 @@ namespace Game {
 		currentTime = chrono::high_resolution_clock::now();
 		float deltaTime = chrono::duration<float, milli>(currentTime - previousTime).count() * 0.001;
 
-		// Called before every render.
+		
 		// TODO:
 		// gonna fix the code so it is more simple and clear
 		// fix reversing, wrong inputs. It works like it should but it does not act like a car with wheels. This is why the reversing is inversed.
 		SDL_PumpEvents();
-		if (keyboard_state_array[SDL_SCANCODE_W])
-		{
+		if (keyboard_state_array[SDL_SCANCODE_W]) {
 			car1->translate(directionVector * deltaTime * speed);
 		}
-		if (keyboard_state_array[SDL_SCANCODE_S])
-		{
+
+		if (keyboard_state_array[SDL_SCANCODE_S]) {
 			car1->translate(directionVector * glm::vec3(-1, 1, -1) * deltaTime * speed);
 		}
-		if (keyboard_state_array[SDL_SCANCODE_D])
-		{
-			angleVector.x -= 3.14159f / 2.0f * deltaTime;
-			car1->rotate(angleVector);
+
+		if (keyboard_state_array[SDL_SCANCODE_D]) {
+			car1->rotate(glm::vec3(-M_PI / 2.0f * deltaTime, 0.0f, 0.0f));
 		}
-		if (keyboard_state_array[SDL_SCANCODE_A])
-		{
-			angleVector.x += 3.14159f / 2.0f * deltaTime;
-			car1->rotate(angleVector);
+
+		if (keyboard_state_array[SDL_SCANCODE_A]) {
+			car1->rotate(glm::vec3(M_PI / 2.0f * deltaTime, 0.0f, 0.0f));
 		}
-		directionVector.x = sin(angleVector.x);
-		directionVector.z = cos(angleVector.x);
+		directionVector.x = sin(car1->getOrientation().x);
+		directionVector.z = cos(car1->getOrientation().x);
 		adjustCamPosition();
 	}
 
