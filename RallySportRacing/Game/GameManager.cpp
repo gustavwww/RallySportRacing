@@ -9,8 +9,16 @@ using namespace std;
 namespace Game {
 
 	GameObject* car1;
-	GameObject* car2;
+	//GameObject* car2;
+	GameObject* environment;
+	GameObject* wall;
 	Rendering::SDLWindowHandler* handler;
+
+	//Colors to select from when creating a model
+	glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
+	glm::vec3 blue = glm::vec3(0.f, 0.f, 1.f);
+	glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
+
 
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
@@ -21,9 +29,21 @@ namespace Game {
 		windowHandler->addModel(carModel1);
 		car1 = new GameObject(carModel1);
 
-		Rendering::Model* carModel2 = Rendering::Model::createModel("../Models/SimpleCarAppliedTransforms.gltf");
+		/*Rendering::Model* carModel2 = Rendering::Model::createModel("../Models/SimpleCarAppliedTransforms.gltf");
 		windowHandler->addModel(carModel2);
-		car2 = new GameObject(carModel2);
+		car2 = new GameObject(carModel2);*/
+
+		Rendering::Model* environmentModel = Rendering::Model::createModel("../Models/SimpleEnvironment.gltf");
+		windowHandler->addModel(environmentModel);
+		environment = new GameObject(environmentModel);
+
+		Rendering::Model* wallModel = Rendering::Model::createModel("../Models/Wall.gltf");
+		windowHandler->addModel(wallModel);
+		wall = new GameObject(wallModel);
+
+		car1->translate(glm::vec3(-15.f, 0.5f, 0.f));
+		wall->translate(glm::vec3(-25.f, 1.f, 0.f));
+		wall->rotate(glm::vec3(0.0f, 0.0f, -M_PI / 2.0f));
 	}
 
 	bool toScreen = true;
@@ -54,7 +74,6 @@ namespace Game {
 		currentTime = chrono::high_resolution_clock::now();
 		float deltaTime = chrono::duration<float, milli>(currentTime - previousTime).count() * 0.001;
 
-		
 		// TODO:
 		// gonna fix the code so it is more simple and clear
 		// fix reversing, wrong inputs. It works like it should but it does not act like a car with wheels. This is why the reversing is inversed.
@@ -74,6 +93,7 @@ namespace Game {
 		if (keyboard_state_array[SDL_SCANCODE_A]) {
 			car1->rotate(glm::vec3(M_PI / 2.0f * deltaTime, 0.0f, 0.0f));
 		}
+
 		directionVector.x = sin(car1->getOrientation().x);
 		directionVector.z = cos(car1->getOrientation().x);
 		adjustCamPosition();

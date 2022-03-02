@@ -231,6 +231,10 @@ namespace Rendering {
 		vector<glm::vec3> colors;
 		vector<unsigned int> indices;
 		vector<glm::vec3> normals;
+		glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
+		glm::vec3 blue = glm::vec3(0.f, 0.f, 1.f);
+		glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
+		glm::vec3 colorSelection = red;
 		
 		bool res = loader.LoadASCIIFromFile(&gltfmodel, &err, &warn, file);
 		unsigned int offset = 0;
@@ -244,10 +248,19 @@ namespace Rendering {
 
 					for (size_t i = 0; i < accessor.count; i++) {
 						vertices.push_back(glm::vec3(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]));
-						//if(i > accessor.count/2)
-						colors.push_back(glm::vec3(0.f, 1.f, 0.f));
-						//else
-							//colors.push_back(glm::vec3(1.f, 0.f, 0.f));
+					
+						if (colorSelection == red) {
+							colors.push_back(colorSelection);
+							colorSelection = blue;
+						}
+						else if (colorSelection == blue) {
+							colors.push_back(colorSelection);
+							colorSelection = green;
+						}
+						else {
+							colors.push_back(colorSelection);
+							colorSelection = red;
+						}
 					}
 				}
 				{
