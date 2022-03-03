@@ -62,6 +62,8 @@ namespace Game {
 	glm::vec3 camOffsetVector;
 	glm::vec3 camOffset;
 
+	int perspective = 1; // 1 = normal thirdperson, 2 = from side, 3 = from a static camera above in a corner
+
 	void update() {
 		// Called before every render.
 
@@ -78,6 +80,7 @@ namespace Game {
 		// gonna fix the code so it is more simple and clear
 		// fix reversing, wrong inputs. It works like it should but it does not act like a car with wheels. This is why the reversing is inversed.
 		SDL_PumpEvents();
+
 		if (keyboard_state_array[SDL_SCANCODE_W]) {
 			car1->translate(directionVector * deltaTime * speed);
 		}
@@ -96,14 +99,37 @@ namespace Game {
 
 		directionVector.x = sin(car1->getOrientation().x);
 		directionVector.z = cos(car1->getOrientation().x);
+
+		if (keyboard_state_array[SDL_SCANCODE_1]) {
+			perspective = 1;
+		}
+		if (keyboard_state_array[SDL_SCANCODE_2]) {
+			perspective = 2;
+		}
+		if (keyboard_state_array[SDL_SCANCODE_3]) {
+			perspective = 3;
+		}
+		if (perspective == 1) {
+			camOffsetVector = directionVector * glm::vec3(-1, 1, -1);
+			camOffset = glm::vec3(20 * camOffsetVector.x, 5, 20 * camOffsetVector.z); //offset 20. Height 5
+			camPosition = camOffset + car1->getPosition();
+			camDirection = car1->getPosition();
+		}
+		else if (perspective == 2) {
+			camOffset = glm::vec3(0, 5, 20); //offset 20. Height 5, create the option to change camera position based on arrows?
+			camPosition = camOffset + car1->getPosition();
+			camDirection = car1->getPosition();
+		}
+		else if (perspective == 3) {
+			camOffset = glm::vec3(30, 15, -40); //corner
+			camPosition = camOffset;
+			camDirection = glm::vec3(0, 0, 0);
+		}
+
 		adjustCamPosition();
 	}
 
 	void adjustCamPosition() {
-		camOffsetVector = directionVector * glm::vec3(-1, 1, -1);
-		camOffset = glm::vec3(20 * camOffsetVector.x, 5, 20 * camOffsetVector.z); //offset 20. Height 5
-		camPosition = camOffset + car1->getPosition();
-		camDirection = car1->getPosition();
 		handler->setCamPosition(camPosition);
 		handler->setCamDirection(camDirection);
 	}
