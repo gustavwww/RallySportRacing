@@ -7,6 +7,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include <imgui.h>
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_opengl3.h"
+
+
+
 using namespace std;
 
 namespace Rendering {
@@ -54,6 +60,14 @@ namespace Rendering {
 
 		this->window = window;
 		this->context = context;
+
+		// Initialize ImGui; will allow us to edit variables in the application.
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+		ImGui_ImplSDL2_InitForOpenGL( window, context );
+		ImGui_ImplOpenGL3_Init();
+
 	}
 
 	GLuint SDLWindowHandler::loadShader(const string& vertexShader, const string& fragmentShader) {
@@ -162,6 +176,12 @@ namespace Rendering {
 		static glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 		SDL_Event windowEvent; 
 		while (true) {
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplSDL2_NewFrame( window );
+			ImGui::NewFrame();
+
+			ImGui::DragFloat3( "light pos", &lightPos.x );
+
 			view = glm::lookAt(camPosition, camDirection, glm::vec3(0, 1, 0));
 			glm::vec4 viewSpaceLightPos = view * lightPos;
 			if (preRender) {
@@ -169,6 +189,7 @@ namespace Rendering {
 			}
 
 			if (SDL_PollEvent(&windowEvent)) {
+				ImGui_ImplSDL2_ProcessEvent( &windowEvent );
 				if (windowEvent.type == SDL_QUIT) break;
 			}
 
@@ -185,6 +206,12 @@ namespace Rendering {
 			for (Model* m : models) {
 				m->render(matrixID, modelViewMatrixID, normalMatrixID, projection, view);
 			}
+
+
+			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			ImGui::Render();
+			glViewport( 0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y );
+			ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
 
 			SDL_GL_SwapWindow(window);
 		}
@@ -204,6 +231,13 @@ namespace Rendering {
 	}
 
 	void SDLWindowHandler::Destroy() {
+		ImGui_ImplSDL2_NewFrame( window );
+
+//Destroy imgui
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplSDL2_Shutdown();
+		ImGui::DestroyContext();
+
 		SDL_GL_DeleteContext(context);
 		SDL_DestroyWindow(window);
 		SDL_Quit();

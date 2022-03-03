@@ -31,8 +31,9 @@ void main(){
 
 	float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
 	//Diffuse
-	float diff = max(dot(normal,lightDir), 0.0) * 500 * 1/(d*d);
-	vec3 diffuse = diff * lightColor;
+	float l =  500 /(d*d);
+	float diff = max(dot(normal,lightDir), 0.0);
+	vec3 diffuse = diff * lightColor * l;
 	
 	//Ambient
 	float ambientStrength = 0.1;
