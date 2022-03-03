@@ -72,120 +72,6 @@ namespace Rendering {
 		//glDeleteVertexArrays(1, &vertexArrayID);
 	}
 
-	//Code for importing gltf without tinygltf library (Not currently used)
-
-	/*std::vector<unsigned char> Model::getData() {
-		std::string bytesText;
-		std::string uri = JSON["buffers"][0]["uri"];
-	}
-
-	std::vector<float> Model::getFloats(json accessor) {
-		std::vector<float> floatVec;
-
-		unsigned int buffViewInd = accessor.value("bufferView", 1);
-		unsigned int count = accessor["count"];
-		unsigned int accByteOffset = accessor.value("byteOffset", 0);
-		std::string type = accessor["type"];
-
-		json bufferView = JSON["bufferViews"][buffViewInd];
-		unsigned int byteOffset = bufferView["byteOffset"];
-
-		unsigned int numPerVert;
-		if (type == "SCALAR") numPerVert = 1;
-		else if (type == "VEC2") numPerVert = 2;
-		else if (type == "VEC3") numPerVert = 3;
-		else if (type == "VEC4") numPerVert = 4;
-		else throw std::invalid_argument("Type is invalid");
-
-		unsigned int beginningOfData = byteOffset + accByteOffset;
-		unsigned int lengthOfData = count * 4 * numPerVert;
-		for (unsigned int i = beginningOfData; i < beginningOfData + lengthOfData; i) {
-			unsigned char bytes[] = { data[i++], data[i++], data[i++], data[i++] };
-			float value;
-			std::memcpy(&value, bytes, sizeof(float));
-			floatVec.push_back(value);
-		}
-
-		return floatVec;
-	}
-
-	std::vector<GLuint> Model::getIndices(json accessor) {
-		std::vector<GLuint> indices;
-
-		unsigned int buffViewInd = accessor.value("bufferView", 0);
-		unsigned int count = accessor["count"];
-		unsigned int accByteOffset = accessor.value("byteOffset", 0);
-
-		json bufferView = JSON["bufferView"][buffViewInd];
-		unsigned int byteOffset = bufferView["byteOffset"];
-
-		unsigned int beginningOfData = byteOffset + accByteOffset;
-
-		if (componentType == 5125) {
-			for (unsigned int i = beginningOfData; i < beginningOfData + count * 4; i) {
-				unsigned char bytes[] = { data[i++], data[i++], data[i++], data[i++] };
-				unsigned int value;
-				std::memcpy(&value, bytes, sizeof(unsigned int));
-				indices.push_back((GLuint)value);
-			}
-		}
-		else if (componentType == 5123) {
-			for (unsigned int i = beginningOfData; i < beginningOfData + count * 2; i) {
-				unsigned char bytes[] = { data[i++], data[i++] };
-				unsigned short value;
-				std::memcpy(&value, bytes, sizeof(unsigned short));
-				indices.push_back((GLuint)value);
-			}
-		}
-		else if (componentType == 5122) {
-			for (unsigned int i = beginningOfData; i < beginningOfData + count * 2; i) {
-				unsigned char bytes[] = { data[i++], data[i++] };
-				short value;
-				std::memcpy(&value, bytes, sizeof(short));
-				indices.push_back((GLuint)value);
-			}
-		}
-
-		return indices;
-	}
-
-	std::vector<Vertex> Model::assembleVertices(std::vector<glm::vec3> positions, std::vector<glm::vec2> texUVs, std::vector<glm::vec3> normals) {
-		std::vector<Vertex> vertices;
-		for (int i = 0; i < positions.size(); i++) {
-			vertices.push_back(
-				Vertex{
-					positions[i],
-					texUVs[i],
-					normals[i]
-				}
-			);
-		}
-	}
-
-	std::vector<glm::vec2> Model::groupFloatsVec2(std::vector<float> floatVec) {
-		std::vector<glm::vec2> vectors;
-		for (int i = 0; i < floatVec.size(); i) {
-			vectors.push_back(glm::vec2(floatVec[i++], floatVec[i++]));
-		}
-		return vectors;
-	}
-
-	std::vector<glm::vec3> Model::groupFloatsVec3(std::vector<float> floatVec) {
-		std::vector<glm::vec3> vectors;
-		for (int i = 0; i < floatVec.size(); i) {
-			vectors.push_back(glm::vec3(floatVec[i++], floatVec[i++], floatVec[i++]));
-		}
-		return vectors;
-	}
-
-	std::vector<glm::vec4> Model::groupFloatsVec4(std::vector<float> floatVec) {
-		std::vector<glm::vec4> vectors;
-		for (int i = 0; i < floatVec.size(); i) {
-			vectors.push_back(glm::vec4(floatVec[i++], floatVec[i++], floatVec[i++], floatVec[i++]));
-		}
-		return vectors;
-	}*/
-
 	void Model::setTranslationMatrix(glm::mat4 translationMat) {
 		this->translationMat = translationMat;
 	}
@@ -218,7 +104,6 @@ namespace Rendering {
 
 		//glDrawArrays(GL_TRIANGLES, 0, this->vertices.size() * 3);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
-		//glDisableVertexAttribArray(1);
 	}
 
 	Model* Model::createModel(const char* file) {
@@ -275,7 +160,7 @@ namespace Rendering {
 				}
 				offset = vertices.size();
 				{
-					const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.attributes["NORMALS"]];
+					const tinygltf::Accessor& accessor = gltfmodel.accessors[primitive.attributes["NORMAL"]];
 					const tinygltf::BufferView& bufferView = gltfmodel.bufferViews[accessor.bufferView];
 					const tinygltf::Buffer& buffer = gltfmodel.buffers[bufferView.buffer];
 					const float* normalsgltf = reinterpret_cast<const float*>(&buffer.data[bufferView.byteOffset + accessor.byteOffset]);
