@@ -148,7 +148,7 @@ namespace Rendering {
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
-		glm::vec4 viewSpaceLightPos = view * glm::vec4(1.0f,1.0f ,1.0f ,1.0f);
+		
 
 		glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 
@@ -159,11 +159,11 @@ namespace Rendering {
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-
+		static glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 		SDL_Event windowEvent; 
 		while (true) {
 			view = glm::lookAt(camPosition, camDirection, glm::vec3(0, 1, 0));
-
+			glm::vec4 viewSpaceLightPos = view * lightPos;
 			if (preRender) {
 				(*preRender)();
 			}
