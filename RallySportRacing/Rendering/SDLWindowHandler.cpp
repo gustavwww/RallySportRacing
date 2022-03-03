@@ -176,9 +176,16 @@ namespace Rendering {
 		static glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 		SDL_Event windowEvent; 
 		while (true) {
+			// This needs to be the first thing checked for imgui to work well
+			if (SDL_PollEvent(&windowEvent)) {
+				ImGui_ImplSDL2_ProcessEvent( &windowEvent );
+				if (windowEvent.type == SDL_QUIT) break;
+			}
+
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame( window );
 			ImGui::NewFrame();
+
 
 			ImGui::DragFloat3( "light pos", &lightPos.x );
 
@@ -186,11 +193,6 @@ namespace Rendering {
 			glm::vec4 viewSpaceLightPos = view * lightPos;
 			if (preRender) {
 				(*preRender)();
-			}
-
-			if (SDL_PollEvent(&windowEvent)) {
-				ImGui_ImplSDL2_ProcessEvent( &windowEvent );
-				if (windowEvent.type == SDL_QUIT) break;
 			}
 
 			// Clear the colorbuffer
