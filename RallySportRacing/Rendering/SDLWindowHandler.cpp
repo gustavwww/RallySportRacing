@@ -23,6 +23,11 @@ namespace Rendering {
 		camDirection = camDir;
 	}
 
+
+	void Rendering::SDLWindowHandler::setCamOrientation(glm::vec3 camOr)
+	{
+		camOrientation = camOr;
+	}
 	SDLWindowHandler::SDLWindowHandler(int width, int height) {
 		this->width = width;
 		this->height = height;
@@ -162,7 +167,7 @@ namespace Rendering {
 		static glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 		SDL_Event windowEvent; 
 		while (true) {
-			view = glm::lookAt(camPosition, camDirection, glm::vec3(0, 1, 0));
+			view = glm::lookAt(camPosition, camDirection, camOrientation);
 			glm::vec4 viewSpaceLightPos = view * lightPos;
 			if (preRender) {
 				(*preRender)();
