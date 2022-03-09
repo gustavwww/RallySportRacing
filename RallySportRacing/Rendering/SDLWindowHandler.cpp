@@ -16,7 +16,9 @@ using namespace std;
 
 namespace Rendering {
 
-
+	//Global variables
+	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
+	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 
 	void Rendering::SDLWindowHandler::setCamPosition(glm::vec3 camPos)
 	{
@@ -165,10 +167,6 @@ namespace Rendering {
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
-		//Init light values.
-		glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
-		glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
-
 		// Send to GLSL shader
 		GLuint matrixID = glGetUniformLocation(programID, "MVP");
 		GLuint modelViewMatrixID = glGetUniformLocation(programID, "modelViewMatrix");
@@ -216,7 +214,7 @@ namespace Rendering {
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			if (showDebugGUI) {
-				displayDebugGUI(lightPos);
+				displayDebugGUI();
 			}
 			SDL_GL_SwapWindow(window);
 		}
@@ -248,7 +246,7 @@ namespace Rendering {
 		SDL_Quit();
 	}
 
-	void SDLWindowHandler::displayDebugGUI(glm::vec4 lightPos)
+	void SDLWindowHandler::displayDebugGUI()
 	{
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplSDL2_NewFrame(window);
