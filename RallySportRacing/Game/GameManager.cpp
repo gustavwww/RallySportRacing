@@ -79,9 +79,9 @@ namespace Game {
 
 	// Below are used to calculate direction of camera when using free look mode (perspective 3)
 	// horizontal angle : toward -Z 
-	float horizontalAngle = -1.1f; //start values tested for the corner
+	float horizontalAngle = 0.f; //start values tested for the corner
 	// vertical angle : 0, look at the horizon
-	float verticalAngle = 6.f;
+	float verticalAngle = 0.f;
 
 	void update() {
 		// Called before every render.
@@ -138,7 +138,7 @@ namespace Game {
 			camPosition = camOffset;
 			camDirection = glm::vec3(0, 0, 0);
 			camOrientation = glm::vec3(0, 1, 0);
-			horizontalAngle = -1.1f; //start values tested for the corner
+			horizontalAngle = -0.7f; //start values tested for the corner
 			verticalAngle = 6.f; //start values tested for the corner
 		}
 
