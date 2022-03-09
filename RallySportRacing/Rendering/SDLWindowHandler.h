@@ -28,6 +28,7 @@ namespace Rendering {
 		void setCamPosition(glm::vec3 camPos);
 		void setCamDirection(glm::vec3 camDir);
 		void setCamOrientation(glm::vec3 camOr);
+		void displayDebugGUI(glm::vec4 lightPos);
 
 	private:
 		SDL_Window* window = nullptr;

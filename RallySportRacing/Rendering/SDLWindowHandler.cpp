@@ -12,7 +12,6 @@
 #include "imgui_impl_opengl3.h"
 
 
-
 using namespace std;
 
 namespace Rendering {
@@ -72,7 +71,6 @@ namespace Rendering {
 		ImGui::StyleColorsDark();
 		ImGui_ImplSDL2_InitForOpenGL( window, context );
 		ImGui_ImplOpenGL3_Init();
-
 	}
 
 	GLuint SDLWindowHandler::loadShader(const string& vertexShader, const string& fragmentShader) {
@@ -167,18 +165,21 @@ namespace Rendering {
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
-		
-
+		//Init light values.
 		glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
+		glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 
 		// Send to GLSL shader
 		GLuint matrixID = glGetUniformLocation(programID, "MVP");
 		GLuint modelViewMatrixID = glGetUniformLocation(programID, "modelViewMatrix");
 		GLuint normalMatrixID = glGetUniformLocation(programID, "normalMatrix");
+		
+		//GUI bool
+		bool showDebugGUI = false;
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		static glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
+		
 		SDL_Event windowEvent; 
 		while (true) {
 			// This needs to be the first thing checked for imgui to work well
@@ -186,13 +187,12 @@ namespace Rendering {
 				ImGui_ImplSDL2_ProcessEvent(&windowEvent);
 				if (windowEvent.type == SDL_QUIT) break;
 			}
-
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplSDL2_NewFrame(window);
-			ImGui::NewFrame();
-
-
-			ImGui::DragFloat3("light pos", &lightPos.x);
+			
+			//Toggle DebugGUI with 'G'.
+			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_g) {
+				showDebugGUI = !showDebugGUI;
+			}
+			
 			view = glm::lookAt(camPosition, camDirection, camOrientation);
 			glm::vec4 viewSpaceLightPos = view * lightPos;
 			if (preRender) {
@@ -215,10 +215,9 @@ namespace Rendering {
 
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
-			ImGui::Render();
-			glViewport( 0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y );
-			ImGui_ImplOpenGL3_RenderDrawData( ImGui::GetDrawData() );
-
+			if (showDebugGUI) {
+				displayDebugGUI(lightPos);
+			}
 			SDL_GL_SwapWindow(window);
 		}
 
@@ -239,7 +238,7 @@ namespace Rendering {
 	void SDLWindowHandler::Destroy() {
 		ImGui_ImplSDL2_NewFrame( window );
 
-//Destroy imgui
+		//Destroy imgui
 		ImGui_ImplOpenGL3_Shutdown();
 		ImGui_ImplSDL2_Shutdown();
 		ImGui::DestroyContext();
@@ -249,5 +248,18 @@ namespace Rendering {
 		SDL_Quit();
 	}
 
+	void SDLWindowHandler::displayDebugGUI(glm::vec4 lightPos)
+	{
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplSDL2_NewFrame(window);
+		ImGui::NewFrame();
 
+		//Set slider to change in scene.
+		ImGui::DragFloat3("light pos", &lightPos.x);
+
+		ImGui::Render();
+		glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+	}
 }
