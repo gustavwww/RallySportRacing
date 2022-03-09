@@ -69,11 +69,13 @@ namespace Game {
 	float minDistance = 4;
 	float perspectiveAngle = 0;
 
+	const int WIDTH = 1920, HEIGHT = 1080;
+
 	// variables for handling mouse events and movement
 	int x, y;
 	Uint32 buttons;
-	float cameraSpeed = 3.0f; // 3 units / second
-	float mouseSpeed = 0.5f;
+	float cameraSpeed = 10.0f; // 3 units / second
+	float mouseSpeed = 0.25f;
 
 	// Below are used to calculate direction of camera when using free look mode (perspective 3)
 	// horizontal angle : toward -Z 
@@ -135,6 +137,9 @@ namespace Game {
 			camOffset = glm::vec3(30, 15, -40); //corner 30, 15, -40
 			camPosition = camOffset;
 			camDirection = glm::vec3(0, 0, 0);
+			camOrientation = glm::vec3(0, 1, 0);
+			horizontalAngle = -1.1f; //start values tested for the corner
+			verticalAngle = 6.f; //start values tested for the corner
 		}
 
 		// Camera handling for the different perspectives
@@ -182,10 +187,10 @@ namespace Game {
 				//SDL_Log("Mouse Button 1 (left) is pressed.");
 				//SDL_Log("horizontalAngle %d, %d", cos(horizontalAngle), cos(verticalAngle));
 				SDL_SetRelativeMouseMode(SDL_TRUE);
-				SDL_WarpMouseInWindow(NULL, 800 / 2, 600 / 2);
+				SDL_WarpMouseInWindow(NULL, WIDTH / 2, HEIGHT / 2);
 				// Compute new orientation
-				horizontalAngle += mouseSpeed * deltaTime * float(800 / 2 - x); // widht and height of window
-				verticalAngle += mouseSpeed * deltaTime * float(600 / 2 - y);
+				horizontalAngle += mouseSpeed * deltaTime * float(WIDTH / 2 - x); // widht and height of window
+				verticalAngle += mouseSpeed * deltaTime * float(HEIGHT / 2 - y);
 				// Direction : Spherical coordinates to Cartesian coordinates conversion
 				glm::vec3 direction(
 					cos(verticalAngle) * sin(horizontalAngle),
@@ -203,19 +208,26 @@ namespace Game {
 
 				// Cam movement
 				if (keyboard_state_array[SDL_SCANCODE_W]) {
-					camPosition += direction * deltaTime * speed;
+					camPosition += direction * deltaTime * cameraSpeed;
 				}
 
 				if (keyboard_state_array[SDL_SCANCODE_S]) {
-					camPosition -= direction * deltaTime * speed;
+					camPosition -= direction * deltaTime * cameraSpeed;
 				}
 
 				if (keyboard_state_array[SDL_SCANCODE_D]) {
-					camPosition += right * deltaTime * speed;
+					camPosition += right * deltaTime * cameraSpeed;
 				}
 
 				if (keyboard_state_array[SDL_SCANCODE_A]) {
-					camPosition -= right * deltaTime * speed;
+					camPosition -= right * deltaTime * cameraSpeed;
+				}
+
+				if (keyboard_state_array[SDL_SCANCODE_LSHIFT]) {
+					cameraSpeed = 30.0f;
+				}
+				else {
+					cameraSpeed = 10.0f;
 				}
 				camDirection = camPosition + direction;
 				camOrientation = up;

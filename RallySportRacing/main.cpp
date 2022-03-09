@@ -2,7 +2,7 @@
 #include "Rendering/Model.h"
 #include "Game/GameManager.h"
 
-const int WIDTH = 800, HEIGHT = 600;
+const int WIDTH = 1920, HEIGHT = 1080;
 
 using namespace Rendering;
 
