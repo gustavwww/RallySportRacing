@@ -36,6 +36,7 @@ target_link_libraries(RallySportRacing PUBLIC
                             "${CMAKE_SOURCE_DIR}/External/SDL/lib/x64/SDL2.lib"
                             "${CMAKE_SOURCE_DIR}/External/SDL/lib/x64/SDL2main.lib"
                             "${OPENGL_LIBRARIES}"
+                            imgui
 )
 
 add_custom_command(TARGET RallySportRacing POST_BUILD
