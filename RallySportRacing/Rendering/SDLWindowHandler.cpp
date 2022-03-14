@@ -185,7 +185,15 @@ namespace Rendering {
 				ImGui_ImplSDL2_ProcessEvent(&windowEvent);
 				if (windowEvent.type == SDL_QUIT) break;
 			}
+			//ImGui Setup
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplSDL2_NewFrame(window);
+			ImGui::NewFrame();
 			
+			//Set slider to change in scene.
+			ImGui::DragFloat3("light pos", &lightPos.x);
+			ImGui::DragFloat3("light color", &lightColor.x);
+
 			//Toggle DebugGUI with 'G'.
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_g) {
 				showDebugGUI = !showDebugGUI;
@@ -213,8 +221,10 @@ namespace Rendering {
 
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+			ImGui::Render();
 			if (showDebugGUI) {
-				displayDebugGUI();
+				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			}
 			SDL_GL_SwapWindow(window);
 		}
@@ -244,20 +254,5 @@ namespace Rendering {
 		SDL_GL_DeleteContext(context);
 		SDL_DestroyWindow(window);
 		SDL_Quit();
-	}
-
-	void SDLWindowHandler::displayDebugGUI()
-	{
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplSDL2_NewFrame(window);
-		ImGui::NewFrame();
-
-		//Set slider to change in scene.
-		ImGui::DragFloat3("light pos", &lightPos.x);
-
-		ImGui::Render();
-		glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
 	}
 }
