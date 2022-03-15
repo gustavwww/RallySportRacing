@@ -16,7 +16,6 @@ out vec3 vertexPosition_viewspace;
 out vec3 normal_viewspace;
 out vec3 color;
 out vec2 texCoord;
-out vec3 cameraDirection_viewspace;
 
 void main(){
   gl_Position = MVP * vec4(vertexPosition_modelspace, 1);
@@ -24,8 +23,6 @@ void main(){
   vertexPosition_viewspace = (modelViewMatrix * vec4(vertexPosition_modelspace, 1.0)).xyz;
   //Set normals to view space.
   normal_viewspace = (normalMatrix * vec4(normals_modelspace, 0.0)).xyz;
-  //Set camera direction.
-  cameraDirection_viewspace = (vec3(0,0,0) - vertexPosition_viewspace);
   
   texCoord = texCoordIn;
   color = colorIn;
