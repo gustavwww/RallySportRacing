@@ -9,9 +9,12 @@ using namespace std;
 namespace Game {
 
 	GameObject* car1;
-	//GameObject* car2;
 	GameObject* environment;
 	GameObject* wall;
+
+	//Debug GameObject
+	GameObject* debugEnvironment;
+
 	Rendering::SDLWindowHandler* handler;
 
 	//Colors to select from when creating a model
@@ -29,10 +32,6 @@ namespace Game {
 		windowHandler->addModel(carModel1);
 		car1 = new GameObject(carModel1);
 
-		/*Rendering::Model* carModel2 = Rendering::Model::createModel("../Models/SimpleCarAppliedTransforms.gltf");
-		windowHandler->addModel(carModel2);
-		car2 = new GameObject(carModel2);*/
-
 		Rendering::Model* environmentModel = Rendering::Model::createModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
 		environment = new GameObject(environmentModel);
@@ -40,6 +39,13 @@ namespace Game {
 		Rendering::Model* wallModel = Rendering::Model::createModel("../Models/Wall.gltf");
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel);
+
+		//Light Debugging Environment
+		Rendering::Model* debugEnvironmentModel = Rendering::Model::createModel("../Models/LightTestEnvironment.gltf");
+		windowHandler->addModel(debugEnvironmentModel);
+		debugEnvironment = new GameObject(debugEnvironmentModel);
+		debugEnvironment->translate(glm::vec3(-10.0f, 15.0f, 20.0f));
+		debugEnvironment->rotate(glm::vec3(M_PI, M_PI/2, 0.0f));
 
 		car1->translate(glm::vec3(-15.f, 0.5f, 0.f));
 		wall->translate(glm::vec3(-25.f, 1.f, 0.f));
