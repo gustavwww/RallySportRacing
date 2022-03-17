@@ -2,9 +2,9 @@
 
 // Input vertex data, different for all executions of shader.
 layout(location = 0) in vec3 vertexPosition_modelspace;
-layout(location = 1) in vec3 colorIn;
-layout(location = 2) in vec3 normals_modelspace;
-layout(location = 3) in vec2 texCoordIn;
+//layout(location = 1) in vec3 colorIn;
+layout(location = 1) in vec3 normals_modelspace;
+layout(location = 2) in vec2 texCoordIn;
 
 // Constant for the whole mesh.
 uniform mat4 MVP;
@@ -14,7 +14,7 @@ uniform mat4 normalMatrix;
 // Outputs for fragment shader.
 out vec3 vertexPosition_viewspace;
 out vec3 normal_viewspace;
-out vec3 color;
+//out vec3 color;
 out vec2 texCoord;
 
 void main(){
@@ -25,5 +25,5 @@ void main(){
   normal_viewspace = (normalMatrix * vec4(normals_modelspace, 0.0)).xyz;
   
   texCoord = texCoordIn;
-  color = colorIn;
+  //color = vec3(1.0);
 }

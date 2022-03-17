@@ -31,10 +31,11 @@ uniform vec3 lightColor;
 ////////////////////////////////
 //Inputs from vertex shader
 ////////////////////////////////
-in vec3 color;
-in vec2 texCoord;
 in vec3 vertexPosition_viewspace;
 in vec3 normal_viewspace;
+in vec2 texCoord;
+//in vec3 color;
+
 
 ////////////////////////////////
 // Outputs
@@ -46,12 +47,13 @@ out vec4 fragmentColor;
 float normaldistrubutionGGX(float NdotH, float roughness){
 	
 	float alpha_Squared = roughness * roughness;
+	float alpha_Squared2 = alpha_Squared * alpha_Squared;
 	float NdotH_Squared = NdotH * NdotH;
 	
-	float denom = NdotH_Squared * (alpha_Squared - 1) + 1;
+	float denom = NdotH_Squared * (alpha_Squared2 - 1) + 1;
 	float denomenator = PI * denom * denom;
 
-	return alpha_Squared / denomenator;
+	return alpha_Squared2 / denomenator;
 }
 
 //Geometry function Schlick-GGX together with Smith's method. 
@@ -75,7 +77,6 @@ vec3 fresnelSchlick(float HdotV, vec3 baseReflectivity){
 
 void main(){
 
-	/*
 	/////////////////////////////////
 	//NEW PBR PIPELINE
 	/////////////////////////////////
@@ -99,7 +100,7 @@ void main(){
 
 	float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
 	float attenuation = 1.0/(d * d);
-	vec3 radiance = lightColor * attenuation;
+	vec3 radiance = lightColor * 500 * attenuation;
 
 	//Dot products.
 	float NdotV = max(dot(normal, viewDir), 0.0000001);
@@ -108,8 +109,8 @@ void main(){
 	float HdotV = max(dot(halfwayVector, viewDir), 0.0);
 
 	//Cook-Torrance BRDF: D*F*G /( 4 * (w0 dot n) * (wi dot n) )
-	float D = normaldistrubutionGGX(NdotH, roughness);
-	float G = geometryFunction(NdotV, NdotL, roughness);
+	float D = normaldistrubutionGGX(NdotH, roughness + 0.01);
+	float G = geometryFunction(NdotV, NdotL, roughness  + 0.01);
 	vec3 F = fresnelSchlick(HdotV, baseReflectivity);
 
 	vec3 specular = D * G * F;
@@ -136,9 +137,8 @@ void main(){
 	color = pow(color, vec3(1.0/2.2));
 
 	fragmentColor = vec4(color, 1.0);
-	*/
 	
-	
+	/*
 	/////////////////////////////////
 	//OLD WAY
 	/////////////////////////////////
@@ -164,5 +164,6 @@ void main(){
 	vec3 specular = specularStrength * spec * lightColor;
 
 	fragmentColor = vec4( (diffuse + ambient + specular) * color, 1.0);
+	*/
 }
 
