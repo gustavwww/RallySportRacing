@@ -28,7 +28,7 @@ namespace Game {
 
 		handler = windowHandler;
 
-		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
 		windowHandler->addModel(carModel1);
 		car1 = new GameObject(carModel1);
 
@@ -47,7 +47,7 @@ namespace Game {
 		debugEnvironment->translate(glm::vec3(-10.0f, 15.0f, 20.0f));
 		debugEnvironment->rotate(glm::vec3(M_PI, M_PI/2, 0.0f));
 
-		car1->translate(glm::vec3(-15.f, 0.5f, 0.f));
+		//car1->translate(glm::vec3(-15.f, 0.5f, 0.f));
 		wall->translate(glm::vec3(-25.f, 1.f, 0.f));
 		wall->rotate(glm::vec3(0.0f, 0.0f, -M_PI / 2.0f));
 	}
