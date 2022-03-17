@@ -28,20 +28,20 @@ namespace Game {
 
 		handler = windowHandler;
 
-		Rendering::Model* carModel1 = Rendering::Model::createModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
 		windowHandler->addModel(carModel1);
 		car1 = new GameObject(carModel1);
 
-		Rendering::Model* environmentModel = Rendering::Model::createModel("../Models/SimpleEnvironment.gltf");
+		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
 		environment = new GameObject(environmentModel);
-
-		Rendering::Model* wallModel = Rendering::Model::createModel("../Models/Wall.gltf");
+		
+		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf");
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel);
-
+		
 		//Light Debugging Environment
-		Rendering::Model* debugEnvironmentModel = Rendering::Model::createModel("../Models/LightTestEnvironment.gltf");
+		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf");
 		windowHandler->addModel(debugEnvironmentModel);
 		debugEnvironment = new GameObject(debugEnvironmentModel);
 		debugEnvironment->translate(glm::vec3(-10.0f, 15.0f, 20.0f));

@@ -166,11 +166,6 @@ namespace Rendering {
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
-
-		// Send to GLSL shader
-		GLuint matrixID = glGetUniformLocation(programID, "MVP");
-		GLuint modelViewMatrixID = glGetUniformLocation(programID, "modelViewMatrix");
-		GLuint normalMatrixID = glGetUniformLocation(programID, "normalMatrix");
 		
 		//GUI bool
 		bool showDebugGUI = false;
@@ -216,7 +211,7 @@ namespace Rendering {
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
 
 			for (Model* m : models) {
-				m->render(matrixID, modelViewMatrixID, normalMatrixID, projection, view);
+				m->render(projection, view, programID);
 			}
 
 
