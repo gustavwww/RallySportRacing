@@ -4,10 +4,9 @@
 
 namespace Rendering {
 
-
-
-	Mesh::Mesh(vector<SubMesh> subMeshes) {
+	Mesh::Mesh(vector<SubMesh> subMeshes, string name) {
 		this->subMeshes = subMeshes;
+		this->name = name;
 	}
 
 	void Mesh::renderMesh(GLint programID) {

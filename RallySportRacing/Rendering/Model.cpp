@@ -90,8 +90,6 @@ namespace Rendering {
 
 		for each (tinygltf::Mesh gltfMesh in gltfmodel.meshes) {
 
-			cout << gltfMesh.name;
-
 			//Mesh data vector.
 			vector<SubMesh> subMeshes;
 
@@ -147,9 +145,8 @@ namespace Rendering {
 				subMeshes.push_back(SubMesh(vertices, indices, materials[primitive.material].roughness, materials[primitive.material].metallic, materials[primitive.material].albedo));
 			}
 
-			meshes.push_back(Mesh(subMeshes));
+			meshes.push_back(Mesh(subMeshes, gltfMesh.name));
 		}
-
 		Model* model = new Model(meshes);
 
 		return model;
