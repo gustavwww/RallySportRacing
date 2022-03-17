@@ -131,6 +131,8 @@ namespace Game {
 		// Different perspectives
 		if (keyboard_state_array[SDL_SCANCODE_1]) {
 			perspective = 1;
+			//perspectiveAngle = tan(pow(camOffsetVector.x - camPosition.x, 2) / pow(camOffsetVector.z - camPosition.z, 2));
+			//camOffset = glm::vec3(radius * cos(perspectiveAngle), 5, radius * sin(perspectiveAngle));
 			camOrientation = glm::vec3(0, 1, 0);
 		}
 		if (keyboard_state_array[SDL_SCANCODE_2]) {
@@ -153,8 +155,10 @@ namespace Game {
 		if (perspective == 1) {
 			camOffsetVector = directionVector * glm::vec3(-1, 1, -1);
 			camOffset = glm::vec3(20 * camOffsetVector.x, 5, 20 * camOffsetVector.z); //offset 20. Height 5
-			camPosition = camOffset + car1->getPosition();
-			camDirection = car1->getPosition();
+
+			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
+			camDirection = camPosition + (car1->getPosition() + directionVector * glm::vec3(2, 2, 2) - camPosition) * 0.5f;
+			camPosition = camPosition + (camOffset + car1->getPosition() - camPosition) * 0.025f; 
 		}
 
 		// Perspective 2 => still following the car but you can change the angle and position relative to the car
