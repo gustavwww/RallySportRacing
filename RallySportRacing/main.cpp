@@ -15,9 +15,6 @@ int main(int argc, char* argv[]) {
 
 	Game::setupGame(&windowHandler);
 
-	
-
-
 	windowHandler.beginRenderingLoop(Game::update);
 
 	windowHandler.Destroy();
