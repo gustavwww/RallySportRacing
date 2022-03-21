@@ -2,6 +2,7 @@
 #define COMMAND
 
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -9,14 +10,13 @@ namespace Protocol {
 
 	class Command {
 	public:
-		Command(string command, string args[], int argsSize);
+		Command(string command, vector<string> args);
 		string getCommand();
-		string* getArgs();
+		vector<string> getArgs();
 		int getArgsSize();
 	private:
 		string command;
-		string* args;
-		int argsSize;
+		vector<string> args;
 	};
 
 }

@@ -1,6 +1,8 @@
 #include "Rendering/SDLWindowHandler.h"
 #include "Rendering/Model.h"
 #include "Game/GameManager.h"
+#include "Services/Protocol/ProtocolParser.h"
+#include "Services/Protocol/Command.h"
 
 const int WIDTH = 1920, HEIGHT = 1080;
 
@@ -12,6 +14,9 @@ int main(int argc, char* argv[]) {
 	windowHandler.initSDLWindow("OpenGL");
 
 	Game::setupGame(&windowHandler);
+
+	
+
 
 	windowHandler.beginRenderingLoop(Game::update);
 

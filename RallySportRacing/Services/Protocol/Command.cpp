@@ -6,22 +6,21 @@ using namespace std;
 namespace Protocol {
 
 
-	Command::Command(string command, string args[], int argsSize) {
+	Command::Command(string command, vector<string> args) {
 		this->command = command;
 		this->args = args;
-		this->argsSize = argsSize;
 	};
 
 	string Command::getCommand() {
 		return command;
 	}
 
-	string* Command::getArgs() {
+	vector<string> Command::getArgs() {
 		return args;
 	}
 
 	int Command::getArgsSize() {
-		return argsSize;
+		return args.size();
 	}
 
 }

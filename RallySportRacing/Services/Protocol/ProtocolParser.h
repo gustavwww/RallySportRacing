@@ -6,7 +6,8 @@
 
 namespace Protocol {
 
-	Command parseMessage(string message);
+	Command parseMessage(string msg);
+	string parseCommand(Command cmd);
 
 }
 
