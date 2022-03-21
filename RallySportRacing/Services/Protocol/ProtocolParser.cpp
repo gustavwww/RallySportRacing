@@ -64,6 +64,7 @@ namespace Protocol {
 			msg += args[i] + ",";
 		}
 		msg.erase(msg.end()-1);
+		return msg;
 	}
 
 }
