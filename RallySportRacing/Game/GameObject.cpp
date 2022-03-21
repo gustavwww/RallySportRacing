@@ -3,12 +3,15 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
+#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
+
 namespace Game {
 
-	GameObject::GameObject(Rendering::Model* model) {
+	GameObject::GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
 		this->model = model;
 		position = glm::vec3(0.0f);
 		orientation = glm::vec3(0.0f);
+		setupRigidbody();
 	}
 
 	void GameObject::translate(glm::vec3 speedVector) {
@@ -29,8 +32,21 @@ namespace Game {
 		return orientation;
 	}
 
+	void GameObject::setupRigidbody() {
+		collisionShape = new btBvhTriangleMeshShape(model->meshInterface, false, true);
+		motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
+		btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, collisionShape, btVector3(0, 0, 0));
+		rigidBody = new btRigidBody(groundRigidBodyCI);
+		rigidBody->setContactProcessingThreshold(0.f);
+
+		dynamicsWorld->addRigidBody(rigidBody);
+	}
+
 	GameObject::~GameObject() {
 		delete model;
+		delete rigidBody;
+		delete motionState;
+		delete collisionShape;
 	}
 
 }

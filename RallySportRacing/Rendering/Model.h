@@ -7,6 +7,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
 #include "Mesh.h"
+//#include <headers/btBulletDynamicsCommon.h>
+#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
 
 using namespace std;
 
@@ -30,6 +32,10 @@ namespace Rendering {
 		void setRotationMatrix(glm::mat4 rotationMat);
 		
 		void render(glm::mat4 projection, glm::mat4 view, GLint programID);
+
+		btTriangleMesh* meshInterface;
+		void Model::generateMeshInterface();
+		std::vector<std::vector<glm::vec3>> faces;
 
 		static Model* loadModel(const char* file);
 

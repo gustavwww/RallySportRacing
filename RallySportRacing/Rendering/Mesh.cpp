@@ -2,6 +2,8 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 
+#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
+
 namespace Rendering {
 
 

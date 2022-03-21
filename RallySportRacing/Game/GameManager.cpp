@@ -3,6 +3,9 @@
 #include <iostream>
 #include <cmath>
 #include "Rendering/SDLWindowHandler.h"
+#include "../../External/bullet/headers/btBulletCollisionCommon.h"
+#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
+#include <Physics/Physics.hpp>
 
 using namespace std;
 
@@ -23,27 +26,27 @@ namespace Game {
 	glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 
 
-
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 
+		Physics* physics = new Physics();
 		handler = windowHandler;
 
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
 		windowHandler->addModel(carModel1);
-		car1 = new GameObject(carModel1);
+		car1 = new GameObject(carModel1, physics->dynamicsWorld);
 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel);
+		environment = new GameObject(environmentModel, physics->dynamicsWorld);
 		
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf");
 		windowHandler->addModel(wallModel);
-		wall = new GameObject(wallModel);
+		wall = new GameObject(wallModel, physics->dynamicsWorld);
 		
 		//Light Debugging Environment
 		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf");
 		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel);
+		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
 		debugEnvironment->translate(glm::vec3(-10.0f, 15.0f, 20.0f));
 		debugEnvironment->rotate(glm::vec3(M_PI, M_PI/2, 0.0f));
 
