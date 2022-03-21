@@ -44,7 +44,7 @@ namespace Server {
 		getsockname(sendingSocket, (SOCKADDR*)&serverAddress, (int*)sizeof(serverAddress));
 		cout << "Connected to server address " << inet_ntoa(serverAddress.sin_addr) << " port " << htons(serverAddress.sin_port) << endl;
 
-
+		//TODO
 
 	}
 
