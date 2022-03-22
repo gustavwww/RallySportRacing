@@ -10,7 +10,7 @@
 #include <SDL_opengl.h>
 #include <tiny_gltf.h>
 
-#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
+#include "btBulletDynamicsCommon.h"
 
 #include "Mesh.h";
 #include <iostream>

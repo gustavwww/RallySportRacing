@@ -3,8 +3,8 @@
 #include <iostream>
 #include <cmath>
 #include "Rendering/SDLWindowHandler.h"
-#include "../../External/bullet/headers/btBulletCollisionCommon.h"
-#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
+#include "btBulletCollisionCommon.h"
+#include "btBulletDynamicsCommon.h"
 #include <Physics/Physics.hpp>
 
 using namespace std;

@@ -3,7 +3,7 @@
 
 #include "Rendering/Model.h"
 #include <glm/glm.hpp>
-#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
+#include "btBulletDynamicsCommon.h"
 
 namespace Game {
 

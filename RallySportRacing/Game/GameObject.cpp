@@ -3,7 +3,7 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <glm/gtx/euler_angles.hpp>
 
-#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
+#include "btBulletDynamicsCommon.h"
 
 namespace Game {
 
@@ -47,6 +47,14 @@ namespace Game {
 		delete rigidBody;
 		delete motionState;
 		delete collisionShape;
+	}
+
+	void GameObject::updateTransform()
+	{
+	}
+
+	void GameObject::updateTransform( const btTransform& btTransform )
+	{
 	}
 
 }

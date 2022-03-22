@@ -2,7 +2,7 @@
 #define physics_hpp
 
 //#include <headers/btBulletDynamicsCommon.h>
-#include "../../External/bullet/headers/btBulletDynamicsCommon.h"
+#include "btBulletDynamicsCommon.h"
 
 class Physics {
 

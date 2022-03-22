@@ -1,7 +1,7 @@
 ﻿# CMakeList.txt : CMake project for RallySportRacing, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.16)
 
 
 
@@ -22,6 +22,9 @@ add_executable (RallySportRacing
 
 find_package(OpenGL REQUIRED)
 
+set(Bullet_ROOT "${CMAKE_SOURCE_DIR}/External/bullet/")
+find_package(Bullet REQUIRED)
+
 target_include_directories(RallySportRacing PUBLIC
                             "${CMAKE_BINARY_DIR}"
                             "${OpenGL_INCLUDE_DIR}"
@@ -29,7 +32,7 @@ target_include_directories(RallySportRacing PUBLIC
                             "${CMAKE_SOURCE_DIR}/External/SDL/include"
                             "${CMAKE_SOURCE_DIR}/External/glm"
                             "${CMAKE_SOURCE_DIR}/External/tinygltf"
-                            "${CMAKE_SOURCE_DIR}/External/bullet"
+                            ${BULLET_INCLUDE_DIR}
                           )
 
 target_link_libraries(RallySportRacing PUBLIC 
@@ -37,18 +40,8 @@ target_link_libraries(RallySportRacing PUBLIC
                             "${CMAKE_SOURCE_DIR}/External/SDL/lib/x64/SDL2.lib"
                             "${CMAKE_SOURCE_DIR}/External/SDL/lib/x64/SDL2main.lib"
 
-                            "${CMAKE_SOURCE_DIR}/External/bullet/Bullet2FileLoader.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/Bullet3Collision.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/Bullet3Common.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/Bullet3Dynamics.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/Bullet3Geometry.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/Bullet3OpenCL_clew.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/BulletCollision.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/BulletDynamics.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/BulletInverseDynamics.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/BulletSoftBody.lib"
-                            "${CMAKE_SOURCE_DIR}/External/bullet/LinearMath.lib"
                             "${OPENGL_LIBRARIES}"
+                            ${BULLET_LIBRARIES}
                             imgui
 )
 
