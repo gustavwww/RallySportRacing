@@ -3,12 +3,20 @@
 #include "Game/GameManager.h"
 #include "Services/Protocol/ProtocolParser.h"
 #include "Services/Protocol/Command.h"
+#include "Services/TCPClient.h"
+#include <thread>
 
 const int WIDTH = 1920, HEIGHT = 1080;
 
 using namespace Rendering;
 
 int main(int argc, char* argv[]) {
+
+
+	auto tcpClient = Server::TCPClient();
+	tcpClient.connectToServer();
+
+	thread t1(&Server::TCPClient::listen, tcpClient);
 
 	SDLWindowHandler windowHandler(WIDTH, HEIGHT);
 	windowHandler.initSDLWindow("OpenGL");

@@ -1,28 +1,27 @@
 #include "TCPClient.h"
 #include <iostream>
 
-#define ADDRESS "localhost"
-#define PORT 2005
-
 using namespace std;
 
 namespace Server {
 
 	TCPClient::TCPClient() {
 
+		connectSocket = INVALID_SOCKET;
+
 		WSADATA wsaData;
-
-		sendingSocket = INVALID_SOCKET;
-		result = WSAStartup(MAKEWORD(2, 2), &wsaData);
-
+		
+		int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
 		if (result != 0) {
 			cout << "WSAStartup failed, error: " << result << endl;
+			throw "WSA Failed to startup.";
 		}
 
-		sendingSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		if (sendingSocket == INVALID_SOCKET) {
+		connectSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+		if (connectSocket == INVALID_SOCKET) {
 			cout << "Client socket failed to initialize, error: " << WSAGetLastError() << endl;
 			WSACleanup();
+			throw "Socket could not be initialized.";
 		}
 		cout << "Client socket created." << endl;
 
@@ -33,19 +32,53 @@ namespace Server {
 
 	void TCPClient::connectToServer() {
 
-		int retCode = connect(sendingSocket, (SOCKADDR*) &serverAddress, sizeof(serverAddress));
-		if (retCode != 0) {
+		cout << "Atempting to connect to server..." << endl;
+		int result = connect(connectSocket, (SOCKADDR*) &serverAddress, sizeof(serverAddress));
+		if (result != 0) {
 			cout << "Connection to server failed " << WSAGetLastError() << endl;
-			closesocket(sendingSocket);
+			closesocket(connectSocket);
+			connectSocket = INVALID_SOCKET;
 			WSACleanup();
-			return;
+			throw "Error connecting to server";
 		}
 
-		getsockname(sendingSocket, (SOCKADDR*)&serverAddress, (int*)sizeof(serverAddress));
+		getsockname(connectSocket, (SOCKADDR*)&serverAddress, (int*)sizeof(serverAddress));
 		cout << "Connected to server address " << inet_ntoa(serverAddress.sin_addr) << " port " << htons(serverAddress.sin_port) << endl;
 
-		//TODO
+	}
 
+	void TCPClient::listen() {
+		char receiveBuffer[BUFLEN];
+		int receiveBufLen = BUFLEN;
+
+		int result;
+		do {
+			result = recv(connectSocket, receiveBuffer, receiveBufLen, 0);
+			cout << "Received buffer: " << receiveBuffer << endl;
+
+		} while (result > 0);
+
+		if (result == 0) {
+			cout << "Connection to server closed." << endl;
+		} else {
+			throw "Error receiving packet from server";
+		}
+
+		closesocket(connectSocket);
+		WSACleanup();
+	}
+
+	void TCPClient::sendPacket(string msg) {
+		string msg_nl = msg + "\n";
+		const char* str = msg_nl.c_str();
+
+		int result = send(connectSocket, str, (int) strlen(str), 0);
+		if (result == SOCKET_ERROR) {
+			closesocket(connectSocket);
+			WSACleanup();
+			cout << "Error sending TCP message, " << WSAGetLastError() << endl;
+		}
+		cout << "Bytes sent: " << result << endl;
 	}
 
 

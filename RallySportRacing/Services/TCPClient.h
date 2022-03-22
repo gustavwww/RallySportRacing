@@ -6,7 +6,16 @@
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 
+#include <string>
+
 #pragma comment (lib, "Ws2_32.lib")
+
+#define ADDRESS "127.0.0.1"
+#define PORT 2005
+
+#define BUFLEN 512
+
+using namespace std;
 
 namespace Server {
 
@@ -14,12 +23,12 @@ namespace Server {
 	public:
 		TCPClient();
 		void connectToServer();
+		void listen();
+		void sendPacket(string msg);
 
 	private:
-		SOCKET sendingSocket;
+		SOCKET connectSocket;
 		SOCKADDR_IN serverAddress;
-		int result;
-
 	};
 
 }
