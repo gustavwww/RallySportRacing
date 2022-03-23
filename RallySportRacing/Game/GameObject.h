@@ -3,7 +3,7 @@
 
 #include "Rendering/Model.h"
 #include <glm/glm.hpp>
-#include "btBulletDynamicsCommon.h"
+#include <btBulletDynamicsCommon.h>
 
 namespace Game {
 
@@ -22,7 +22,11 @@ namespace Game {
 
 		glm::vec3 getPosition();
 		glm::vec3 getOrientation();
-	private:
+		btVector3 glmToBullet(const glm::vec3& vec);
+		btQuaternion glmToBullet(const glm::quat& q);
+		glm::vec3 bulletToGlm(const btVector3& v);
+		glm::quat bulletToGlm(const btQuaternion& q);
+	protected:
 		Rendering::Model* model;
 		glm::vec3 position;
 		glm::vec3 orientation;

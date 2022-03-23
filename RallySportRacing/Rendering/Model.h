@@ -8,7 +8,7 @@
 #include <GL/glew.h>
 #include "Mesh.h"
 //#include <headers/btBulletDynamicsCommon.h>
-#include "btBulletDynamicsCommon.h"
+#include <btBulletDynamicsCommon.h>
 
 using namespace std;
 

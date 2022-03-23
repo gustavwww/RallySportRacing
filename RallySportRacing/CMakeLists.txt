@@ -33,6 +33,7 @@ target_include_directories(RallySportRacing PUBLIC
                             "${CMAKE_SOURCE_DIR}/External/glm"
                             "${CMAKE_SOURCE_DIR}/External/tinygltf"
                             ${BULLET_INCLUDE_DIR}
+                            "External/bullet/include/bullet/" 
                           )
 
 target_link_libraries(RallySportRacing PUBLIC 

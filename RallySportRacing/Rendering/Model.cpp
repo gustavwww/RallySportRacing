@@ -10,7 +10,7 @@
 #include <SDL_opengl.h>
 #include <tiny_gltf.h>
 
-#include "btBulletDynamicsCommon.h"
+#include <btBulletDynamicsCommon.h>
 
 #include "Mesh.h";
 #include <iostream>
@@ -151,7 +151,7 @@ namespace Rendering {
 				//Add SubMesh to Mesh.
 				subMeshes.push_back(SubMesh(vertices, indices, materials[primitive.material].roughness, materials[primitive.material].metallic, materials[primitive.material].albedo));
 			}
-
+			
 			meshes.push_back(Mesh(subMeshes));
 		}
 
@@ -162,7 +162,7 @@ namespace Rendering {
 
 	void Model::generateMeshInterface() {
 		meshInterface = new btTriangleMesh();
-
+		
 		for (int i = 0; i < faces.size(); i++) {
 			std::vector<glm::vec3> face = faces[i];
 			meshInterface->addTriangle(

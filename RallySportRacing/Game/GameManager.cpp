@@ -3,9 +3,13 @@
 #include <iostream>
 #include <cmath>
 #include "Rendering/SDLWindowHandler.h"
-#include "btBulletCollisionCommon.h"
-#include "btBulletDynamicsCommon.h"
+#include <btBulletDynamicsCommon.h>
 #include <Physics/Physics.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <btBulletDynamicsCommon.h>
 
 using namespace std;
 
@@ -19,6 +23,7 @@ namespace Game {
 	GameObject* debugEnvironment;
 
 	Rendering::SDLWindowHandler* handler;
+	Physics* physics;
 
 	//Colors to select from when creating a model
 	glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
@@ -28,12 +33,14 @@ namespace Game {
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 
-		Physics* physics = new Physics();
+		physics = new Physics();
 		handler = windowHandler;
 
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
 		windowHandler->addModel(carModel1);
 		car1 = new GameObject(carModel1, physics->dynamicsWorld);
+
+		//wheel = new GameObject(carModel1, physics->dynamicsWorld);
 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
@@ -93,8 +100,16 @@ namespace Game {
 	float verticalAngle = 0.f;
 
 	void update() {
+
+		//car1->setupRigidbody();
+		//btTransform test;
+		car1->translate(directionVector);
+		car1->rotate(glm::vec3(-M_PI / 2.0f, 0.0f, 0.0f));
+		//test.setOrigin(btVector3(2, 2, 2));
+		//test.setRotation(btQuaternion(0, 0, 0, 1));
 		// Called before every render.
 
+		physics->dynamicsWorld->debugDrawWorld(); // not working
 		// Calculate deltaTime
 		if (firstTime) {
 			camOrientation = glm::vec3(0, 1, 0);
@@ -104,16 +119,21 @@ namespace Game {
 		previousTime = currentTime;
 		currentTime = chrono::high_resolution_clock::now();
 		float deltaTime = chrono::duration<float, milli>(currentTime - previousTime).count() * 0.001;
+		physics->dynamicsWorld->stepSimulation(deltaTime, 1);
 
 		// TODO:
 		// gonna fix the code so it is more simple and clear?
 		SDL_PumpEvents();
 		buttons = SDL_GetMouseState(&x, &y);
-
+		if (keyboard_state_array[SDL_SCANCODE_H]) {
+			car1->updateTransform();
+		}
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
 			if (keyboard_state_array[SDL_SCANCODE_W]) {
 				car1->translate(directionVector * deltaTime * speed);
+				car1->updateTransform();
+
 			}
 
 			if (keyboard_state_array[SDL_SCANCODE_S]) {
@@ -160,7 +180,7 @@ namespace Game {
 			camOffset = glm::vec3(20 * camOffsetVector.x, 5, 20 * camOffsetVector.z); //offset 20. Height 5
 
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
-			camDirection = camPosition + (car1->getPosition() + directionVector * glm::vec3(2, 2, 2) - camPosition) * 0.5f;
+			camDirection = camPosition + (car1->getPosition() +directionVector * glm::vec3(2, 2, 2) - camPosition) * 0.5f;
 			camPosition = camPosition + (camOffset + car1->getPosition() - camPosition) * 0.025f; 
 		}
 
@@ -251,12 +271,32 @@ namespace Game {
 		}
 
 		adjustCamPosition();
+
 	}
 
 	void adjustCamPosition() {
 		handler->setCamPosition(camPosition);
 		handler->setCamDirection(camDirection);
 		handler->setCamOrientation(camOrientation);
+	}
+
+	// Different types of conversions between bullet and glm
+
+	btVector3 Game::glmToBullet(const glm::vec3& vec)
+	{
+		return { vec.x, vec.y, vec.z };
+	}
+	btQuaternion Game::glmToBullet(const glm::quat& q)
+	{
+		return btQuaternion(q.x, q.y, q.z, q.w);
+	}
+	glm::vec3 Game::bulletToGlm(const btVector3& v)
+	{
+		return glm::vec3(v.getX(), v.getY(), v.getZ());
+	}
+	glm::quat Game::bulletToGlm(const btQuaternion& q)
+	{
+		return glm::quat(q.getW(), q.getX(), q.getY(), q.getZ());
 	}
 
 }
