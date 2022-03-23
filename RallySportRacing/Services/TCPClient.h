@@ -7,6 +7,7 @@
 #include <WS2tcpip.h>
 
 #include <string>
+#include <vector>
 
 #pragma comment (lib, "Ws2_32.lib")
 
@@ -26,9 +27,12 @@ namespace Server {
 		void listen();
 		void sendPacket(string msg);
 
+		void addCallback(void (*func)(string str));
+
 	private:
 		SOCKET connectSocket;
 		SOCKADDR_IN serverAddress;
+		vector<void (*)(string str)> funcs;
 	};
 
 }

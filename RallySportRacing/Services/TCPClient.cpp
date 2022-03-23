@@ -54,7 +54,17 @@ namespace Server {
 		int result;
 		do {
 			result = recv(connectSocket, receiveBuffer, receiveBufLen, 0);
-			cout << "Received buffer: " << receiveBuffer << endl;
+
+			string str(receiveBuffer);
+			str.erase(find_if(str.begin(), str.end(), [](unsigned char c) {
+				return c == '\n';
+				}), str.end());
+
+			for (void(*func)(string str) : funcs) {
+				if (func) {
+					(*func)(str);
+				}
+			}
 
 		} while (result > 0);
 
@@ -79,6 +89,10 @@ namespace Server {
 			cout << "Error sending TCP message, " << WSAGetLastError() << endl;
 		}
 		cout << "Bytes sent: " << result << endl;
+	}
+
+	void TCPClient::addCallback(void (*func)(string str)) {
+		funcs.push_back(func);
 	}
 
 
