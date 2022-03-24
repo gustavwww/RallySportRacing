@@ -35,7 +35,6 @@ namespace Rendering {
 
 		btTriangleMesh* meshInterface;
 		void Model::generateMeshInterface();
-		std::vector<std::vector<glm::vec3>> faces;
 
 		static Model* loadModel(const char* file);
 

@@ -28,6 +28,7 @@ public:
 	btQuaternion glmToBullet(const glm::quat& q);
 	glm::vec3 bulletToGlm(const btVector3& v);
 	glm::quat bulletToGlm(const btQuaternion& q);
+
 protected:
 	Rendering::Model* model;
 	glm::vec3 position;

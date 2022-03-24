@@ -103,6 +103,7 @@ namespace Rendering {
 				vector<Vertex> vertices;
 				vector<unsigned int> indices;
 
+
 				//Temp variable
 				Vertex vertex;
 
@@ -118,14 +119,13 @@ namespace Rendering {
 				const tinygltf::Buffer& bufferNormals = gltfmodel.buffers[bufferViewNormals.buffer];
 				const float* normals = reinterpret_cast<const float*>(&bufferNormals.data[bufferViewNormals.byteOffset + accessorNormals.byteOffset]);
 
-				std::vector <glm::vec3> face;
+
 
 				//Contructing vertices.
 				for (size_t i = 0; i < accessorPositions.count; i++) {
 					vertex.position = glm::vec3(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]);
 					vertex.normal = glm::vec3(normals[i * 3 + 0], normals[i * 3 + 1], normals[i * 3 + 2]);
 					vertices.push_back(vertex);
-					face.push_back(glm::vec3(vertex.position.x, vertex.position.y, vertex.position.z));
 				}
 
 				//Indices accessor.
@@ -162,14 +162,6 @@ namespace Rendering {
 
 	void Model::generateMeshInterface() {
 		meshInterface = new btTriangleMesh();
-		
-		for (int i = 0; i < faces.size(); i++) {
-			std::vector<glm::vec3> face = faces[i];
-			meshInterface->addTriangle(
-				btVector3(face[0].x, face[0].y, face[0].z),
-				btVector3(face[1].x, face[1].y, face[1].z),
-				btVector3(face[2].x, face[2].y, face[2].z)
-			);
-		}
+	
 	}
 }

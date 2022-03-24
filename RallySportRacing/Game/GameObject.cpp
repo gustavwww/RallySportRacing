@@ -47,6 +47,7 @@ glm::vec3 GameObject::getOrientation() {
 void GameObject::setupRigidbody() {
 	//collisionShape = new btBvhTriangleMeshShape(model->meshInterface, false, true);
 	collisionShape = new btBoxShape(btVector3(100, 2, 100));
+
 	motionState = new btDefaultMotionState(btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 0, 0)));
 	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, collisionShape, btVector3(0, 0, 0));
 	rigidBody = new btRigidBody(groundRigidBodyCI);
@@ -112,6 +113,7 @@ void GameObject::updateTransform()
 	rigidBody->getMotionState()->getWorldTransform(btTransform);
 	transform = btTransform;
 	updateMatrices();
+	
 }
 
 void GameObject::updateTransform(const btTransform& btTransform)
@@ -137,6 +139,9 @@ glm::quat GameObject::bulletToGlm(const btQuaternion& q)
 {
 	return glm::quat(q.getW(), q.getX(), q.getY(), q.getZ());
 }
+
+
+
 
 //nedan är konverteringar mellan glm vectorer och bulletsvectorer osv
 /*glm::vec3 bulletToGlm(const btVector3& v) { return glm::vec3(v.getX(), v.getY(), v.getZ()); }

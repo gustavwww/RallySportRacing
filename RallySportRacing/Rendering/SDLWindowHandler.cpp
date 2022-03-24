@@ -20,6 +20,11 @@ namespace Rendering {
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 
+	GLint Rendering::SDLWindowHandler::getDebugID()
+	{
+		return this->debugID;
+	}
+
 	void Rendering::SDLWindowHandler::setCamPosition(glm::vec3 camPos)
 	{
 		camPosition = camPos;
@@ -160,6 +165,8 @@ namespace Rendering {
 	void SDLWindowHandler::beginRenderingLoop(void (*preRender)()) {
 
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
+
+		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);

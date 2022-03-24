@@ -11,6 +11,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
 #include "vehicle.h"
+#include "DebugDraw.h"
 
 using namespace std;
 
@@ -32,6 +33,7 @@ namespace Game {
 	glm::vec3 blue = glm::vec3(0.f, 0.f, 1.f);
 	glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 
+	DebugDraw* debugDrawer;
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 
@@ -66,6 +68,8 @@ namespace Game {
 		//car1->getRigidBody().getWorldTransform().setRotation(btQuaternion(1, 1, 1, 1));
 			
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
+
+		debugDrawer = new DebugDraw();
 	}
 
 	bool toScreen = true;
@@ -107,13 +111,14 @@ namespace Game {
 
 
 
+
 	void update() {
 		//car1->updateTransform();
 		wall->updateTransform();
 		debugEnvironment->updateTransform();
 		environment->updateTransform();
 		vehicle->updateTransform();
-
+		//physics->dynamicsWorld->setDebugDrawer(&mydebugdrawer);
 		//car1->setupRigidbody();
 		//btTransform test;
 	
@@ -121,7 +126,25 @@ namespace Game {
 		//test.setRotation(btQuaternion(0, 0, 0, 1));
 		// Called before every render.
 
-		physics->dynamicsWorld->debugDrawWorld(); // not working
+		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
+
+		physics->dynamicsWorld->debugDrawWorld(); 
+
+		debugDrawer->doDebugDraw();
+		
+
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
+		glm::mat4 view = glm::lookAt(camPosition, camDirection, camOrientation);
+
+		glUseProgram(handler->getDebugID());
+		GLint MatrixID = glGetUniformLocation(handler->getDebugID(), "MVP"); // use the MVP in the simple shader
+		// make the View and  Projection matrix
+		glm::mat4 VP = projection * view;  // Remember order seems backwards
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &VP[0][0]);
+
+
+		
+
 		// Calculate deltaTime
 		if (firstTime) {
 			camOrientation = glm::vec3(0, 1, 0);
