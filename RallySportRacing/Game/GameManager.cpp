@@ -10,14 +10,16 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
+#include "vehicle.h"
 
 using namespace std;
 
 namespace Game {
 
-	GameObject* car1;
+	//GameObject* car1;
 	GameObject* environment;
 	GameObject* wall;
+	Vehicle* vehicle;
 
 	//Debug GameObject
 	GameObject* debugEnvironment;
@@ -38,7 +40,7 @@ namespace Game {
 
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
 		windowHandler->addModel(carModel1);
-		car1 = new GameObject(carModel1, physics->dynamicsWorld);
+		//car1 = new GameObject(carModel1, physics->dynamicsWorld);
 
 		//wheel = new GameObject(carModel1, physics->dynamicsWorld);
 
@@ -54,12 +56,16 @@ namespace Game {
 		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf");
 		windowHandler->addModel(debugEnvironmentModel);
 		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
-		debugEnvironment->translate(glm::vec3(-10.0f, 15.0f, 20.0f));
-		debugEnvironment->rotate(glm::vec3(M_PI, M_PI/2, 0.0f));
+		debugEnvironment->setInitialPosition(btVector3(-20, 20, 20));
+		//debugEnvironment->rotate(glm::vec3(M_PI, M_PI/2, 0.0f));
 
-		car1->translate(glm::vec3(-15.f, 0.5f, 0.f));
-		wall->translate(glm::vec3(-25.f, 1.f, 0.f));
-		wall->rotate(glm::vec3(0.0f, 0.0f, -M_PI / 2.0f));
+		//car1->setInitialPosition(btVector3(-15.f, 0.5f, 0.f));
+		wall->setInitialPosition(btVector3(-20, 2, 2));
+		wall->setInitialRotation(btQuaternion(1, 1, 1, 1));
+		//debugEnvironment->getRigidBody().getWorldTransform().setRotation(btQuaternion(1, 0, 0, 1));
+		//car1->getRigidBody().getWorldTransform().setRotation(btQuaternion(1, 1, 1, 1));
+			
+		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 	}
 
 	bool toScreen = true;
@@ -99,12 +105,18 @@ namespace Game {
 	// vertical angle : 0, look at the horizon
 	float verticalAngle = 0.f;
 
+
+
 	void update() {
+		//car1->updateTransform();
+		wall->updateTransform();
+		debugEnvironment->updateTransform();
+		environment->updateTransform();
+		vehicle->updateTransform();
 
 		//car1->setupRigidbody();
 		//btTransform test;
-		car1->translate(directionVector);
-		car1->rotate(glm::vec3(-M_PI / 2.0f, 0.0f, 0.0f));
+	
 		//test.setOrigin(btVector3(2, 2, 2));
 		//test.setRotation(btQuaternion(0, 0, 0, 1));
 		// Called before every render.
@@ -119,36 +131,37 @@ namespace Game {
 		previousTime = currentTime;
 		currentTime = chrono::high_resolution_clock::now();
 		float deltaTime = chrono::duration<float, milli>(currentTime - previousTime).count() * 0.001;
-		physics->dynamicsWorld->stepSimulation(deltaTime, 1);
+
 
 		// TODO:
 		// gonna fix the code so it is more simple and clear?
 		SDL_PumpEvents();
 		buttons = SDL_GetMouseState(&x, &y);
 		if (keyboard_state_array[SDL_SCANCODE_H]) {
-			car1->updateTransform();
+			//car1->updateTransform();
 		}
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
 			if (keyboard_state_array[SDL_SCANCODE_W]) {
-				car1->translate(directionVector * deltaTime * speed);
-				car1->updateTransform();
-
+				vehicle->drive(1);
 			}
 
 			if (keyboard_state_array[SDL_SCANCODE_S]) {
-				car1->translate(directionVector * glm::vec3(-1, 1, -1) * deltaTime * speed);
+				vehicle->drive(-1);
 			}
 
 			if (keyboard_state_array[SDL_SCANCODE_D]) {
-				car1->rotate(glm::vec3(-M_PI / 2.0f * deltaTime, 0.0f, 0.0f));
+				vehicle->steerLeft(deltaTime);
+			}
+			else if (keyboard_state_array[SDL_SCANCODE_A]) {
+				vehicle->steerRight(deltaTime);
+			}
+			else {
+				vehicle->steerNeutral();
 			}
 
-			if (keyboard_state_array[SDL_SCANCODE_A]) {
-				car1->rotate(glm::vec3(M_PI / 2.0f * deltaTime, 0.0f, 0.0f));
-			}
-			directionVector.x = sin(car1->getOrientation().x);
-			directionVector.z = cos(car1->getOrientation().x);
+			directionVector.x = sin(vehicle->getOrientation().x);
+			directionVector.z = cos(vehicle->getOrientation().x);
 		}
 
 		// Different perspectives
@@ -180,8 +193,8 @@ namespace Game {
 			camOffset = glm::vec3(20 * camOffsetVector.x, 5, 20 * camOffsetVector.z); //offset 20. Height 5
 
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
-			camDirection = camPosition + (car1->getPosition() +directionVector * glm::vec3(2, 2, 2) - camPosition) * 0.5f;
-			camPosition = camPosition + (camOffset + car1->getPosition() - camPosition) * 0.025f; 
+			camDirection = camPosition + (vehicle->getPosition() + directionVector * glm::vec3(2, 2, 2) - camPosition) * 0.5f;
+			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.025f;
 		}
 
 		// Perspective 2 => still following the car but you can change the angle and position relative to the car
@@ -209,8 +222,8 @@ namespace Game {
 				camOffset = glm::vec3(radius * cos(perspectiveAngle), 5, radius * sin(perspectiveAngle));
 			}
 
-			camPosition = camOffset + car1->getPosition();
-			camDirection = car1->getPosition();
+			//camPosition = camOffset + car1->getPosition();
+			//camDirection = car1->getPosition();
 		}
 
 		// Perspective 3 => static point for the camera, located in the corner of the map
@@ -271,7 +284,7 @@ namespace Game {
 		}
 
 		adjustCamPosition();
-
+		physics->dynamicsWorld->stepSimulation(deltaTime, 1);
 	}
 
 	void adjustCamPosition() {

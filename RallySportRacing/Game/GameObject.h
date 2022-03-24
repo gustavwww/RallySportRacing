@@ -5,41 +5,43 @@
 #include <glm/glm.hpp>
 #include <btBulletDynamicsCommon.h>
 
-namespace Game {
 
-	class GameObject {
-	public:
-		GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld);
-		~GameObject();
 
-		void translate(glm::vec3 speedVector);
-		void rotate(glm::vec3 angleVector);
+class GameObject {
+public:
+	GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld);
+	~GameObject();
 
-		btTransform getTransform();
-		void setupRigidbody();
-		virtual void updateTransform();
-		virtual void updateTransform(const btTransform& btTransform);
+	void updateMatrices();
+	void rotate(glm::vec3 angleVector);
 
-		glm::vec3 getPosition();
-		glm::vec3 getOrientation();
-		btVector3 glmToBullet(const glm::vec3& vec);
-		btQuaternion glmToBullet(const glm::quat& q);
-		glm::vec3 bulletToGlm(const btVector3& v);
-		glm::quat bulletToGlm(const btQuaternion& q);
-	protected:
-		Rendering::Model* model;
-		glm::vec3 position;
-		glm::vec3 orientation;
+	btTransform getTransform();
+	void setInitialPosition(const btVector3& v);
+	void setInitialRotation(const btQuaternion& q);
+	void setupRigidbody();
+	virtual void updateTransform();
+	virtual void updateTransform(const btTransform& btTransform);
 
-		btTransform transform;
-		btDiscreteDynamicsWorld* dynamicsWorld;
-		btRigidBody* rigidBody;
-		btDefaultMotionState* motionState;
-		btCollisionShape* collisionShape;
+	glm::vec3 getPosition();
+	glm::vec3 getOrientation();
+	btVector3 glmToBullet(const glm::vec3& vec);
+	btQuaternion glmToBullet(const glm::quat& q);
+	glm::vec3 bulletToGlm(const btVector3& v);
+	glm::quat bulletToGlm(const btQuaternion& q);
+protected:
+	Rendering::Model* model;
+	glm::vec3 position;
+	glm::vec3 orientation;
 
-	};
+	btTransform transform;
+	btDiscreteDynamicsWorld* dynamicsWorld;
+	btRigidBody* rigidBody;
+	btDefaultMotionState* motionState;
+	btCollisionShape* collisionShape;
 
-}
+};
+
+
 
 
 
