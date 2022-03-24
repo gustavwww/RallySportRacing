@@ -4,11 +4,16 @@
 #include "Networking.h"
 #include "Services/TCPClient.h"
 #include "Services/Protocol/Command.h"
+#include "Services/Protocol/ProtocolParser.h"
 #include "Game/GameObject.h"
+
+using namespace std;
 
 namespace Networking {
 
 	Server::TCPClient tcpClient;
+	thread tcpThread;
+
 	Game::GameObject* playerObj;
 
 	void setupNetwork() {
@@ -20,17 +25,15 @@ namespace Networking {
 		tcpThread = thread(&Server::TCPClient::listen, tcpClient);
 	}
 
-	void joinGame(string id, string name, Game::GameObject* gameObj) {
+	void joinGame(string id, string name) {
 		tcpClient.sendPacket("join:" + id + "," + name);
-		playerObj = gameObj;
 	}
 
-	void tcpPacketReceived() {
+	void tcpPacketReceived(string str) {
 		Protocol::Command cmd = Protocol::parseMessage(str);
+		string command = cmd.getCommand();
 
-		switch (cmd.getCommand()) {
-
-		case "game":
+		if (command == "game") {
 			for (int i = 0; i < cmd.getArgsSize(); i += 4) {
 				string name = cmd.getArgs()[i + 1];
 				float x = stof(cmd.getArgs()[i + 2]);
@@ -38,14 +41,10 @@ namespace Networking {
 				float z = stof(cmd.getArgs()[i + 4]);
 
 				// TODO: Spawn model if player not already spawned.
-
 			}
-			break;
 
-		case "error":
+		} else if (command == "error") {
 			cout << "Error: " << cmd.getArgs()[0] << endl;
-			break;
-
 		}
 
 	}
