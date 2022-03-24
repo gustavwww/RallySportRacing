@@ -18,7 +18,7 @@ add_executable (RallySportRacing
     "Rendering/SDLWindowHandler.cpp"
     "Rendering/SDLWindowHandler.h"
     ${SHADERS}
-    "Rendering/Model.h" "Rendering/Model.cpp"   "Game/GameManager.h" "Game/GameManager.cpp" "Game/GameObject.h" "Game/GameObject.cpp" "Rendering/Mesh.h" "Rendering/Mesh.cpp" "Rendering/SubMesh.h" "Rendering/SubMesh.cpp" "Services/Protocol/ProtocolParser.h" "Services/Protocol/ProtocolParser.cpp" "Services/Protocol/Command.h" "Services/Protocol/Command.cpp" "Services/TCPClient.h" "Services/TCPClient.cpp" )
+    "Rendering/Model.h" "Rendering/Model.cpp"   "Game/GameManager.h" "Game/GameManager.cpp" "Game/GameObject.h" "Game/GameObject.cpp" "Rendering/Mesh.h" "Rendering/Mesh.cpp" "Rendering/SubMesh.h" "Rendering/SubMesh.cpp" "Services/Protocol/ProtocolParser.h" "Services/Protocol/ProtocolParser.cpp" "Services/Protocol/Command.h" "Services/Protocol/Command.cpp" "Services/TCPClient.h" "Services/TCPClient.cpp"  "Game/Networking/Networking.h" "Game/Networking/Networking.cpp")
 
 find_package(OpenGL REQUIRED)
 

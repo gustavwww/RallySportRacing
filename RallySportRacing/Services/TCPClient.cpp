@@ -42,7 +42,7 @@ namespace Server {
 			throw "Error connecting to server";
 		}
 
-		getsockname(connectSocket, (SOCKADDR*)&serverAddress, (int*)sizeof(serverAddress));
+		//getsockname(connectSocket, (SOCKADDR*)&serverAddress, (int*)sizeof(serverAddress));
 		cout << "Connected to server address " << inet_ntoa(serverAddress.sin_addr) << " port " << htons(serverAddress.sin_port) << endl;
 
 	}
@@ -57,7 +57,7 @@ namespace Server {
 
 			string str(receiveBuffer);
 			str.erase(find_if(str.begin(), str.end(), [](unsigned char c) {
-				return c == '\n';
+				return c == '\r';
 				}), str.end());
 
 			for (void(*func)(string str) : funcs) {
@@ -79,6 +79,10 @@ namespace Server {
 	}
 
 	void TCPClient::sendPacket(string msg) {
+		if (connectSocket == INVALID_SOCKET) {
+			cout << "Attempted to send packet. Not connected to server." << endl;
+			return;
+		}
 		string msg_nl = msg + "\n";
 		const char* str = msg_nl.c_str();
 
@@ -89,6 +93,7 @@ namespace Server {
 			cout << "Error sending TCP message, " << WSAGetLastError() << endl;
 		}
 		cout << "Bytes sent: " << result << endl;
+		cout << "String sent: " << str << endl;
 	}
 
 	void TCPClient::addCallback(void (*func)(string str)) {

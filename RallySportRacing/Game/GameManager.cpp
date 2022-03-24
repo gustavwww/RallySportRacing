@@ -5,6 +5,9 @@
 #include <thread>
 #include "Rendering/SDLWindowHandler.h"
 #include "Services/TCPClient.h";
+#include "Services/Protocol/ProtocolParser.h"
+#include "Services/Protocol/Command.h"
+#include "Networking/Networking.h"
 
 using namespace std;
 
@@ -24,11 +27,7 @@ namespace Game {
 	glm::vec3 blue = glm::vec3(0.f, 0.f, 1.f);
 	glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 
-
-
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
-
-		setupNetwork();
 
 		handler = windowHandler;
 
@@ -54,21 +53,10 @@ namespace Game {
 		//car1->translate(glm::vec3(-15.f, 0.5f, 0.f));
 		wall->translate(glm::vec3(-25.f, 1.f, 0.f));
 		wall->rotate(glm::vec3(0.0f, 0.0f, -M_PI / 2.0f));
-	}
 
-	thread tcpThread;
-
-	void setupNetwork() {
-
-		auto tcpClient = Server::TCPClient();
-		tcpClient.addCallback(Game::tcpPacketReceived);
-		tcpClient.connectToServer();
-
-		tcpThread = thread(&Server::TCPClient::listen, tcpClient);
-	}
-
-	void tcpPacketReceived(string str) {
-		cout << "Got message! " << str << endl;
+		// Multiplayer setup
+		Networking::setupNetwork();
+		Networking::joinGame("hub", "Gustav");
 	}
 
 	bool toScreen = true;
