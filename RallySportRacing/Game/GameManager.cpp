@@ -55,8 +55,8 @@ namespace Game {
 		wall->rotate(glm::vec3(0.0f, 0.0f, -M_PI / 2.0f));
 
 		// Multiplayer setup
-		Networking::setupNetwork();
-		Networking::joinGame("hub", "Gustav");
+		//Networking::setupNetwork();
+		//Networking::joinGame("hub", "Gustav");
 	}
 
 	bool toScreen = true;
