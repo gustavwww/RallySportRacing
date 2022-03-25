@@ -10,6 +10,7 @@
 #include <imgui.h>
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
+#include "Game/GameManager.h"
 
 
 using namespace std;
@@ -220,7 +221,7 @@ namespace Rendering {
 			for (Model* m : models) {
 				m->render(projection, view, programID);
 			}
-
+			Game::drawDebug();
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);

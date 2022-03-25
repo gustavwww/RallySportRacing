@@ -130,20 +130,7 @@ namespace Game {
 
 		physics->dynamicsWorld->debugDrawWorld(); 
 
-		debugDrawer->doDebugDraw();
-		
 
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
-		glm::mat4 view = glm::lookAt(camPosition, camDirection, camOrientation);
-
-		glUseProgram(handler->getDebugID());
-		GLint MatrixID = glGetUniformLocation(handler->getDebugID(), "MVP"); // use the MVP in the simple shader
-		// make the View and  Projection matrix
-		glm::mat4 VP = projection * view;  // Remember order seems backwards
-		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &VP[0][0]);
-
-
-		
 
 		// Calculate deltaTime
 		if (firstTime) {
@@ -335,4 +322,18 @@ namespace Game {
 		return glm::quat(q.getW(), q.getX(), q.getY(), q.getZ());
 	}
 
+	void Game::drawDebug() {
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)1920 / (float)1080, 0.1f, 100.0f);
+		glm::mat4 view = glm::lookAt(camPosition, camDirection, camOrientation);
+
+		glUseProgram(handler->getDebugID());
+		GLint MatrixID = glGetUniformLocation(handler->getDebugID(), "MVP"); // use the MVP in the simple shader
+		// make the View and  Projection matrix
+		glm::mat4 VP = projection * view;  // Remember order seems backwards
+		glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &VP[0][0]);
+
+
+
+		debugDrawer->doDebugDraw();
+	}
 }

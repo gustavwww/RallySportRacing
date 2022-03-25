@@ -37,7 +37,7 @@ void DebugDraw::doDebugDraw()
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
-	glBufferData(GL_ARRAY_BUFFER, TheLines.size() * sizeof(LineValues), &TheLines[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, TheLines.size() * sizeof(LineValues), TheLines.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -45,13 +45,13 @@ void DebugDraw::doDebugDraw()
 
 	glDrawArrays(GL_LINES, 0, TheLines.size() * 2);
 
-
+	// create once then update
 	TheLines.clear();
 }
 
 int DebugDraw::getDebugMode() const
 {
-	return 0;
+	return DBG_DrawWireframe|DBG_DrawAabb;
 }
 
 void DebugDraw::drawContactPoint(const btVector3& PointOnB, const btVector3& normalOnB, btScalar distance, int lifeTime, const btVector3& color)

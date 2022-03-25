@@ -13,6 +13,7 @@ namespace Game {
 	btQuaternion glmToBullet(const glm::quat& q);
 	glm::vec3 bulletToGlm(const btVector3& v);
 	glm::quat bulletToGlm(const btQuaternion& q);
+	void drawDebug();
 }
 
 #endif
