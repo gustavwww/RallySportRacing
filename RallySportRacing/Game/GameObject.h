@@ -38,6 +38,7 @@ protected:
 	btRigidBody* rigidBody;
 	btDefaultMotionState* motionState;
 	btCollisionShape* collisionShape;
+	btCompoundShape* compoundShape;
 
 };
 
