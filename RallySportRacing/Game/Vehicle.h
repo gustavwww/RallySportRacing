@@ -13,6 +13,7 @@ public:
 	void steerLeft(double deltaTime);
 	void steerNeutral();
 	void Vehicle::notGasing();
+	void Vehicle::handBrake();
 	
 protected:
 	float steering;

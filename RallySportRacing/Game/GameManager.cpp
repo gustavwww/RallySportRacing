@@ -154,16 +154,22 @@ namespace Game {
 		}
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
-			if (keyboard_state_array[SDL_SCANCODE_W]) {
+
+			// driving 
+			if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->drive(1);
 			}
-			else if (keyboard_state_array[SDL_SCANCODE_S]) {
+			else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->drive(-1);
 			}
-			else {
+			if (keyboard_state_array[SDL_SCANCODE_SPACE]) {
+				vehicle->handBrake();
+			}
+			if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->notGasing();
 			}
 
+			// steering
 			if (keyboard_state_array[SDL_SCANCODE_D]) {
 				vehicle->steerLeft(deltaTime);
 			}
@@ -205,6 +211,9 @@ namespace Game {
 		if (perspective == 1) {
 			camOffsetVector = directionVector * glm::vec3(-1, 1, -1);
 			camOffset = glm::vec3(20 * camOffsetVector.x, 5, 20 * camOffsetVector.z); //offset 20. Height 5
+
+			/*camDirection = vehicle->getPosition();
+			camPosition = camOffset + vehicle->getPosition();*/
 
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
 			camDirection = camPosition + (vehicle->getPosition() + directionVector * glm::vec3(2, 2, 2) - camPosition) * 0.5f;

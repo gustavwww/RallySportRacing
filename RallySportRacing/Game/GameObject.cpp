@@ -19,15 +19,36 @@ void GameObject::updateMatrices() {
 	model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), bulletToGlm(rigidBody->getWorldTransform().getOrigin())));
 
 	glm::quat q = bulletToGlm(rigidBody->getWorldTransform().getRotation()); // this seems to work
-	glm::vec3 euler = glm::eulerAngles(q); // gives xyz // 
-	//cout << "rigitbodyRotation.x " << rigidBody->getWorldTransform().getRotation().x() << endl;
-	//cout << "q.x " << q.x << endl;
-	orientation = glm::vec3 (euler.y, euler.x, euler.z);
-	(*model).setRotationMatrix(glm::eulerAngleYXZ(euler.y, euler.x, euler.z));
+	glm::vec3 euler = glm::eulerAngles(q); // should give x,y,z as angles from the quaternion above
+
+	//orientation = euler; this should be enough but it doesnt work??
+
+	/*static btScalar yaw;
+	static btScalar pitch;
+	static btScalar roll;
+	getTransform().getBasis().getEulerZYX(roll, pitch, yaw, 1);*/
+
+	orientation.x = rigidBody->getWorldTransform().getRotation().getAngle(); // this almost works, but it comes to a point where the camera just snaps 
+
+	
+
+
+	(*model).setRotationMatrix(glm::toMat4(q));
 
 	//model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), position));
 	//std::cout << "RigidX: " << rigidBody->getWorldTransform().getOrigin().getX();
 	//std::cout << "Positionx: " << position.x << endl;
+
+	// These two have the same values which means that the bullettoglm is working
+	/*if (rigidBody->getWorldTransform().getRotation().w() != q.w) { // tested with x,y,z,w all works
+		cout << "something is wrong: ";
+	}*/
+	/*if (euler.x != q.z) {
+		cout << "something is wrong: "; xyz, yxz,
+	}*/
+
+	//cout << "eulerAngles.x " << rigidBody->getWorldTransform().getRotation().x() << endl;
+	//cout << "q.x " << q.x << endl;
 }
 
 void GameObject::rotate(glm::vec3 angleVector) {

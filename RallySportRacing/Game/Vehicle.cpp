@@ -10,19 +10,22 @@ Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld
 
 	btScalar chassisMass(1.0);
 	btVector3 chassisInertia(0.0f, 0.0f, 0.0f);
-	btVector3 shape = btVector3(0.9, 0.3, 2.3);
+	btVector3 shape = btVector3(0.9, 0.5, 2.3);
 	collisionShape = new btBoxShape(shape); // meshCollider = new Mesh(collider); =>  collisionShape = new btConvexTriangleMeshShape(meshCollider->meshInterface);
 
 	btQuaternion initalRotation = btQuaternion(0, 0, 0, 1);
 	initalRotation.setRotation(btVector3(0, 1, 0), btScalar(0));
 	motionState = new btDefaultMotionState(btTransform(initalRotation, btVector3(0.f, 10.f, 0.f)));
 	collisionShape->calculateLocalInertia(chassisMass, chassisInertia);
-	//collisionShape->setLocalScaling(btVector3(1, 2, 1));
+
+	// moves the centrum of the collisionshape
 	compoundShape = new btCompoundShape();
 	btTransform position;
 	position.setIdentity();
-	position.setOrigin(btVector3(0, 1, 0.25));
+	position.setOrigin(btVector3(0, 1, 0.25));  // offset
 	compoundShape->addChildShape(position, collisionShape);
+	shape = shape + btVector3(0, 1, -0.25); // adjust shape with offset 
+
 	btRigidBody::btRigidBodyConstructionInfo chassisRigidBodyCI(chassisMass, motionState, compoundShape, chassisInertia);
 	rigidBody = new btRigidBody(chassisRigidBodyCI);
 	rigidBody->setActivationState(DISABLE_DEACTIVATION);
@@ -58,10 +61,10 @@ Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld
 	btScalar wheelRadius(0.5);
 
 	//The height where the wheels are connected to the chassis
-	btScalar connectionHeight(1.2);
+	btScalar connectionHeight(shape.y() - wheelRadius);
 
 	//All the wheel configuration assumes the vehicle is centered at the origin and a right handed coordinate system is used
-	btVector3 wheelConnectionPoint(shape.x() - wheelRadius, connectionHeight, shape.z() - wheelWidth);
+	btVector3 wheelConnectionPoint(shape.x(), connectionHeight, shape.z() - wheelWidth); // these will be needed to be adjusted depending on the model
 
 	//Adds the front wheels
 	vehicle->addWheel(wheelConnectionPoint, wheelDirectionCS0, wheelAxleCS, suspensionRestLength, wheelRadius, tuning, true);
@@ -137,6 +140,15 @@ void Vehicle::steerNeutral()
 	steering = 0.0f;
 	vehicle->setSteeringValue(steering, 0);
 	vehicle->setSteeringValue(steering, 1);
+}
+
+void Vehicle::handBrake()
+{
+	vehicle->applyEngineForce(0, 2);
+	vehicle->applyEngineForce(0, 3);
+
+	vehicle->setBrake(500, 2);
+	vehicle->setBrake(500, 3);
 }
 
 void Vehicle::updateTransform()
