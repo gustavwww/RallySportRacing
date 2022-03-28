@@ -11,7 +11,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
 #include "vehicle.h"
-#include "DebugDraw.h"
 
 #include "Debugging/DebugDraw.h"
 
