@@ -18,8 +18,10 @@ void GameObject::updateMatrices() {
 	position = bulletToGlm(getTransform().getOrigin());
 	model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), bulletToGlm(rigidBody->getWorldTransform().getOrigin())));
 
-	glm::quat q = bulletToGlm(rigidBody->getWorldTransform().getRotation());
-	glm::vec3 euler = glm::eulerAngles(q); // gives xyz
+	glm::quat q = bulletToGlm(rigidBody->getWorldTransform().getRotation()); // this seems to work
+	glm::vec3 euler = glm::eulerAngles(q); // gives xyz // 
+	//cout << "rigitbodyRotation.x " << rigidBody->getWorldTransform().getRotation().x() << endl;
+	//cout << "q.x " << q.x << endl;
 	orientation = glm::vec3 (euler.y, euler.x, euler.z);
 	(*model).setRotationMatrix(glm::eulerAngleYXZ(euler.y, euler.x, euler.z));
 
@@ -50,8 +52,11 @@ void GameObject::setupRigidbody() {
 
 	motionState = new btDefaultMotionState(btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 0, 0)));
 	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, collisionShape, btVector3(0, 0, 0));
+	groundRigidBodyCI.m_rollingFriction = 100;
+	groundRigidBodyCI.m_friction = 100;
 	rigidBody = new btRigidBody(groundRigidBodyCI);
 	rigidBody->setContactProcessingThreshold(0.f);
+	rigidBody->setFriction(100);
 
 
 	btTransform initialTransform;

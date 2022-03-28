@@ -13,6 +13,9 @@
 #include "vehicle.h"
 #include "DebugDraw.h"
 
+#include "Debugging/DebugDraw.h"
+
+
 using namespace std;
 
 namespace Game {
@@ -58,12 +61,12 @@ namespace Game {
 		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf");
 		windowHandler->addModel(debugEnvironmentModel);
 		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
-		debugEnvironment->setInitialPosition(btVector3(-20, 20, 20));
+		debugEnvironment->setInitialPosition(btVector3(-100, 100, 20));
 		//debugEnvironment->rotate(glm::vec3(M_PI, M_PI/2, 0.0f));
 
 		//car1->setInitialPosition(btVector3(-15.f, 0.5f, 0.f));
-		wall->setInitialPosition(btVector3(-20, 2, 2));
-		wall->setInitialRotation(btQuaternion(1, 1, 1, 1));
+		wall->setInitialPosition(btVector3(-100, 100, 2));
+		//wall->setInitialRotation(btQuaternion(1, 1, 1, 1));
 		//debugEnvironment->getRigidBody().getWorldTransform().setRotation(btQuaternion(1, 0, 0, 1));
 		//car1->getRigidBody().getWorldTransform().setRotation(btQuaternion(1, 1, 1, 1));
 			
@@ -155,9 +158,11 @@ namespace Game {
 			if (keyboard_state_array[SDL_SCANCODE_W]) {
 				vehicle->drive(1);
 			}
-
-			if (keyboard_state_array[SDL_SCANCODE_S]) {
+			else if (keyboard_state_array[SDL_SCANCODE_S]) {
 				vehicle->drive(-1);
+			}
+			else {
+				vehicle->notGasing();
 			}
 
 			if (keyboard_state_array[SDL_SCANCODE_D]) {
