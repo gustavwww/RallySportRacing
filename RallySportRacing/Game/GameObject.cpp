@@ -19,44 +19,9 @@ void GameObject::updateMatrices() {
 	model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), bulletToGlm(rigidBody->getWorldTransform().getOrigin())));
 
 	glm::quat q = bulletToGlm(rigidBody->getWorldTransform().getRotation()); // this seems to work
-	glm::vec3 euler = glm::eulerAngles(q); // should give x,y,z as angles from the quaternion above
-
-	//orientation = euler; this should be enough but it doesnt work??
-
-	/*static btScalar yaw;
-	static btScalar pitch;
-	static btScalar roll;
-	getTransform().getBasis().getEulerZYX(roll, pitch, yaw, 1);*/
-
-	orientation.x = rigidBody->getWorldTransform().getRotation().getAngle(); // this almost works, but it comes to a point where the camera just snaps 
-
+	orientation = glm::rotate(q, glm::vec3(0, 0, -1));
 	
-
-
 	(*model).setRotationMatrix(glm::toMat4(q));
-
-	//model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), position));
-	//std::cout << "RigidX: " << rigidBody->getWorldTransform().getOrigin().getX();
-	//std::cout << "Positionx: " << position.x << endl;
-
-	// These two have the same values which means that the bullettoglm is working
-	/*if (rigidBody->getWorldTransform().getRotation().w() != q.w) { // tested with x,y,z,w all works
-		cout << "something is wrong: ";
-	}*/
-	/*if (euler.x != q.z) {
-		cout << "something is wrong: "; xyz, yxz,
-	}*/
-
-	//cout << "eulerAngles.x " << rigidBody->getWorldTransform().getRotation().x() << endl;
-	//cout << "q.x " << q.x << endl;
-}
-
-void GameObject::rotate(glm::vec3 angleVector) {
-	/*(*model).setRotationMatrix(glm::toMat4(glm::quat(transform.getRotation().getW(),
-		transform.getRotation().getX(),
-		transform.getRotation().getY(),
-		transform.getRotation().getZ())));*/
-		//(*model).setRotationMatrix(glm::toMat4(bulletToGlm(transform.getRotation())));
 }
 
 glm::vec3 GameObject::getPosition() {
@@ -120,21 +85,6 @@ void GameObject::setInitialRotation(const btQuaternion& q)
 
 void GameObject::updateTransform()
 {
-	//btTransform initialTransform;
-
-	//initialTransform.setOrigin(glmToBullet(position));
-	//initialTransform.setRotation(glmToBullet(glm::quat(orientation)));
-
-	//rigidBody->setWorldTransform(initialTransform);
-	//motionState->setWorldTransform(initialTransform);
-	//rigidBody->applyForce(btVector3(1, 1, 1), btVector3(1, 1, 1));
-	/*
-	btTransform btTransform;
-	rigidBody->getMotionState()->getWorldTransform(btTransform);
-	transform = btTransform;
-	*/
-	//rigidBody->applyCentralForce(btVector3(100, 0, 0));
-
 	btTransform btTransform;
 	rigidBody->getMotionState()->getWorldTransform(btTransform);
 	transform = btTransform;
@@ -144,7 +94,6 @@ void GameObject::updateTransform()
 
 void GameObject::updateTransform(const btTransform& btTransform)
 {
-	//std::cout << "RigidX: " << rigidBody->getWorldTransform().getOrigin().getX();
 	transform = btTransform;
 }
 

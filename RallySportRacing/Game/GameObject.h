@@ -13,7 +13,6 @@ public:
 	~GameObject();
 
 	void updateMatrices();
-	void rotate(glm::vec3 angleVector);
 
 	btTransform getTransform();
 	void setInitialPosition(const btVector3& v);

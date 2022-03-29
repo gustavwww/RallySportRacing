@@ -115,21 +115,14 @@ namespace Game {
 
 
 	void update() {
-		//car1->updateTransform();
+		// Should probably just be a loop that does update on all objects
 		wall->updateTransform();
 		debugEnvironment->updateTransform();
 		environment->updateTransform();
 		vehicle->updateTransform();
-		//physics->dynamicsWorld->setDebugDrawer(&mydebugdrawer);
-		//car1->setupRigidbody();
-		//btTransform test;
-	
-		//test.setOrigin(btVector3(2, 2, 2));
-		//test.setRotation(btQuaternion(0, 0, 0, 1));
-		// Called before every render.
 
+		// debug drawing
 		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
-
 		physics->dynamicsWorld->debugDrawWorld(); 
 
 
@@ -179,22 +172,16 @@ namespace Game {
 			else {
 				vehicle->steerNeutral();
 			}
-
-			directionVector.x = sin(vehicle->getOrientation().x);
-			directionVector.z = cos(vehicle->getOrientation().x);
 		}
 
 		// Different perspectives
 		if (keyboard_state_array[SDL_SCANCODE_1]) {
 			perspective = 1;
-			//perspectiveAngle = tan(pow(camOffsetVector.x - camPosition.x, 2) / pow(camOffsetVector.z - camPosition.z, 2));
-			//camOffset = glm::vec3(radius * cos(perspectiveAngle), 5, radius * sin(perspectiveAngle));
 			camOrientation = glm::vec3(0, 1, 0);
 		}
 		if (keyboard_state_array[SDL_SCANCODE_2]) {
-			camOffset = glm::vec3(radius * cos(perspectiveAngle), 5, radius * sin(perspectiveAngle));
-			camOrientation = glm::vec3(0, 1, 0);
 			perspective = 2;
+			camOrientation = glm::vec3(0, 1, 0);
 		}
 		if (keyboard_state_array[SDL_SCANCODE_3]) {
 			perspective = 3;
@@ -209,52 +196,24 @@ namespace Game {
 		// Camera handling for the different perspectives
 		// Perspective 1 => start perspective following the car
 		if (perspective == 1) {
-			camOffsetVector = directionVector * glm::vec3(-1, 1, -1);
-			camOffset = glm::vec3(20 * camOffsetVector.x, 5, 20 * camOffsetVector.z); //offset 20. Height 5
-
-			/*camDirection = vehicle->getPosition();
-			camPosition = camOffset + vehicle->getPosition();*/
-
+			camOffset = glm::vec3(11 * vehicle->getOrientation().x, 3, 11 * vehicle->getOrientation().z); //offset 20. Height 5
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
-			camDirection = camPosition + (vehicle->getPosition() + directionVector * glm::vec3(2, 2, 2) - camPosition) * 0.5f;
-			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.025f;
+			camDirection = camPosition + (vehicle->getPosition() - camPosition) * 0.5f;
+			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.05f;
 		}
 
-		// Perspective 2 => still following the car but you can change the angle and position relative to the car
+		// Perspective 2 => for reversing
 		else if (perspective == 2) {
-			if (radius <= minDistance) {
-				radius = minDistance;
-			}
-			if (radius >= maxDistance) { 
-				radius = maxDistance;
-			}
-			if (keyboard_state_array[SDL_SCANCODE_UP]) {
-				radius -= 0.1f;
-				camOffset = glm::vec3(radius * cos(perspectiveAngle), 5, radius * sin(perspectiveAngle));
-			}
-			if (keyboard_state_array[SDL_SCANCODE_DOWN]) {
-				radius += 0.1f;
-				camOffset = glm::vec3(radius * cos(perspectiveAngle), 5, radius * sin(perspectiveAngle));
-			}
-			if (keyboard_state_array[SDL_SCANCODE_LEFT]) {
-				perspectiveAngle += 0.01;
-				camOffset = glm::vec3(radius * cos(perspectiveAngle), 5, radius * sin(perspectiveAngle));
-			}
-			if (keyboard_state_array[SDL_SCANCODE_RIGHT]) {
-				perspectiveAngle -= 0.01;
-				camOffset = glm::vec3(radius * cos(perspectiveAngle), 5, radius * sin(perspectiveAngle));
-			}
-
-			//camPosition = camOffset + car1->getPosition();
-			//camDirection = car1->getPosition();
+			camOffset = glm::vec3(15 * vehicle->getOrientation().x * -1, 3, 15 * vehicle->getOrientation().z * -1); //offset 20. Height 5
+			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
+			camDirection = vehicle->getPosition();
+			camPosition = camOffset + vehicle->getPosition();
 		}
 
 		// Perspective 3 => static point for the camera, located in the corner of the map
 		else if (perspective == 3) {
 			if ((buttons & SDL_BUTTON_RMASK) == SDL_BUTTON_RMASK) {
 				//SDL_Log("Mouse cursor is at %d, %d", x, y); //window is 800 x 600
-				//SDL_Log("Mouse Button 1 (left) is pressed.");
-				//SDL_Log("horizontalAngle %d, %d", cos(horizontalAngle), cos(verticalAngle));
 				SDL_SetRelativeMouseMode(SDL_TRUE);
 				SDL_WarpMouseInWindow(NULL, WIDTH / 2, HEIGHT / 2);
 				// Compute new orientation
