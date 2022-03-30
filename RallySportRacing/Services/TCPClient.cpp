@@ -57,7 +57,7 @@ namespace Server {
 
 			string str(receiveBuffer);
 			str.erase(find_if(str.begin(), str.end(), [](unsigned char c) {
-				return c == '\r';
+				return c == '\n';
 				}), str.end());
 
 			for (void(*func)(string str) : funcs) {
@@ -92,8 +92,6 @@ namespace Server {
 			WSACleanup();
 			cout << "Error sending TCP message, " << WSAGetLastError() << endl;
 		}
-		cout << "Bytes sent: " << result << endl;
-		cout << "String sent: " << str << endl;
 	}
 
 	void TCPClient::addCallback(void (*func)(string str)) {

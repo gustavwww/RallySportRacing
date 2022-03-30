@@ -1,18 +1,19 @@
 #ifndef NETWORKING
 #define NETWORKING
 
-#include <glm/glm.hpp>
 #include <string>
+
+#include "Game/GameObject.h"
+#include "Rendering/SDLWindowHandler.h"
 
 using namespace std;
 
 namespace Networking {
 
-	void setupNetwork();
+	void setupNetwork(Game::GameObject* playerObj, Rendering::SDLWindowHandler* windowHandler);
 	void joinGame(string id, string name);
 	void tcpPacketReceived(string str);
-	void sendPosition(glm::vec3 position);
-
+	void sendStatusPacket();
 }
 
 #endif

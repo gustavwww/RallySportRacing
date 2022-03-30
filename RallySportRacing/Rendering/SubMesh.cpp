@@ -8,11 +8,10 @@ namespace Rendering {
 		this->roughness = roughness;
 		this->metallic = metallic;
 		this->albedo = albedo;
-
-		setupSubMesh();
 	}
 
 	void SubMesh::setupSubMesh() {
+
 		vector<glm::vec3> normals;
 		vector<glm::vec3> positions;
 
@@ -44,9 +43,13 @@ namespace Rendering {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 	}
-
+	
 	void SubMesh::renderSubMesh(GLint programID) {
-		
+		if (!isMeshSetup) {
+			setupSubMesh();
+			isMeshSetup = true;
+		}
+
 		//Send materials to shader.
 		GLuint roughnessID = glGetUniformLocation(programID, "roughness");
 		glUniform1fv(roughnessID, 1, &roughness);
