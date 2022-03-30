@@ -53,16 +53,19 @@ namespace Networking {
 			joinGame("hub", "Gustav");
 
 		} else if (command == "game") {
-			for (int i = 0; i < cmd.getArgsSize(); i += 6) {
-				int id = stoi(cmd.getArgs()[i + 1]);
+			for (int i = 1; i < cmd.getArgsSize(); i += 9) {
+				int id = stoi(cmd.getArgs()[i]);
 				if (id == clientID) {
 					continue;
 				}
 
-				string name = cmd.getArgs()[i + 2];
-				float x = stof(cmd.getArgs()[i + 3]);
-				float y = stof(cmd.getArgs()[i + 4]);
-				float z = stof(cmd.getArgs()[i + 5]);
+				string name = cmd.getArgs()[i + 1];
+				float posX = stof(cmd.getArgs()[i + 2]);
+				float posY = stof(cmd.getArgs()[i + 3]);
+				float posZ = stof(cmd.getArgs()[i + 4]);
+				float orX = stof(cmd.getArgs()[i + 5]);
+				float orY = stof(cmd.getArgs()[i + 6]);
+				float orZ = stof(cmd.getArgs()[i + 7]);
 
 				// TODO: Spawn model if player not already spawned.
 				auto el = players.find(id);
@@ -72,14 +75,16 @@ namespace Networking {
 					Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
 					handler->addModel(model);
 					Game::GameObject* obj = new Game::GameObject(model);
-					obj->setPosition(glm::vec3(x, y, z));
+					obj->setPosition(glm::vec3(posX, posY, posZ));
+					obj->setOrientation(glm::vec3(orX, orY, orZ));
 
 					Player* p = new Player(name, obj);
 					players.insert(pair<int, Player*>(id, p));
 				} else {
 					// Player already created, updating position...
 					Player* p = el->second;
-					p->setPosition(glm::vec3(x,y,z));
+					p->setPosition(glm::vec3(posX, posY, posZ));
+					p->setOrientation(glm::vec3(orX, orY, orZ));
 				}
 
 			}
@@ -102,9 +107,13 @@ namespace Networking {
 	void sendStatusPacket() {
 		while (inGame) {
 			glm::vec3 pos = obj->getPosition();
+			glm::vec3 or = obj->getOrientation();
 			tcpClient.sendPacket("pos:" + to_string(pos.x) + ","
 				+ to_string(pos.y) + ","
-				+ to_string(pos.z));
+				+ to_string(pos.z) + ","
+				+ to_string(or.y) + ","
+				+ to_string(or.x) + ","
+				+ to_string(or.z));
 			this_thread::sleep_for(2ms);
 		}
 	}
