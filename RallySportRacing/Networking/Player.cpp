@@ -13,9 +13,8 @@ namespace Networking {
 	void Player::setPosition(glm::vec3 pos) {
 		obj->setPosition(pos);
 	}
-
-	void Player::setOrientation(glm::vec3 orientation) {
-		obj->setOrientation(orientation);
+	void Player::setQuaternion(glm::quat quaternion)
+	{
+		obj->setQuaternion(quaternion);
 	}
-
 }

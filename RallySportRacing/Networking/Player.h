@@ -3,7 +3,7 @@
 
 #include <string>
 #include <glm/glm.hpp>
-
+#include <glm/gtx/quaternion.hpp>
 #include "Game/GameObject.h"
 
 using namespace std;
@@ -14,7 +14,7 @@ namespace Networking {
 	public:
 		Player(string name, Game::GameObject* obj);
 		void setPosition(glm::vec3 pos);
-		void setOrientation(glm::vec3 orientation);
+		void setQuaternion(glm::quat quaternion);
 
 	private:
 		string name;

@@ -11,6 +11,7 @@
 #include "Player.h"
 #include "Rendering/SDLWindowHandler.h"
 #include "Rendering/Model.h"
+#include <glm/gtx/quaternion.hpp>
 
 using namespace std;
 
@@ -53,7 +54,7 @@ namespace Networking {
 			joinGame("hub", "Gustav");
 
 		} else if (command == "game") {
-			for (int i = 1; i < cmd.getArgsSize(); i += 9) {
+			for (int i = 1; i < cmd.getArgsSize(); i += 10) {
 				int id = stoi(cmd.getArgs()[i]);
 				if (id == clientID) {
 					continue;
@@ -63,9 +64,10 @@ namespace Networking {
 				float posX = stof(cmd.getArgs()[i + 2]);
 				float posY = stof(cmd.getArgs()[i + 3]);
 				float posZ = stof(cmd.getArgs()[i + 4]);
-				float orX = stof(cmd.getArgs()[i + 5]);
-				float orY = stof(cmd.getArgs()[i + 6]);
-				float orZ = stof(cmd.getArgs()[i + 7]);
+				float quX = stof(cmd.getArgs()[i + 5]);
+				float quY = stof(cmd.getArgs()[i + 6]);
+				float quZ = stof(cmd.getArgs()[i + 7]);
+				float quW = stof(cmd.getArgs()[i + 8]);
 
 				// TODO: Spawn model if player not already spawned.
 				auto el = players.find(id);
@@ -75,8 +77,17 @@ namespace Networking {
 					Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
 					handler->addModel(model);
 					Game::GameObject* obj = new Game::GameObject(model);
+
+					/*// testing wheels
+					Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+					handler->addModel(wheel1Model);
+					Game::GameObject* wheel1 = new Game::GameObject(wheel1Model);
+					wheel1->setPosition(glm::vec3(posX, posY, posZ));
+					wheel1->setOrientation(glm::vec3(orX, orY, orZ));*/
+
+
 					obj->setPosition(glm::vec3(posX, posY, posZ));
-					obj->setOrientation(glm::vec3(orX, orY, orZ));
+					obj->setQuaternion(glm::quat(quX, quY, quZ, quW));
 
 					Player* p = new Player(name, obj);
 					players.insert(pair<int, Player*>(id, p));
@@ -84,7 +95,7 @@ namespace Networking {
 					// Player already created, updating position...
 					Player* p = el->second;
 					p->setPosition(glm::vec3(posX, posY, posZ));
-					p->setOrientation(glm::vec3(orX, orY, orZ));
+					p->setQuaternion(glm::quat(quX, quY, quZ, quW));
 				}
 
 			}
@@ -107,13 +118,14 @@ namespace Networking {
 	void sendStatusPacket() {
 		while (inGame) {
 			glm::vec3 pos = obj->getPosition();
-			glm::vec3 or = obj->getOrientation();
+			glm::quat qu = obj->getQuaternion();
 			tcpClient.sendPacket("pos:" + to_string(pos.x) + ","
 				+ to_string(pos.y) + ","
 				+ to_string(pos.z) + ","
-				+ to_string(or.y) + ","
-				+ to_string(or.x) + ","
-				+ to_string(or.z));
+				+ to_string(qu.y) + ","
+				+ to_string(qu.x) + ","
+				+ to_string(qu.z) + ","
+				+ to_string(qu.w));
 			this_thread::sleep_for(2ms);
 		}
 	}
