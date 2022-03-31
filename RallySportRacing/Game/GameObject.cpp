@@ -5,6 +5,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <iostream>
+#define PI 3.1415926538f
+
 
 namespace Game{
 
@@ -46,7 +48,7 @@ namespace Game{
 
 	void Game::GameObject::setQuaternion(glm::quat quaternion)
 	{
-		(*model).setRotationMatrix(glm::toMat4(quaternion));
+		(*model).setRotationMatrix(glm::rotate(glm::toMat4(quaternion), PI, glm::vec3(0, 0, 1)));
 	}
 
 	glm::quat Game::GameObject::getQuaternion()
@@ -67,7 +69,7 @@ namespace Game{
 		compoundShape = new btCompoundShape();
 
 		if (isWheel) { // special case for wheels
-			collisionShape = new btCylinderShape(btVector3(0.1,0.1,0.1));
+			collisionShape = new btCylinderShape(btVector3(0.5,0.5,0.5));
 			btTransform position;
 			position.setIdentity();
 			compoundShape->addChildShape(position, collisionShape);

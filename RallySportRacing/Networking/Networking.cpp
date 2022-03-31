@@ -122,8 +122,8 @@ namespace Networking {
 			tcpClient.sendPacket("pos:" + to_string(pos.x) + ","
 				+ to_string(pos.y) + ","
 				+ to_string(pos.z) + ","
-				+ to_string(qu.y) + ","
 				+ to_string(qu.x) + ","
+				+ to_string(qu.y) + ","
 				+ to_string(qu.z) + ","
 				+ to_string(qu.w));
 			this_thread::sleep_for(2ms);
