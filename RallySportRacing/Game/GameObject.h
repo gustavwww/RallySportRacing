@@ -9,7 +9,7 @@
 
 class GameObject {
 public:
-	GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld);
+	GameObject(Rendering::Model* model, bool isWheel, btDiscreteDynamicsWorld* dynamicsWorld);
 	~GameObject();
 
 	void updateMatrices();
@@ -32,6 +32,7 @@ protected:
 	Rendering::Model* model;
 	glm::vec3 position;
 	glm::vec3 orientation;
+	bool isWheel;
 
 	btTransform transform;
 	btDiscreteDynamicsWorld* dynamicsWorld;

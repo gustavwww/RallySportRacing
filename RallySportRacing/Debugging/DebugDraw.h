@@ -2,6 +2,9 @@
 
 class DebugDraw : public btIDebugDraw {
 public:
+		
+		DebugDraw();
+
 		void drawLine(const btVector3& from,
 			const btVector3& to,
 			const btVector3& color);
@@ -17,4 +20,7 @@ public:
 		void draw3dText(const btVector3& location, const char* textString);
 
 		void setDebugMode(int debugMode);
+
+private:
+		void setupDraw();
 };

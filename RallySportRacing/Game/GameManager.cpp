@@ -19,9 +19,13 @@ using namespace std;
 
 namespace Game {
 
-	//GameObject* car1;
 	GameObject* environment;
 	GameObject* wall;
+
+	GameObject* wheel1;
+	GameObject* wheel2;
+	GameObject* wheel3;
+	GameObject* wheel4;
 	Vehicle* vehicle;
 
 	//Debug GameObject
@@ -37,39 +41,54 @@ namespace Game {
 
 	DebugDraw* debugDrawer;
 
+	bool isWheel = 1;
+	bool notWheel = 0;
+
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 
 		physics = new Physics();
 		handler = windowHandler;
 
-		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
-		windowHandler->addModel(carModel1);
+	
 		//car1 = new GameObject(carModel1, physics->dynamicsWorld);
 
 		//wheel = new GameObject(carModel1, physics->dynamicsWorld);
 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel, physics->dynamicsWorld);
-		
+		environment = new GameObject(environmentModel, notWheel,  physics->dynamicsWorld);
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf");
 		windowHandler->addModel(wallModel);
-		wall = new GameObject(wallModel, physics->dynamicsWorld);
-		
+		wall = new GameObject(wallModel, notWheel, physics->dynamicsWorld);
+		wall->setInitialPosition(btVector3(-400, -5, 0));
+		wall->setInitialRotation(btQuaternion(1,0,0,1));
+
 		//Light Debugging Environment
 		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf");
 		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
-		debugEnvironment->setInitialPosition(btVector3(-100, 100, 20));
-		//debugEnvironment->rotate(glm::vec3(M_PI, M_PI/2, 0.0f));
+		debugEnvironment = new GameObject(debugEnvironmentModel, notWheel, physics->dynamicsWorld);
+		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));
 
-		//car1->setInitialPosition(btVector3(-15.f, 0.5f, 0.f));
-		wall->setInitialPosition(btVector3(-100, 100, 2));
-		//wall->setInitialRotation(btQuaternion(1, 1, 1, 1));
-		//debugEnvironment->getRigidBody().getWorldTransform().setRotation(btQuaternion(1, 0, 0, 1));
-		//car1->getRigidBody().getWorldTransform().setRotation(btQuaternion(1, 1, 1, 1));
-			
-		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
+		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		windowHandler->addModel(wheel1Model);
+		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		windowHandler->addModel(wheel2Model);
+		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		windowHandler->addModel(wheel3Model);
+		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		windowHandler->addModel(wheel4Model);
+
+
+		//test wheels but have no model, using wallmodel temporary
+		wheel1 = new GameObject(wheel1Model, isWheel, physics->dynamicsWorld);
+		wheel2 = new GameObject(wheel2Model, isWheel, physics->dynamicsWorld);
+		wheel3 = new GameObject(wheel3Model, isWheel, physics->dynamicsWorld);
+		wheel4 = new GameObject(wheel4Model, isWheel, physics->dynamicsWorld);
+
+		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		windowHandler->addModel(carModel1);
+		vehicle = new Vehicle(carModel1, physics->dynamicsWorld, wheel1, wheel2, wheel3, wheel4);
+
 
 		debugDrawer = new DebugDraw();
 	}
@@ -120,6 +139,10 @@ namespace Game {
 		debugEnvironment->updateTransform();
 		environment->updateTransform();
 		vehicle->updateTransform();
+		//wheel1->updateTransform();
+		//wheel2->updateTransform();
+		//wheel3->updateTransform();
+		//wheel4->updateTransform();
 
 		// debug drawing
 		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
@@ -138,8 +161,6 @@ namespace Game {
 		float deltaTime = chrono::duration<float, milli>(currentTime - previousTime).count() * 0.001;
 
 
-		// TODO:
-		// gonna fix the code so it is more simple and clear?
 		SDL_PumpEvents();
 		buttons = SDL_GetMouseState(&x, &y);
 		if (keyboard_state_array[SDL_SCANCODE_H]) {

@@ -4,6 +4,9 @@
 #include "Rendering/SDLWindowHandler.h"
 using namespace std;
 
+// set up the line shader and then draw the buffer
+GLuint VAO, VBO;
+
 struct
 {
 	btVector3 p1;
@@ -25,15 +28,19 @@ void DebugDraw::drawLine(const btVector3& from, const btVector3& to, const btVec
 	// we don't care about colour?		
 }
 
+DebugDraw::DebugDraw()
+{
+	setupDraw();
+}
+
+void DebugDraw::setupDraw()
+{
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &VBO);
+}
 
 void DebugDraw::doDebugDraw()
 {
-	// set up the line shader and then draw the buffer
-	GLuint VAO, VBO;
-
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
-
 	glBindVertexArray(VAO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 
@@ -44,9 +51,6 @@ void DebugDraw::doDebugDraw()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
 
 	glDrawArrays(GL_LINES, 0, TheLines.size() * 2);
-
-	// create once then update
-	// remember to change the class so that the vertex array object and the buffer are created only at the beginning
 	TheLines.clear();
 }
 

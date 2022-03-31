@@ -66,8 +66,20 @@ namespace Rendering {
 			m.renderMesh(programID);
 		}
 	}
-
+	double maxX = 0;
+	double maxY = 0;
+	double maxZ = 0;
+	double minX = 0;
+	double minY = 0;
+	double minZ = 0;
 	Model* Model::loadModel(const char* file) {
+		maxX = 0;
+		maxY = 0;
+		maxZ = 0;
+		minX = 0;
+		minY = 0;
+		minZ = 0;
+
 		tinygltf::Model gltfmodel;
 		TinyGLTF loader;
 		std::string err;
@@ -92,7 +104,7 @@ namespace Rendering {
 
 		for each (tinygltf::Mesh gltfMesh in gltfmodel.meshes) {
 
-			cout << gltfMesh.name;
+			//cout << gltfMesh.name;
 
 			//Mesh data vector.
 			vector<SubMesh> subMeshes;
@@ -126,6 +138,27 @@ namespace Rendering {
 					vertex.position = glm::vec3(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]);
 					vertex.normal = glm::vec3(normals[i * 3 + 0], normals[i * 3 + 1], normals[i * 3 + 2]);
 					vertices.push_back(vertex);
+
+					if (maxX <= vertex.position.x) {
+						maxX = vertex.position.x;
+					}
+					if (maxY <= vertex.position.y) {
+						maxY = vertex.position.y;
+					}
+					if (maxZ <= vertex.position.z) {
+						maxZ = vertex.position.z;
+					}
+
+					if (minX >= vertex.position.x) {
+						minX = vertex.position.x;
+					}
+					if (minY >= vertex.position.y) {
+						minY = vertex.position.y;
+					}
+					if (minZ >= vertex.position.z) {
+						minZ = vertex.position.z;
+					}
+
 				}
 
 				//Indices accessor.
@@ -160,8 +193,10 @@ namespace Rendering {
 		return model;
 	}
 
-	void Model::generateMeshInterface() {
-		meshInterface = new btTriangleMesh();
-	
+	btVector3 Model::generateCollisionShape() {
+		return btVector3((maxX-minX)/2, (maxY - minY)/2, (maxZ - minZ) / 2);
+	}
+	btVector3 Model::generateCollisionShapeOffset() {
+		return btVector3((maxX + minX) / 2, (maxY + minY) / 2, (maxZ + minZ) / 2);
 	}
 }

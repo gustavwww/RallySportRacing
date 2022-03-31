@@ -7,21 +7,27 @@
 #include <iostream>
 
 
-GameObject::GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
+GameObject::GameObject(Rendering::Model* model, bool isWheel, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
 	this->model = model;
 	position = glm::vec3(0.0f);
 	orientation = glm::vec3(0.0f);
+	this->isWheel = isWheel;
 	setupRigidbody();
 }
 
 void GameObject::updateMatrices() {
-	position = bulletToGlm(getTransform().getOrigin());
-	model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), bulletToGlm(rigidBody->getWorldTransform().getOrigin())));
+	if (isWheel) {
+		std::cout << "transform: " << transform.getOrigin().x() << endl;
+	}
 
-	glm::quat q = bulletToGlm(rigidBody->getWorldTransform().getRotation()); // this seems to work
+	position = bulletToGlm(transform.getOrigin());
+	model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), bulletToGlm(transform.getOrigin())));
+
+	glm::quat q = bulletToGlm(transform.getRotation());
 	orientation = glm::rotate(q, glm::vec3(0, 0, -1));
 	
 	(*model).setRotationMatrix(glm::toMat4(q));
+
 }
 
 glm::vec3 GameObject::getPosition() {
@@ -33,24 +39,46 @@ glm::vec3 GameObject::getOrientation() {
 }
 
 void GameObject::setupRigidbody() {
-	//collisionShape = new btBvhTriangleMeshShape(model->meshInterface, false, true);
-	collisionShape = new btBoxShape(btVector3(100, 2, 100));
+	
+	compoundShape = new btCompoundShape();
 
-	motionState = new btDefaultMotionState(btTransform(btQuaternion(1, 0, 0, 1), btVector3(0, 0, 0)));
-	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, collisionShape, btVector3(0, 0, 0));
-	groundRigidBodyCI.m_rollingFriction = 100;
-	groundRigidBodyCI.m_friction = 100;
+	if (isWheel) { // special case for wheels
+		collisionShape = new btCylinderShape(btVector3(0.1,0.1,0.1));
+		btTransform position;
+		position.setIdentity();
+		compoundShape->addChildShape(position, collisionShape);
+	}
+	else { // creates collisionshape based on model and its offset
+		collisionShape = new btBoxShape(model->generateCollisionShape());
+		btTransform position;
+		position.setIdentity();
+		position.setOrigin(btVector3(model->generateCollisionShapeOffset()));  // offset
+		compoundShape->addChildShape(position, collisionShape);
+	}
+	
+	motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
+	btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, compoundShape, btVector3(0, 0, 0));
+
+
 	rigidBody = new btRigidBody(groundRigidBodyCI);
+
 	rigidBody->setContactProcessingThreshold(0.f);
-	rigidBody->setFriction(100);
 
 
-	btTransform initialTransform;
-	initialTransform.setOrigin(glmToBullet(position));
-	initialTransform.setRotation(btQuaternion(0, 0, 0, 1));
-	rigidBody->setWorldTransform(initialTransform);
-	motionState->setWorldTransform(initialTransform);
-
+	if (isWheel) { // for testing purpose
+		btTransform initialTransform;
+		initialTransform.setOrigin(glmToBullet(position));
+		initialTransform.setRotation(btQuaternion(1, 1, 0, 1));
+		rigidBody->setWorldTransform(initialTransform);
+		motionState->setWorldTransform(initialTransform);
+	}
+	else {
+		btTransform initialTransform;
+		initialTransform.setOrigin(glmToBullet(position));
+		initialTransform.setRotation(btQuaternion(0, 0, 0, 1));
+		rigidBody->setWorldTransform(initialTransform);
+		motionState->setWorldTransform(initialTransform);
+	}
 
 	dynamicsWorld->addRigidBody(rigidBody);
 }
@@ -89,12 +117,12 @@ void GameObject::updateTransform()
 	rigidBody->getMotionState()->getWorldTransform(btTransform);
 	transform = btTransform;
 	updateMatrices();
-	
 }
 
 void GameObject::updateTransform(const btTransform& btTransform)
 {
 	transform = btTransform;
+	updateMatrices();
 }
 
 // Different types of conversions between bullet and glm

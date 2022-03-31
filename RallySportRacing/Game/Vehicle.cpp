@@ -2,16 +2,22 @@
 #include <iostream>
 
 
-Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, dynamicsWorld)
+Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld, GameObject* wheel1, GameObject* wheel2, GameObject* wheel3, GameObject* wheel4) : GameObject(model, 0, dynamicsWorld)
 {
+	wheels.push_back(wheel1);
+	wheels.push_back(wheel2);
+	wheels.push_back(wheel3);
+	wheels.push_back(wheel4);
+
+
 	steeringClamp = 0.2;
 	steeringIncrement = 0.5;
 	engineForce = 5;
 
 	btScalar chassisMass(1.0);
 	btVector3 chassisInertia(0.0f, 0.0f, 0.0f);
-	btVector3 shape = btVector3(0.9, 0.5, 2.3);
-	collisionShape = new btBoxShape(shape); // meshCollider = new Mesh(collider); =>  collisionShape = new btConvexTriangleMeshShape(meshCollider->meshInterface);
+	btVector3 shape = btVector3(0.9, 0.5, 2.3); // could use automatically generated cshape from model but requires a little bit of fine tunements
+	collisionShape = new btBoxShape(shape); 
 
 	btQuaternion initalRotation = btQuaternion(0, 0, 0, 1);
 	initalRotation.setRotation(btVector3(0, 1, 0), btScalar(0));
@@ -34,20 +40,16 @@ Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld
 	raycaster = new btDefaultVehicleRaycaster(dynamicsWorld);
 	btRaycastVehicle::btVehicleTuning tuning;
 
-	tuning.m_suspensionStiffness = 12.88;
-	tuning.m_suspensionDamping = 3.0;
-	tuning.m_suspensionCompression = 10.1;
+	tuning.m_suspensionStiffness = 20.f;
+	tuning.m_suspensionDamping = 2.3f;
+	tuning.m_suspensionCompression = 4.4f;
 	tuning.m_maxSuspensionForce = 11600.0;
 	tuning.m_maxSuspensionTravelCm = 30.0;
 	tuning.m_frictionSlip = 100.5;
 
+
 	vehicle = new btRaycastVehicle(tuning, rigidBody, raycaster);
 	vehicle->setCoordinateSystem(0, 1, 2);
-
-	/*btVector3 wheelDirection(0.0f, -1.0f, 0.0f);
-	btVector3 wheelAxis(-1.0f, 0.0f, 0.0f);
-	btScalar suspensionRestLength(0.1);
-	btScalar wheelRadius(0.3f);*/
 
 	btVector3 wheelDirectionCS0(0, -1, 0);
 
@@ -76,20 +78,13 @@ Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld
 
 	vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, -1), wheelDirectionCS0, wheelAxleCS, suspensionRestLength, wheelRadius, tuning, false);
 
-	/*vehicle->addWheel(btVector3(-0.7f, 0.0f, 1.7f), wheelDirection, wheelAxis, suspensionRestLength, wheelRadius, tuning, true);
-	vehicle->addWheel(btVector3(0.7f, 0.0f, 1.7f), wheelDirection, wheelAxis, suspensionRestLength, wheelRadius, tuning, true);
-	vehicle->addWheel(btVector3(-0.7f, 0.0f, -1.45f), wheelDirection, wheelAxis, suspensionRestLength, wheelRadius, tuning, false);
-	vehicle->addWheel(btVector3(0.7f, 0.0f, -1.45f), wheelDirection, wheelAxis, suspensionRestLength, wheelRadius, tuning, false);
-	*/
-
 	for (int i = 0; i < vehicle->getNumWheels(); i++)
 	{
 		btWheelInfo& wheel = vehicle->getWheelInfo(i);
 		wheel.m_suspensionStiffness = 50;
-		wheel.m_wheelsDampingCompression = btScalar(0.3) * 2 * btSqrt(wheel.m_suspensionStiffness);//btScalar(0.8);
-		wheel.m_wheelsDampingRelaxation = btScalar(0.5) * 2 * btSqrt(wheel.m_suspensionStiffness);//1;
-		//Larger friction slips will result in better handling
-		wheel.m_frictionSlip = btScalar(3);
+		wheel.m_wheelsDampingCompression = btScalar(0.3) * 2 * btSqrt(wheel.m_suspensionStiffness);
+		wheel.m_wheelsDampingRelaxation = btScalar(0.5) * 2 * btSqrt(wheel.m_suspensionStiffness);
+		wheel.m_frictionSlip = btScalar(4);
 		wheel.m_rollInfluence = 1;
 	}
 
@@ -107,7 +102,6 @@ void Vehicle::drive(int direction)
 {
 	vehicle->applyEngineForce(direction * engineForce, 2);
 	vehicle->applyEngineForce(direction * engineForce, 3);
-	//cout << "Position " << vehicle->getChassisWorldTransform().getOrigin().z();
 }
 
 void Vehicle::notGasing()
@@ -115,7 +109,9 @@ void Vehicle::notGasing()
 	vehicle->applyEngineForce(0, 2);
 	vehicle->applyEngineForce(0, 3);
 
-	//Default braking force, always added otherwise there is no friction on the wheels
+	//Default braking force, always added otherwise there is no friction on the wheels, (This is axis friction)
+	// I can change this depending on ground? One way to simulate friction. Same with frictionslip
+	// Real rolling friction is not possible using a raycastvehicle because a ray is infinitely thin and thus cannot cause friction. Other wise you would have to simulate a rolling cylinder
 	vehicle->setBrake(1, 2);
 	vehicle->setBrake(1, 3);
 }
@@ -153,10 +149,30 @@ void Vehicle::handBrake()
 
 void Vehicle::updateTransform()
 {
+
+
 	GameObject::updateTransform();
+
+	//m_groundObject = vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject;
+	//cout << "object: " << m_groundObject <<  endl;
+	//btRigidBody* test = btRigidBody::upcast(raycaster.m_groundObject);
+	// 
+	//btCollisionObject* groundObject =
+		//static_cast<btCollisionObject*>(vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject);
+
+	//class btRigidBody* groundObject =
+		//(class btRigidBody*)vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject;
+
+	//if (groundObject->getFriction() != 0) {
+		//float test = *groundObject;
+		//cout << "friction: " << test << endl;
+	//}
+
+
 
 	for (int i = 0; i < 4; i++) {
 		vehicle->updateWheelTransform(i, true);
+		wheels[i]->updateTransform(vehicle->getWheelInfo(i).m_worldTransform);
 		//vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject
 		//wheels[i]->updateTransform(vehicle->getWheelInfo(i).m_worldTransform); Denna raden gör så att hjulen som objekt faktiskt uppdaterar sin position och roteras beroende på styrningen osv
 	}

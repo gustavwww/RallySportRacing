@@ -34,7 +34,8 @@ namespace Rendering {
 		void render(glm::mat4 projection, glm::mat4 view, GLint programID);
 
 		btTriangleMesh* meshInterface;
-		void Model::generateMeshInterface();
+		btVector3 Model::generateCollisionShape();
+		btVector3 Model::generateCollisionShapeOffset();
 
 		static Model* loadModel(const char* file);
 
