@@ -18,7 +18,6 @@ namespace Rendering {
 	public:
 		SubMesh(vector<Vertex> vertices, vector<unsigned int> indices, float roughness, float metallic, glm::vec3 albedo);
 		void renderSubMesh(GLint programID);
-
 	private:
 		vector<Vertex> vertices;
 		vector<unsigned int> indices;
@@ -28,6 +27,8 @@ namespace Rendering {
 		glm::vec3 albedo;
 		
 		unsigned int VAO, VBO, EBO;
+
+		bool isMeshSetup = false;
 		void setupSubMesh();
 	
 	};

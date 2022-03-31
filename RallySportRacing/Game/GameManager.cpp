@@ -2,7 +2,9 @@
 #include <chrono>
 #include <iostream>
 #include <cmath>
+#include <thread>
 #include "Rendering/SDLWindowHandler.h"
+
 #include <btBulletDynamicsCommon.h>
 #include <Physics/Physics.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -13,6 +15,12 @@
 #include "vehicle.h"
 
 #include "Debugging/DebugDraw.h"
+
+
+#include "Services/TCPClient.h";
+#include "Services/Protocol/ProtocolParser.h"
+#include "Services/Protocol/Command.h"
+#include "Networking/Networking.h"
 
 
 using namespace std;
@@ -39,20 +47,27 @@ namespace Game {
 	glm::vec3 blue = glm::vec3(0.f, 0.f, 1.f);
 	glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 
+
 	DebugDraw* debugDrawer;
 
 	bool isWheel = 1;
 	bool notWheel = 0;
+
+
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 
 		physics = new Physics();
 		handler = windowHandler;
 
+
 	
 		//car1 = new GameObject(carModel1, physics->dynamicsWorld);
 
 		//wheel = new GameObject(carModel1, physics->dynamicsWorld);
+
+
+
 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
@@ -85,12 +100,18 @@ namespace Game {
 		wheel3 = new GameObject(wheel3Model, isWheel, physics->dynamicsWorld);
 		wheel4 = new GameObject(wheel4Model, isWheel, physics->dynamicsWorld);
 
-		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld, wheel1, wheel2, wheel3, wheel4);
 
 
+
 		debugDrawer = new DebugDraw();
+
+
+		// Multiplayer setup
+		Networking::setupNetwork(vehicle, windowHandler);
+
 	}
 
 	bool toScreen = true;

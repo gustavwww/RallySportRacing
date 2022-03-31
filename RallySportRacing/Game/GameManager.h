@@ -1,6 +1,7 @@
 #ifndef GAME
 #define GAME
 
+#include <string>
 #include "GameObject.h"
 #include "Rendering/SDLWindowHandler.h"
 
