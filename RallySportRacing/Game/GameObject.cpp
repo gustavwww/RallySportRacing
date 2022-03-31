@@ -16,10 +16,6 @@ GameObject::GameObject(Rendering::Model* model, bool isWheel, btDiscreteDynamics
 }
 
 void GameObject::updateMatrices() {
-	if (isWheel) {
-		std::cout << "transform: " << transform.getOrigin().x() << endl;
-	}
-
 	position = bulletToGlm(transform.getOrigin());
 	model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), bulletToGlm(transform.getOrigin())));
 
