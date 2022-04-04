@@ -24,7 +24,15 @@ namespace Game{
 		position = glm::vec3(0.0f);
 		orientation = glm::vec3(0.0f);
 		quaternion = glm::quat(0, 0, 0, 0);
-		this->isWheel = 0;
+		setupRigidbody();
+	}
+
+	GameObject::GameObject(Rendering::Model* model, float friction, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
+		this->model = model;
+		position = glm::vec3(0.0f);
+		orientation = glm::vec3(0.0f);
+		quaternion = glm::quat(0, 0, 0, 0);
+		this->friction = friction;
 		setupRigidbody();
 	}
 
@@ -101,6 +109,8 @@ namespace Game{
 			btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, compoundShape, btVector3(0, 0, 0));
 			rigidBody = new btRigidBody(groundRigidBodyCI);
 		}
+
+		rigidBody->setFriction(friction);
 
 		rigidBody->setContactProcessingThreshold(0.f);
 

@@ -60,7 +60,7 @@ namespace Game {
 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel,  physics->dynamicsWorld);
+		environment = new GameObject(environmentModel, 0.3f,  physics->dynamicsWorld);
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf");
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel, physics->dynamicsWorld);

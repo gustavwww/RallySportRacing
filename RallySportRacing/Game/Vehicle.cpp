@@ -5,7 +5,7 @@
 namespace Game {
 
 
-	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, 0, dynamicsWorld)
+	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, dynamicsWorld)
 	{
 		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
 		getHandler()->addModel(wheel1Model);
@@ -106,10 +106,12 @@ namespace Game {
 			wheel.m_wheelsDampingRelaxation = btScalar(0.5) * 2 * btSqrt(wheel.m_suspensionStiffness);
 			wheel.m_frictionSlip = btScalar(4);
 			wheel.m_rollInfluence = 1;
+			
 		}
 
 		dynamicsWorld->addVehicle(vehicle);
 
+		
 	}
 
 	Vehicle::~Vehicle()
@@ -129,7 +131,7 @@ namespace Game {
 		vehicle->applyEngineForce(0, 2);
 		vehicle->applyEngineForce(0, 3);
 
-		//Default braking force, always added otherwise there is no friction on the wheels, (This is axis friction)
+		// Default braking force, always added otherwise there is no friction on the wheels, (This is axis friction)
 		// I can change this depending on ground? One way to simulate friction. Same with frictionslip
 		// Real rolling friction is not possible using a raycastvehicle because a ray is infinitely thin and thus cannot cause friction. Other wise you would have to simulate a rolling cylinder
 		vehicle->setBrake(1, 2);
@@ -170,20 +172,37 @@ namespace Game {
 	void Vehicle::updateTransform()
 	{
 		GameObject::updateTransform();
-		//m_groundObject = vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; dont know what to do with this????
 
-		//btCollisionObject* groundObject =
-			//static_cast<btCollisionObject*>(vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject);
-
-		//class btRigidBody* groundObject =
-			//(class btRigidBody*)vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; Saw something similar to this but in Java. Gives a runtime error
-
-		//if (groundObject->getFriction() != 0) { test
-			//float test = *groundObject;
-			//cout << "friction: " << test << endl;
-		//}
 		for (int i = 0; i < 4; i++) {
-			//vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; Returns a void *...
+
+			if (vehicle->getWheelInfo(i).m_raycastInfo.m_isInContact) {
+
+				btTransform location = vehicle->getWheelInfo(i).m_worldTransform;
+				btVector3 start = location.getOrigin();
+				btVector3 wheelRadiusOffset = btVector3(0, vehicle->getWheelInfo(i).m_wheelsRadius, 0);
+				btVector3 end = start - wheelRadiusOffset;
+
+
+				btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+
+				dynamicsWorld->rayTest(
+					start,
+					end,
+					RayCallback
+				);
+
+				if (RayCallback.hasHit()) {
+					float friction = (float)RayCallback.m_collisionObject->getFriction();
+					vehicle->setBrake(friction, 2); // does not work when setting wheel 0 and 1
+					vehicle->setBrake(friction, 3); // does not work when setting wheel 0 and 1
+					vehicle->getWheelInfo(i).m_frictionSlip = friction * static_cast<btScalar>(10);
+
+					cout << "friction " << friction << endl;
+					cout << "frictionSlip " << friction * static_cast<btScalar>(10) << endl;
+				}
+
+			}
+
 			vehicle->updateWheelTransform(i, true);
 			wheels[i]->updateTransform(vehicle->getWheelInfo(i).m_worldTransform);
 		}
