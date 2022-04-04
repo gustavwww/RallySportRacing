@@ -9,8 +9,9 @@
 namespace Game {
 	class GameObject {
 	public:
-		GameObject(Rendering::Model* model, bool isWheel, btDiscreteDynamicsWorld* dynamicsWorld);
-		GameObject(Rendering::Model* model);
+		GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld); // normal
+		GameObject(Rendering::Model* model, bool isWheel, btDiscreteDynamicsWorld* dynamicsWorld); // for wheels
+		GameObject(Rendering::Model* model); // for multiplayer
 
 		~GameObject();
 

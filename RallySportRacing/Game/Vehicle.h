@@ -5,7 +5,7 @@ namespace Game{
 	class Vehicle : public GameObject {
 
 	public:
-		Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld, GameObject* wheel1, GameObject* wheel2, GameObject* wheel3, GameObject* wheel4);
+		Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld);
 		~Vehicle();
 		btRaycastVehicle* vehicle;
 		virtual void updateTransform();
@@ -19,6 +19,10 @@ namespace Game{
 		void* m_groundObject; // the object the vehicle is in contact with
 	
 	protected:
+		GameObject* wheel1;
+		GameObject* wheel2;
+		GameObject* wheel3;
+		GameObject* wheel4;
 		float steering;
 		float steeringClamp;
 		float steeringIncrement;

@@ -19,6 +19,15 @@ namespace Game{
 		setupRigidbody();
 	}
 
+	GameObject::GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
+		this->model = model;
+		position = glm::vec3(0.0f);
+		orientation = glm::vec3(0.0f);
+		quaternion = glm::quat(0, 0, 0, 0);
+		this->isWheel = 0;
+		setupRigidbody();
+	}
+
 	Game::GameObject::GameObject(Rendering::Model* model)
 	{
 		this->model = model;
@@ -68,11 +77,18 @@ namespace Game{
 	
 		compoundShape = new btCompoundShape();
 
-		if (isWheel) { // special case for wheels
-			collisionShape = new btCylinderShape(btVector3(0.5,0.5,0.5));
+		// this ifstatement does not do anything. It gets overwritten by the information from the vechicle class anyways.
+		// However the concept is applicable on heightmaps and that is why I have not removed it yet
+		if (isWheel) { // special case for wheels, maybe we want to add another one for heightmaps?
+			collisionShape = new btCylinderShape(btVector3(0.1, 0.1, 0.1));
 			btTransform position;
 			position.setIdentity();
 			compoundShape->addChildShape(position, collisionShape);
+
+			motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
+			btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(1, motionState, compoundShape, btVector3(0, 30, 0));
+			rigidBody = new btRigidBody(groundRigidBodyCI);
+
 		}
 		else { // creates collisionshape based on model and its offset
 			collisionShape = new btBoxShape(model->generateCollisionShape());
@@ -80,31 +96,19 @@ namespace Game{
 			position.setIdentity();
 			position.setOrigin(btVector3(model->generateCollisionShapeOffset()));  // offset
 			compoundShape->addChildShape(position, collisionShape);
+
+			motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
+			btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, compoundShape, btVector3(0, 0, 0));
+			rigidBody = new btRigidBody(groundRigidBodyCI);
 		}
-	
-		motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
-		btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, compoundShape, btVector3(0, 0, 0));
-
-
-		rigidBody = new btRigidBody(groundRigidBodyCI);
 
 		rigidBody->setContactProcessingThreshold(0.f);
 
-
-		if (isWheel) { // for testing purpose
-			btTransform initialTransform;
-			initialTransform.setOrigin(glmToBullet(position));
-			initialTransform.setRotation(btQuaternion(1, 1, 0, 1));
-			rigidBody->setWorldTransform(initialTransform);
-			motionState->setWorldTransform(initialTransform);
-		}
-		else {
-			btTransform initialTransform;
-			initialTransform.setOrigin(glmToBullet(position));
-			initialTransform.setRotation(btQuaternion(0, 0, 0, 1));
-			rigidBody->setWorldTransform(initialTransform);
-			motionState->setWorldTransform(initialTransform);
-		}
+		btTransform initialTransform;
+		initialTransform.setOrigin(glmToBullet(position));
+		initialTransform.setRotation(btQuaternion(0, 0, 0, 1));
+		rigidBody->setWorldTransform(initialTransform);
+		motionState->setWorldTransform(initialTransform);
 
 		dynamicsWorld->addRigidBody(rigidBody);
 	}

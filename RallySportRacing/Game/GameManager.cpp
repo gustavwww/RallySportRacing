@@ -30,10 +30,6 @@ namespace Game {
 	GameObject* environment;
 	GameObject* wall;
 
-	GameObject* wheel1;
-	GameObject* wheel2;
-	GameObject* wheel3;
-	GameObject* wheel4;
 	Vehicle* vehicle;
 
 	//Debug GameObject
@@ -51,58 +47,35 @@ namespace Game {
 	DebugDraw* debugDrawer;
 
 	bool isWheel = 1;
-	bool notWheel = 0;
 
-
+	Rendering::SDLWindowHandler* Game::getHandler()
+	{
+		return handler;
+	}
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 
 		physics = new Physics();
 		handler = windowHandler;
 
-
-	
-		//car1 = new GameObject(carModel1, physics->dynamicsWorld);
-
-		//wheel = new GameObject(carModel1, physics->dynamicsWorld);
-
-
-
-
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel, notWheel,  physics->dynamicsWorld);
+		environment = new GameObject(environmentModel,  physics->dynamicsWorld);
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf");
 		windowHandler->addModel(wallModel);
-		wall = new GameObject(wallModel, notWheel, physics->dynamicsWorld);
+		wall = new GameObject(wallModel, physics->dynamicsWorld);
 		wall->setInitialPosition(btVector3(-400, -5, 0));
 		wall->setInitialRotation(btQuaternion(1,0,0,1));
 
 		//Light Debugging Environment
 		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf");
 		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel, notWheel, physics->dynamicsWorld);
+		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
 		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));
-
-		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
-		windowHandler->addModel(wheel1Model);
-		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
-		windowHandler->addModel(wheel2Model);
-		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
-		windowHandler->addModel(wheel3Model);
-		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
-		windowHandler->addModel(wheel4Model);
-
-
-		//test wheels but have no model, using wallmodel temporary
-		wheel1 = new GameObject(wheel1Model, isWheel, physics->dynamicsWorld);
-		wheel2 = new GameObject(wheel2Model, isWheel, physics->dynamicsWorld);
-		wheel3 = new GameObject(wheel3Model, isWheel, physics->dynamicsWorld);
-		wheel4 = new GameObject(wheel4Model, isWheel, physics->dynamicsWorld);
 
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
 		windowHandler->addModel(carModel1);
-		vehicle = new Vehicle(carModel1, physics->dynamicsWorld, wheel1, wheel2, wheel3, wheel4);
+		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 
 
 

@@ -1,10 +1,29 @@
 #include "Vehicle.h"
 #include <iostream>
+#include <Game/GameManager.h>
 
 namespace Game {
 
-	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld, GameObject* wheel1, GameObject* wheel2, GameObject* wheel3, GameObject* wheel4) : GameObject(model, 0, dynamicsWorld)
+
+	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, 0, dynamicsWorld)
 	{
+		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		getHandler()->addModel(wheel1Model);
+		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		getHandler()->addModel(wheel2Model);
+		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		getHandler()->addModel(wheel3Model);
+		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		getHandler()->addModel(wheel4Model);
+
+		isWheel = 1;
+
+		//test wheels but have no model, using wallmodel temporary
+		wheel1 = new GameObject(wheel1Model, isWheel, dynamicsWorld);
+		wheel2 = new GameObject(wheel2Model, isWheel, dynamicsWorld);
+		wheel3 = new GameObject(wheel3Model, isWheel, dynamicsWorld);
+		wheel4 = new GameObject(wheel4Model, isWheel, dynamicsWorld);
+
 		wheels.push_back(wheel1);
 		wheels.push_back(wheel2);
 		wheels.push_back(wheel3);
@@ -52,10 +71,10 @@ namespace Game {
 		vehicle = new btRaycastVehicle(tuning, rigidBody, raycaster);
 		vehicle->setCoordinateSystem(0, 1, 2);
 
-		btVector3 wheelDirectionCS0(0, -1, 0);
+		btVector3 wheelDirection(0, -1, 0);
 
 		//The axis which the wheel rotates arround
-		btVector3 wheelAxleCS(-1.0f, 0.0f, 0.0f);
+		btVector3 wheelAxle(-1.0f, 0.0f, 0.0f);
 
 		btScalar suspensionRestLength(0.7);
 
@@ -70,14 +89,14 @@ namespace Game {
 		btVector3 wheelConnectionPoint(shape.x(), connectionHeight, shape.z() - wheelWidth); // these will be needed to be adjusted depending on the model
 
 		//Adds the front wheels
-		vehicle->addWheel(wheelConnectionPoint, wheelDirectionCS0, wheelAxleCS, suspensionRestLength, wheelRadius, tuning, true);
+		vehicle->addWheel(wheelConnectionPoint, wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
-		vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, 1), wheelDirectionCS0, wheelAxleCS, suspensionRestLength, wheelRadius, tuning, true);
+		vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, 1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
 		//Adds the rear wheels
-		vehicle->addWheel(wheelConnectionPoint * btVector3(1, 1, -1), wheelDirectionCS0, wheelAxleCS, suspensionRestLength, wheelRadius, tuning, false);
+		vehicle->addWheel(wheelConnectionPoint * btVector3(1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
 
-		vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, -1), wheelDirectionCS0, wheelAxleCS, suspensionRestLength, wheelRadius, tuning, false);
+		vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
 
 		for (int i = 0; i < vehicle->getNumWheels(); i++)
 		{
@@ -150,32 +169,23 @@ namespace Game {
 
 	void Vehicle::updateTransform()
 	{
-
-
 		GameObject::updateTransform();
+		//m_groundObject = vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; dont know what to do with this????
 
-		//m_groundObject = vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject;
-		//cout << "object: " << m_groundObject <<  endl;
-		//btRigidBody* test = btRigidBody::upcast(raycaster.m_groundObject);
-		// 
 		//btCollisionObject* groundObject =
 			//static_cast<btCollisionObject*>(vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject);
 
 		//class btRigidBody* groundObject =
-			//(class btRigidBody*)vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject;
+			//(class btRigidBody*)vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; Saw something similar to this but in Java. Gives a runtime error
 
-		//if (groundObject->getFriction() != 0) {
+		//if (groundObject->getFriction() != 0) { test
 			//float test = *groundObject;
 			//cout << "friction: " << test << endl;
 		//}
-
-
-
 		for (int i = 0; i < 4; i++) {
+			//vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; Returns a void *...
 			vehicle->updateWheelTransform(i, true);
 			wheels[i]->updateTransform(vehicle->getWheelInfo(i).m_worldTransform);
-			//vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject
-			//wheels[i]->updateTransform(vehicle->getWheelInfo(i).m_worldTransform); Denna raden gör så att hjulen som objekt faktiskt uppdaterar sin position och roteras beroende på styrningen osv
 		}
 	}
 
