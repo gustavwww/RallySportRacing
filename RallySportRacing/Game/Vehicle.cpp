@@ -7,13 +7,13 @@ namespace Game {
 
 	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, dynamicsWorld)
 	{
-		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel1Model);
-		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel2Model);
-		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel3Model);
-		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel4Model);
 
 		isWheel = 1;
@@ -36,7 +36,7 @@ namespace Game {
 
 		btScalar chassisMass(1.0);
 		btVector3 chassisInertia(0.0f, 0.0f, 0.0f);
-		btVector3 shape = btVector3(0.9, 0.5, 2.3); // could use automatically generated cshape from model but requires a little bit of fine tunements
+		btVector3 shape = btVector3(0.9, 0.5, 2.2); // could use automatically generated cshape from model but requires a little bit of fine tunements
 		collisionShape = new btBoxShape(shape); 
 
 		btQuaternion initalRotation = btQuaternion(0, 0, 0, 1);
@@ -48,9 +48,9 @@ namespace Game {
 		compoundShape = new btCompoundShape();
 		btTransform position;
 		position.setIdentity();
-		position.setOrigin(btVector3(0, 1, 0.25));  // offset
+		position.setOrigin(btVector3(0, 0.8, 0.4));  // offset
 		compoundShape->addChildShape(position, collisionShape);
-		shape = shape + btVector3(0, 1, -0.25); // adjust shape with offset 
+		shape = shape + btVector3(0, 1, -0.13); // adjust shape with offset 
 
 		btRigidBody::btRigidBodyConstructionInfo chassisRigidBodyCI(chassisMass, motionState, compoundShape, chassisInertia);
 		rigidBody = new btRigidBody(chassisRigidBodyCI);
@@ -64,8 +64,8 @@ namespace Game {
 		tuning.m_suspensionDamping = 2.3f;
 		tuning.m_suspensionCompression = 4.4f;
 		tuning.m_maxSuspensionForce = 11600.0;
-		tuning.m_maxSuspensionTravelCm = 30.0;
-		tuning.m_frictionSlip = 100.5;
+		tuning.m_maxSuspensionTravelCm = 10.0;
+		tuning.m_frictionSlip = 100.5; // not used
 
 
 		vehicle = new btRaycastVehicle(tuning, rigidBody, raycaster);
@@ -78,9 +78,9 @@ namespace Game {
 
 		btScalar suspensionRestLength(0.7);
 
-		btScalar wheelWidth(0.4);
+		btScalar wheelWidth(0.32);
 
-		btScalar wheelRadius(0.5);
+		btScalar wheelRadius(0.32);
 
 		//The height where the wheels are connected to the chassis
 		btScalar connectionHeight(shape.y() - wheelRadius);
@@ -88,15 +88,19 @@ namespace Game {
 		//All the wheel configuration assumes the vehicle is centered at the origin and a right handed coordinate system is used
 		btVector3 wheelConnectionPoint(shape.x(), connectionHeight, shape.z() - wheelWidth); // these will be needed to be adjusted depending on the model
 
+		// front wheels offset
+		btVector3 frontWheelsOffset = btVector3(-0.06, -0.14, -0.06);
 		//Adds the front wheels
-		vehicle->addWheel(wheelConnectionPoint, wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
+		vehicle->addWheel(wheelConnectionPoint + frontWheelsOffset, wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
-		vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, 1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
+		vehicle->addWheel((wheelConnectionPoint + frontWheelsOffset) * btVector3(-1, 1, 1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
+		// Rear wheels offset
+		btVector3 rearWheelsOffset = btVector3(-0.06, -0.15, -0.83);
 		//Adds the rear wheels
-		vehicle->addWheel(wheelConnectionPoint * btVector3(1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
+		vehicle->addWheel((wheelConnectionPoint + rearWheelsOffset) * btVector3(1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
 
-		vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
+		vehicle->addWheel((wheelConnectionPoint + rearWheelsOffset) * btVector3(-1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
 
 		for (int i = 0; i < vehicle->getNumWheels(); i++)
 		{
@@ -193,12 +197,8 @@ namespace Game {
 
 				if (RayCallback.hasHit()) {
 					float friction = (float)RayCallback.m_collisionObject->getFriction();
-					vehicle->setBrake(friction, 2); // does not work when setting wheel 0 and 1
-					vehicle->setBrake(friction, 3); // does not work when setting wheel 0 and 1
-					vehicle->getWheelInfo(i).m_frictionSlip = friction * static_cast<btScalar>(10);
-
+					vehicle->getWheelInfo(i).m_frictionSlip = friction;
 					cout << "friction " << friction << endl;
-					cout << "frictionSlip " << friction * static_cast<btScalar>(10) << endl;
 				}
 
 			}
