@@ -30,6 +30,7 @@ namespace Game {
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 
 		handler = windowHandler;
+		handler = windowHandler;
 
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
 		windowHandler->addModel(carModel1);
@@ -55,7 +56,7 @@ namespace Game {
 		wall->rotate(glm::vec3(0.0f, 0.0f, -M_PI / 2.0f));
 
 		// Multiplayer setup
-		Networking::setupNetwork(car1, windowHandler);
+		//Networking::setupNetwork(car1, windowHandler);
 	}
 
 	bool toScreen = true;

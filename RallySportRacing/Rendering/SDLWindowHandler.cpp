@@ -6,10 +6,13 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <stb_image.h>
+#include "ParticleSystem.h"
 
 #include <imgui.h>
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
+
 
 
 using namespace std;
@@ -19,6 +22,7 @@ namespace Rendering {
 	//Global variables
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
+	unsigned int smokeTexture;
 
 	void Rendering::SDLWindowHandler::setCamPosition(glm::vec3 camPos)
 	{
@@ -157,15 +161,46 @@ namespace Rendering {
 		return programID;
 	}
 
+	void SDLWindowHandler::loadTexture(const char* textureFilePath, unsigned int textureID) {
+
+		ifstream textureStream(textureFilePath, ios::in);
+		if (!textureStream.is_open()) {
+			printf("Could not open %s. Maybe in the wrong directory?\n", textureFilePath);
+			return;
+		}
+
+		int width, height, nrChannels;
+		unsigned char* image = stbi_load(textureFilePath, &width, &height, &nrChannels, STBI_rgb_alpha);
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+		free(image);
+
+		//Set wrapping type.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		//Mipmap and filtering.
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+	}
+
 	void SDLWindowHandler::beginRenderingLoop(void (*preRender)()) {
 
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
+		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
+		loadTexture("../Textures/explosion.png", smokeTexture);
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
+
+		ParticleSystem particleSystem = ParticleSystem::ParticleSystem(100000);
 		
 		//GUI bool
 		bool showDebugGUI = false;
@@ -191,6 +226,12 @@ namespace Rendering {
 
 			//Toggle DebugGUI with 'G'.
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_g) {
+				glm::vec3 velocity = glm::vec3(0,0,0);
+				glm::vec3 pos = glm::vec3(0, 2, 0);
+				
+				//REMOVE THIS ONLY USED FOR TESTING.
+				particleSystem.createParticle(10, velocity, pos);
+
 				showDebugGUI = !showDebugGUI;
 			}
 			
@@ -213,7 +254,11 @@ namespace Rendering {
 			for (Model* m : models) {
 				m->render(projection, view, programID);
 			}
-
+			
+			//Particle System
+			//ToDo change to deltatime.
+			particleSystem.updateParticles(0.02);
+			particleSystem.renderParticleSystem(particleProgramID, projection, view, width, height, smokeTexture);
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);

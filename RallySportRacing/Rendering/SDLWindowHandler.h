@@ -2,6 +2,8 @@
 #define SDLWINDOWHANDLER
 
 #include "Model.h"
+//Remove this
+#include "ParticleSystem.h"
 #include <SDL.h>
 #include <GL/glew.h>
 #include <SDL_opengl.h>
@@ -18,6 +20,7 @@ namespace Rendering {
 		void initSDLWindow(string caption);
 		GLuint loadShader(const string& vertexShader, const string& fragmentShader);
 		void SDLWindowHandler::beginRenderingLoop(void (*preRender)() = nullptr);
+		void loadTexture(const char* textureFilePath, unsigned int textureID);
 
 		void addModel(Model* model);
 		void removeModel(Model* model);
