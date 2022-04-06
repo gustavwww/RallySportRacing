@@ -20,7 +20,7 @@ namespace Rendering {
 		void initSDLWindow(string caption);
 		GLuint loadShader(const string& vertexShader, const string& fragmentShader);
 		void SDLWindowHandler::beginRenderingLoop(void (*preRender)() = nullptr);
-		void loadTexture(const char* textureFilePath, unsigned int textureID);
+		unsigned int loadTexture(const char* textureFilePath);
 
 		void addModel(Model* model);
 		void removeModel(Model* model);

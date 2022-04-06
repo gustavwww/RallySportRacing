@@ -22,7 +22,6 @@ namespace Rendering {
 	//Global variables
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
-	unsigned int smokeTexture;
 
 	void Rendering::SDLWindowHandler::setCamPosition(glm::vec3 camPos)
 	{
@@ -161,16 +160,18 @@ namespace Rendering {
 		return programID;
 	}
 
-	void SDLWindowHandler::loadTexture(const char* textureFilePath, unsigned int textureID) {
+	unsigned int SDLWindowHandler::loadTexture(const char* textureFilePath) {
 
 		ifstream textureStream(textureFilePath, ios::in);
 		if (!textureStream.is_open()) {
 			printf("Could not open %s. Maybe in the wrong directory?\n", textureFilePath);
-			return;
+			return 0;
 		}
 
 		int width, height, nrChannels;
 		unsigned char* image = stbi_load(textureFilePath, &width, &height, &nrChannels, STBI_rgb_alpha);
+		unsigned int textureID;
+
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
@@ -182,17 +183,18 @@ namespace Rendering {
 
 		//Mipmap and filtering.
 		glGenerateMipmap(GL_TEXTURE_2D);
-		glBindTexture(GL_TEXTURE_2D, textureID);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+
+		return textureID;
 	}
 
 	void SDLWindowHandler::beginRenderingLoop(void (*preRender)()) {
 
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
-		loadTexture("../Textures/explosion.png", smokeTexture);
+		unsigned int smokeTexture = loadTexture("../Textures/explosion.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
