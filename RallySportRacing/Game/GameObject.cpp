@@ -5,17 +5,20 @@
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
 #include <iostream>
+#include <BulletCollision/CollisionShapes/btHeightfieldTerrainShape.h>
+#include <SDL.h>
+
 #define PI 3.1415926538f
 
 
 namespace Game{
 
-	GameObject::GameObject(Rendering::Model* model, bool isWheel, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
+	GameObject::GameObject(Rendering::Model* model, string objectType, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
 		this->model = model;
 		position = glm::vec3(0.0f);
 		orientation = glm::vec3(0.0f);
 		quaternion= glm::quat(0, 0, 0, 0);
-		this->isWheel = isWheel;
+		this->objectType = objectType;
 		setupRigidbody();
 	}
 
@@ -87,7 +90,7 @@ namespace Game{
 
 		// this ifstatement does not do anything. It gets overwritten by the information from the vechicle class anyways.
 		// However the concept is applicable on heightmaps and that is why I have not removed it yet
-		if (isWheel) { // special case for wheels, maybe we want to add another one for heightmaps?
+		if (objectType == "wheel") { // special case for wheels, maybe we want to add another one for heightmaps?
 			collisionShape = new btCylinderShape(btVector3(0.1, 0.1, 0.1));
 			btTransform position;
 			position.setIdentity();
@@ -95,6 +98,23 @@ namespace Game{
 
 			motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
 			btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(1, motionState, compoundShape, btVector3(0, 30, 0));
+			rigidBody = new btRigidBody(groundRigidBodyCI);
+
+		}
+		else if (objectType == "terrain") { // for terrainShapes based on heightmaps
+
+			
+			//SDL_Surface* image = IMG_Load("test/test.png");
+
+			// btHeightfieldTerrainShape (int heightStickWidth, int heightStickLength, const void *heightfieldData, btScalar heightScale, btScalar minHeight, btScalar maxHeight, int upAxis, PHY_ScalarType heightDataType, bool flipQuadEdges)
+			collisionShape = new btHeightfieldTerrainShape(1, 1, 0, 1, 0, 1, 1, PHY_FLOAT, false); // test values
+
+			btTransform position;
+			position.setIdentity();
+			compoundShape->addChildShape(position, collisionShape);
+
+			motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
+			btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, compoundShape, btVector3(0, 30, 0));
 			rigidBody = new btRigidBody(groundRigidBodyCI);
 
 		}

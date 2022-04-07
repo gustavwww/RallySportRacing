@@ -16,7 +16,7 @@ namespace Game {
 		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel4Model);
 
-		isWheel = 1;
+		string isWheel = "wheel";
 
 		//test wheels but have no model, using wallmodel temporary
 		wheel1 = new GameObject(wheel1Model, isWheel, dynamicsWorld);
@@ -30,8 +30,8 @@ namespace Game {
 		wheels.push_back(wheel4);
 
 
-		steeringClamp = 0.2;
-		steeringIncrement = 0.5;
+		steeringClamp = 0.4;
+		steeringIncrement = 1.5;
 		engineForce = 5;
 
 		btScalar chassisMass(1.0);
@@ -198,7 +198,7 @@ namespace Game {
 				if (RayCallback.hasHit()) {
 					float friction = (float)RayCallback.m_collisionObject->getFriction();
 					vehicle->getWheelInfo(i).m_frictionSlip = friction;
-					cout << "friction " << friction << endl;
+					//cout << "friction " << friction << endl;
 				}
 
 			}

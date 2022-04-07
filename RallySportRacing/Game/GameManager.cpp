@@ -47,7 +47,8 @@ namespace Game {
 
 	DebugDraw* debugDrawer;
 
-	bool isWheel = 1;
+	string isWheel = "wheel";
+	string isTerrainShape = "terrain";
 
 	Rendering::SDLWindowHandler* Game::getHandler()
 	{
@@ -62,7 +63,7 @@ namespace Game {
 		// environment 1 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel, 4.0f,  physics->dynamicsWorld);
+		environment = new GameObject(environmentModel, 5.0f,  physics->dynamicsWorld);
 		environment->setInitialPosition(btVector3(0, 0, 0));
 
 
