@@ -30,11 +30,12 @@ namespace Game{
 		setupRigidbody();
 	}
 
-	GameObject::GameObject(Rendering::Model* model, float friction, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
+	GameObject::GameObject(Rendering::Model* model, string objectType, float friction, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
 		this->model = model;
 		position = glm::vec3(0.0f);
 		orientation = glm::vec3(0.0f);
 		quaternion = glm::quat(0, 0, 0, 0);
+		this->objectType = objectType;
 		this->friction = friction;
 		setupRigidbody();
 	}
@@ -116,7 +117,11 @@ namespace Game{
 				}
 			}*/
 
-			collisionShape = new btHeightfieldTerrainShape(1, 1, 0, 1, 0, 1, 1, PHY_FLOAT, false); // test values
+			//float test[] = {1, 1, 1, 0, 0, 0, 4};
+
+			//collisionShape = new btHeightfieldTerrainShape(1, 1, 0, 1, 0, 1, 1, PHY_FLOAT, false); // test values
+
+			collisionShape = new btBvhTriangleMeshShape(model->getMeshInterface(), false, true);
 
 			btTransform position;
 			position.setIdentity();
@@ -141,7 +146,7 @@ namespace Game{
 		rigidBody->setContactProcessingThreshold(0.f);
 
 		btTransform initialTransform;
-		initialTransform.setOrigin(glmToBullet(position));
+		initialTransform.setOrigin(btVector3(0, -5, 0));
 		initialTransform.setRotation(btQuaternion(0, 0, 0, 1));
 		rigidBody->setWorldTransform(initialTransform);
 		motionState->setWorldTransform(initialTransform);

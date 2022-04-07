@@ -10,7 +10,7 @@ namespace Game {
 	class GameObject {
 	public:
 		GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld); // for objects not interatcting with physics (no friction)
-		GameObject(Rendering::Model* model, float friction, btDiscreteDynamicsWorld* dynamicsWorld); // normal
+		GameObject(Rendering::Model* model, string objectType, float friction, btDiscreteDynamicsWorld* dynamicsWorld); // normal
 		GameObject(Rendering::Model* model, string objectType, btDiscreteDynamicsWorld* dynamicsWorld); // for wheels
 		GameObject(Rendering::Model* model); // for multiplayer
 

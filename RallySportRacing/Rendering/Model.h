@@ -23,6 +23,7 @@ namespace Rendering {
 	class Model {
 	public:
 		vector<Mesh> meshes;
+;
 
 		Model(vector<Mesh> meshes);
 		~Model();
@@ -33,11 +34,12 @@ namespace Rendering {
 		
 		void render(glm::mat4 projection, glm::mat4 view, GLint programID);
 
-		btTriangleMesh* meshInterface;
 		btVector3 Model::generateCollisionShape();
 		btVector3 Model::generateCollisionShapeOffset();
 
 		static Model* loadModel(const char* file);
+
+		btTriangleMesh* getMeshInterface();
 
 	private:
 		glm::mat4 translationMat = glm::mat4(1.0f);

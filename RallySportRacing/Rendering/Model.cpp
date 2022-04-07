@@ -72,6 +72,9 @@ namespace Rendering {
 	double minX = 0;
 	double minY = 0;
 	double minZ = 0;
+
+	btTriangleMesh* meshInterface = new btTriangleMesh();
+
 	Model* Model::loadModel(const char* file) {
 		maxX = 0;
 		maxY = 0;
@@ -79,6 +82,7 @@ namespace Rendering {
 		minX = 0;
 		minY = 0;
 		minZ = 0;
+		meshInterface = new btTriangleMesh();
 
 		tinygltf::Model gltfmodel;
 		TinyGLTF loader;
@@ -157,7 +161,6 @@ namespace Rendering {
 					if (minZ >= vertex.position.z) {
 						minZ = vertex.position.z;
 					}
-
 				}
 
 				//Indices accessor.
@@ -176,7 +179,22 @@ namespace Rendering {
 						indices.push_back(unsigned int(indicesgltf[i]));
 					}
 				}
-				
+
+				for (int i = 0; i < accessorIndices.count; i++) {
+					// ../Models/LightTestEnvironment.gltf
+					string test = "../Models/SimpleEnvironment.gltf";
+					string test2 = "../Models/TerrainCollisionShape.gltf";
+					
+					if (file == test2) {
+						if ((i + 1) % 3 == 0) {
+							meshInterface->addTriangle(
+								btVector3(vertices[indices[i-2]].position.x, vertices[indices[i - 2]].position.y, vertices[indices[i - 2]].position.z),
+								btVector3(vertices[indices[i - 1]].position.x, vertices[indices[i - 1]].position.y, vertices[indices[i - 1]].position.z),
+								btVector3(vertices[indices[i]].position.x, vertices[indices[i]].position.y, vertices[indices[i]].position.z)
+							);
+						}
+					}
+				}
 
 				
 
@@ -192,10 +210,18 @@ namespace Rendering {
 		return model;
 	}
 
+	btTriangleMesh* Model::getMeshInterface()
+	{
+		return meshInterface;
+	}
+
 	btVector3 Model::generateCollisionShape() {
+		//vertices[0].
 		return btVector3((maxX-minX)/2, (maxY - minY)/2, (maxZ - minZ) / 2);
 	}
 	btVector3 Model::generateCollisionShapeOffset() {
 		return btVector3((maxX + minX) / 2, (maxY + minY) / 2, (maxZ + minZ) / 2);
 	}
+
+
 }

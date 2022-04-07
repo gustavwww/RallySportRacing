@@ -30,6 +30,7 @@ namespace Game {
 	GameObject* environment;
 	GameObject* environment2;
 	GameObject* wall;
+	GameObject* test1;
 
 	Vehicle* vehicle;
 
@@ -63,34 +64,37 @@ namespace Game {
 		// environment 1 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel, 5.0f,  physics->dynamicsWorld);
+		environment = new GameObject(environmentModel, "", 5.0f, physics->dynamicsWorld);
 		environment->setInitialPosition(btVector3(0, 0, 0));
 
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf");
+		windowHandler->addModel(test);
+		test1 = new GameObject(test, isTerrainShape, 10.0f, physics->dynamicsWorld); // test
+		test1->setInitialPosition(btVector3(-40, -300, 0));
 
 		// environment 2 
 		Rendering::Model* environmentModel2 = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel2);
-		environment2 = new GameObject(environmentModel2, 1.0f, physics->dynamicsWorld);
+		environment2 = new GameObject(environmentModel2, "", 1.0f, physics->dynamicsWorld);
 		environment2->setInitialPosition(btVector3(-50, 0, 0));
 
 
 		// test wall
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf");
 		windowHandler->addModel(wallModel);
-		wall = new GameObject(wallModel, physics->dynamicsWorld);
+		wall = new GameObject(wallModel, "", physics->dynamicsWorld);
 		wall->setInitialPosition(btVector3(-60, 6, 0));
 		wall->setInitialRotation(btQuaternion(0,0,1,1));
 
 		//Light Debugging Environment
-		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf");
+		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf"); // 
 		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
+		debugEnvironment = new GameObject(debugEnvironmentModel, "", physics->dynamicsWorld);
 		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));
 
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
-
 
 
 		debugDrawer = new DebugDraw();
@@ -148,6 +152,7 @@ namespace Game {
 		environment->updateTransform();
 		environment2->updateTransform();
 		vehicle->updateTransform();
+		test1->updateTransform();
 		//wheel1->updateTransform();
 		//wheel2->updateTransform();
 		//wheel3->updateTransform();

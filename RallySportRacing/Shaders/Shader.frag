@@ -100,7 +100,7 @@ void main(){
 
 	float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
 	float attenuation = 1.0/(d * d);
-	vec3 radiance = lightColor * 500 * attenuation;
+	vec3 radiance = lightColor * 500000 * attenuation;
 
 	//Dot products.
 	float NdotV = max(dot(normal, viewDir), 0.0000001);
