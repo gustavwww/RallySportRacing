@@ -95,11 +95,6 @@ namespace Game{
 			btTransform position;
 			position.setIdentity();
 			compoundShape->addChildShape(position, collisionShape);
-
-			motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
-			btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(1, motionState, compoundShape, btVector3(0, 30, 0));
-			rigidBody = new btRigidBody(groundRigidBodyCI);
-
 		}
 		else if (objectType == "terrain") { // for terrainShapes based on heightmaps
 
@@ -107,15 +102,25 @@ namespace Game{
 			//SDL_Surface* image = IMG_Load("test/test.png");
 
 			// btHeightfieldTerrainShape (int heightStickWidth, int heightStickLength, const void *heightfieldData, btScalar heightScale, btScalar minHeight, btScalar maxHeight, int upAxis, PHY_ScalarType heightDataType, bool flipQuadEdges)
+
+			/*float numHeightfieldRows = 256;
+			float numHeightfieldColumns = 256;
+			float heightfieldData[] = {0};
+			for (int j = 0; j <= int(numHeightfieldColumns / 2); j++) {
+				for (int i = 0; i <= int(numHeightfieldRows / 2); i++) {
+					height = random.uniform(0, heightPerturbationRange)
+						heightfieldData[2 * i + 2 * j * numHeightfieldRows] = height
+						heightfieldData[2 * i + 1 + 2 * j * numHeightfieldRows] = height
+						heightfieldData[2 * i + (2 * j + 1) * numHeightfieldRows] = height
+						heightfieldData[2 * i + 1 + (2 * j + 1) * numHeightfieldRows] = height
+				}
+			}*/
+
 			collisionShape = new btHeightfieldTerrainShape(1, 1, 0, 1, 0, 1, 1, PHY_FLOAT, false); // test values
 
 			btTransform position;
 			position.setIdentity();
 			compoundShape->addChildShape(position, collisionShape);
-
-			motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
-			btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, compoundShape, btVector3(0, 30, 0));
-			rigidBody = new btRigidBody(groundRigidBodyCI);
 
 		}
 		else { // creates collisionshape based on model and its offset
@@ -125,10 +130,11 @@ namespace Game{
 			position.setOrigin(btVector3(model->generateCollisionShapeOffset()));  // offset
 			compoundShape->addChildShape(position, collisionShape);
 
-			motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
-			btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, compoundShape, btVector3(0, 0, 0));
-			rigidBody = new btRigidBody(groundRigidBodyCI);
 		}
+
+		motionState = new btDefaultMotionState(btTransform(btQuaternion(0, 0, 0, 1), btVector3(0, 0, 0)));
+		btRigidBody::btRigidBodyConstructionInfo groundRigidBodyCI(0, motionState, compoundShape, btVector3(0, 0, 0));
+		rigidBody = new btRigidBody(groundRigidBodyCI);
 
 		rigidBody->setFriction(friction);
 
