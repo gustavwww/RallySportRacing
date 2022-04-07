@@ -31,10 +31,10 @@ namespace Game {
 
 
 		steeringClamp = 0.4;
-		steeringIncrement = 1.5;
-		engineForce = 5;
+		steeringIncrement = 1;
+		engineForce = 5000;
 
-		btScalar chassisMass(1.0);
+		btScalar chassisMass(1000.0);
 		btVector3 chassisInertia(0.0f, 0.0f, 0.0f);
 		btVector3 shape = btVector3(0.9, 0.5, 2.2); // could use automatically generated cshape from model but requires a little bit of fine tunements
 		collisionShape = new btBoxShape(shape); 
@@ -126,20 +126,29 @@ namespace Game {
 
 	void Vehicle::drive(int direction)
 	{
-		vehicle->applyEngineForce(direction * engineForce, 2);
-		vehicle->applyEngineForce(direction * engineForce, 3);
+		cout << "km/h: " << vehicle->getCurrentSpeedKmHour() <<endl;
+		if (vehicle->getCurrentSpeedKmHour() <= 150) {
+			vehicle->applyEngineForce(direction * engineForce, 1);
+			vehicle->applyEngineForce(direction * engineForce, 0);
+		}
+		else {
+			vehicle->applyEngineForce(0, 1);
+			vehicle->applyEngineForce(0, 0);
+		}
+		vehicle->setBrake(0, 2);
+		vehicle->setBrake(0, 3);
 	}
 
 	void Vehicle::notGasing()
 	{
-		vehicle->applyEngineForce(0, 2);
-		vehicle->applyEngineForce(0, 3);
+		vehicle->applyEngineForce(0, 1);
+		vehicle->applyEngineForce(0, 0);
 
 		// Default braking force, always added otherwise there is no friction on the wheels, (This is axis friction)
 		// I can change this depending on ground? One way to simulate friction. Same with frictionslip
 		// Real rolling friction is not possible using a raycastvehicle because a ray is infinitely thin and thus cannot cause friction. Other wise you would have to simulate a rolling cylinder
-		vehicle->setBrake(1, 2);
-		vehicle->setBrake(1, 3);
+		vehicle->setBrake(500, 1);
+		vehicle->setBrake(500, 0);
 	}
 
 	void Vehicle::steerRight(double deltaTime)
@@ -166,11 +175,11 @@ namespace Game {
 
 	void Vehicle::handBrake()
 	{
-		vehicle->applyEngineForce(0, 2);
-		vehicle->applyEngineForce(0, 3);
+		vehicle->applyEngineForce(0, 0);
+		vehicle->applyEngineForce(0, 1);
 
-		vehicle->setBrake(500, 2);
-		vehicle->setBrake(500, 3);
+		vehicle->setBrake(500000, 2);
+		vehicle->setBrake(500000, 3);
 	}
 
 	void Vehicle::updateTransform()

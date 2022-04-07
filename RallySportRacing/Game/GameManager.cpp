@@ -64,12 +64,12 @@ namespace Game {
 		// environment 1 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel, "", 5.0f, physics->dynamicsWorld);
+		environment = new GameObject(environmentModel, "", 4.0f, physics->dynamicsWorld);
 		environment->setInitialPosition(btVector3(0, 0, 0));
 
 		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf");
 		windowHandler->addModel(test);
-		test1 = new GameObject(test, isTerrainShape, 10.0f, physics->dynamicsWorld); // test
+		test1 = new GameObject(test, isTerrainShape, 2.5f, physics->dynamicsWorld); // test
 		test1->setInitialPosition(btVector3(-40, -300, 0));
 
 		// environment 2 
@@ -234,7 +234,7 @@ namespace Game {
 			camOffset = glm::vec3(11 * vehicle->getOrientation().x, 3, 11 * vehicle->getOrientation().z); //offset 20. Height 5
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
 			camDirection = camPosition + (vehicle->getPosition() - camPosition) * 0.5f;
-			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.05f;
+			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.25f;
 		}
 
 		// Perspective 2 => for reversing
