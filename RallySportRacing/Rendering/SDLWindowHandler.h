@@ -25,6 +25,9 @@ namespace Rendering {
 		void addModel(Model* model);
 		void removeModel(Model* model);
 
+		void addParticleSystem(ParticleSystem* particleSystem);
+		void removeParticlesSystem(ParticleSystem* particleSystem);
+
 		SDL_Window* getSDLWindow();
 		void Destroy();
 
@@ -38,6 +41,7 @@ namespace Rendering {
 		int width;
 		int height;
 		unordered_set<Model*> models;
+		unordered_set<ParticleSystem*> particleSystems;
 
 		glm::vec3 camPosition = glm::vec3(0, 0, 20);
 		glm::vec3 camDirection = glm::vec3(0, 0, 0);

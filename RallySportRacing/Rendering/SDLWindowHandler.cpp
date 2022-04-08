@@ -7,13 +7,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <stb_image.h>
-#include "ParticleSystem.h"
 
 #include <imgui.h>
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
-
-
 
 using namespace std;
 
@@ -32,7 +29,6 @@ namespace Rendering {
 	{
 		camDirection = camDir;
 	}
-
 
 	void Rendering::SDLWindowHandler::setCamOrientation(glm::vec3 camOr)
 	{
@@ -194,15 +190,12 @@ namespace Rendering {
 
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
-		unsigned int smokeTexture = loadTexture("../Textures/explosion.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
-
-		ParticleSystem particleSystem = ParticleSystem::ParticleSystem(100000);
 		
 		//GUI bool
 		bool showDebugGUI = false;
@@ -228,11 +221,6 @@ namespace Rendering {
 
 			//Toggle DebugGUI with 'G'.
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_g) {
-				glm::vec3 velocity = glm::vec3(0,0,0);
-				glm::vec3 pos = glm::vec3(0, 2, 0);
-				
-				//REMOVE THIS ONLY USED FOR TESTING.
-				particleSystem.createParticle(10, velocity, pos);
 
 				showDebugGUI = !showDebugGUI;
 			}
@@ -256,11 +244,11 @@ namespace Rendering {
 			for (Model* m : models) {
 				m->render(projection, view, programID);
 			}
-			
-			//Particle System
-			//ToDo change to deltatime.
-			particleSystem.updateParticles(0.02);
-			particleSystem.renderParticleSystem(particleProgramID, projection, view, width, height, smokeTexture);
+
+			for (ParticleSystem* p : particleSystems) {
+				p->emitParticle(glm::vec3(0, 5, 0), glm::vec3(0, 0, 0), 1);
+				p->render(particleProgramID, projection, view, width, height);
+			}
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
@@ -279,6 +267,13 @@ namespace Rendering {
 
 	void SDLWindowHandler::removeModel(Model* model) {
 		models.erase(model);
+	}
+
+	void SDLWindowHandler::addParticleSystem(ParticleSystem* particleSystem) {
+		particleSystems.insert(particleSystem);
+	}
+	void SDLWindowHandler::removeParticlesSystem(ParticleSystem* particleSystem) {
+		particleSystems.erase(particleSystem);
 	}
 
 	SDL_Window* SDLWindowHandler::getSDLWindow() {
