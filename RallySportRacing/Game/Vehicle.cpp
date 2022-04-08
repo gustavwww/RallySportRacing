@@ -7,22 +7,20 @@ namespace Game {
 
 	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, dynamicsWorld)
 	{
-		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
+		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
 		getHandler()->addModel(wheel1Model);
-		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
+		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
 		getHandler()->addModel(wheel2Model);
-		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
+		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
 		getHandler()->addModel(wheel3Model);
-		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
+		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
 		getHandler()->addModel(wheel4Model);
 
-		string isWheel = "wheel";
-
 		//test wheels but have no model, using wallmodel temporary
-		wheel1 = new GameObject(wheel1Model, isWheel, dynamicsWorld);
-		wheel2 = new GameObject(wheel2Model, isWheel, dynamicsWorld);
-		wheel3 = new GameObject(wheel3Model, isWheel, dynamicsWorld);
-		wheel4 = new GameObject(wheel4Model, isWheel, dynamicsWorld);
+		wheel1 = new GameObject(wheel1Model, dynamicsWorld);
+		wheel2 = new GameObject(wheel2Model, dynamicsWorld);
+		wheel3 = new GameObject(wheel3Model, dynamicsWorld);
+		wheel4 = new GameObject(wheel4Model, dynamicsWorld);
 
 		wheels.push_back(wheel1);
 		wheels.push_back(wheel2);

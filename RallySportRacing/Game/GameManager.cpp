@@ -31,6 +31,7 @@ namespace Game {
 	GameObject* environment2;
 	GameObject* wall;
 	GameObject* test1;
+	vector<GameObject*> gameObjects;
 
 	Vehicle* vehicle;
 
@@ -48,9 +49,6 @@ namespace Game {
 
 	DebugDraw* debugDrawer;
 
-	string isWheel = "wheel";
-	string isTerrainShape = "terrain";
-
 	Rendering::SDLWindowHandler* Game::getHandler()
 	{
 		return handler;
@@ -62,47 +60,51 @@ namespace Game {
 		handler = windowHandler;
 
 		// environment 1 
-		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
+		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel, "", 4.0f, physics->dynamicsWorld);
+		environment = new GameObject(environmentModel, true, 4.0f, physics->dynamicsWorld); // use false if not terrain
+		gameObjects.push_back(environment);
 		environment->setInitialPosition(btVector3(0, 0, 0));
 
-		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf");
-		windowHandler->addModel(test);
-		test1 = new GameObject(test, isTerrainShape, 2.5f, physics->dynamicsWorld); // test
-		test1->setInitialPosition(btVector3(-40, -300, 0));
-
 		// environment 2 
-		Rendering::Model* environmentModel2 = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
+		Rendering::Model* environmentModel2 = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true);
 		windowHandler->addModel(environmentModel2);
-		environment2 = new GameObject(environmentModel2, "", 1.0f, physics->dynamicsWorld);
+		environment2 = new GameObject(environmentModel2, true, 1.0f, physics->dynamicsWorld);
+		gameObjects.push_back(environment2);
 		environment2->setInitialPosition(btVector3(-50, 0, 0));
 
+		// test environment finished track
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf", true);
+		windowHandler->addModel(test);
+		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
+		gameObjects.push_back(test1);
+		test1->setInitialPosition(btVector3(-40, -300, 0));
 
 		// test wall
-		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf");
+		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf", false);
 		windowHandler->addModel(wallModel);
-		wall = new GameObject(wallModel, "", physics->dynamicsWorld);
+		wall = new GameObject(wallModel, physics->dynamicsWorld);
+		gameObjects.push_back(wall);
 		wall->setInitialPosition(btVector3(-60, 6, 0));
 		wall->setInitialRotation(btQuaternion(0,0,1,1));
 
 		//Light Debugging Environment
-		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf"); // 
+		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false); // 
 		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel, "", physics->dynamicsWorld);
+		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
+		gameObjects.push_back(debugEnvironment);
 		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));
 
-		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
+		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
-
+		gameObjects.push_back(vehicle);
 
 		debugDrawer = new DebugDraw();
 
 
 		// Multiplayer setup
 		Networking::setupNetwork(vehicle, windowHandler);
-
 	}
 
 	bool toScreen = true;
@@ -146,22 +148,14 @@ namespace Game {
 
 
 	void update() {
-		// Should probably just be a loop that does update on all objects
-		wall->updateTransform();
-		debugEnvironment->updateTransform();
-		environment->updateTransform();
-		environment2->updateTransform();
-		vehicle->updateTransform();
-		test1->updateTransform();
-		//wheel1->updateTransform();
-		//wheel2->updateTransform();
-		//wheel3->updateTransform();
-		//wheel4->updateTransform();
 
-		// debug drawing
-		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
-		physics->dynamicsWorld->debugDrawWorld(); 
+		// debug drawing, takes a lot of performance
+		//physics->dynamicsWorld->setDebugDrawer(debugDrawer);
+		//physics->dynamicsWorld->debugDrawWorld(); 
 
+		for (int i = 0; i < gameObjects.size(); i++) {
+			gameObjects[i]->updateTransform();
+		}
 
 
 		// Calculate deltaTime

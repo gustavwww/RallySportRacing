@@ -74,7 +74,7 @@ namespace Networking {
 				if (el == players.end()) {
 					// Player not initialized, creating player...
 					cout << "A player has joined the game: " << name << endl;
-					Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf");
+					Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
 					handler->addModel(model);
 					Game::GameObject* obj = new Game::GameObject(model);
 

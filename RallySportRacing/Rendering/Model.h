@@ -37,7 +37,7 @@ namespace Rendering {
 		btVector3 Model::generateCollisionShape();
 		btVector3 Model::generateCollisionShapeOffset();
 
-		static Model* loadModel(const char* file);
+		static Model* loadModel(const char* file, bool isTerrain);
 
 		btTriangleMesh* getMeshInterface();
 

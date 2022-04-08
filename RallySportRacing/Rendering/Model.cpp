@@ -75,7 +75,7 @@ namespace Rendering {
 
 	btTriangleMesh* meshInterface = new btTriangleMesh();
 
-	Model* Model::loadModel(const char* file) {
+	Model* Model::loadModel(const char* file, bool isTerrain) {
 		maxX = 0;
 		maxY = 0;
 		maxZ = 0;
@@ -181,11 +181,7 @@ namespace Rendering {
 				}
 
 				for (int i = 0; i < accessorIndices.count; i++) {
-					// ../Models/LightTestEnvironment.gltf
-					string test = "../Models/SimpleEnvironment.gltf";
-					string test2 = "../Models/TerrainCollisionShape.gltf";
-					
-					if (file == test2) {
+					if (isTerrain) {
 						if ((i + 1) % 3 == 0) {
 							meshInterface->addTriangle(
 								btVector3(vertices[indices[i-2]].position.x, vertices[indices[i - 2]].position.y, vertices[indices[i - 2]].position.z),

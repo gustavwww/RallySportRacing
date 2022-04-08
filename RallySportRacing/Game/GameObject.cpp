@@ -13,15 +13,6 @@
 
 namespace Game{
 
-	GameObject::GameObject(Rendering::Model* model, string objectType, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
-		this->model = model;
-		position = glm::vec3(0.0f);
-		orientation = glm::vec3(0.0f);
-		quaternion= glm::quat(0, 0, 0, 0);
-		this->objectType = objectType;
-		setupRigidbody();
-	}
-
 	GameObject::GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
 		this->model = model;
 		position = glm::vec3(0.0f);
@@ -30,12 +21,12 @@ namespace Game{
 		setupRigidbody();
 	}
 
-	GameObject::GameObject(Rendering::Model* model, string objectType, float friction, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
+	GameObject::GameObject(Rendering::Model* model, bool isTerrain, float friction, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
 		this->model = model;
 		position = glm::vec3(0.0f);
 		orientation = glm::vec3(0.0f);
 		quaternion = glm::quat(0, 0, 0, 0);
-		this->objectType = objectType;
+		this->isTerrain = isTerrain;
 		this->friction = friction;
 		setupRigidbody();
 	}
@@ -89,37 +80,7 @@ namespace Game{
 	
 		compoundShape = new btCompoundShape();
 
-		// this ifstatement does not do anything. It gets overwritten by the information from the vechicle class anyways.
-		// However the concept is applicable on heightmaps and that is why I have not removed it yet
-		if (objectType == "wheel") { // special case for wheels, maybe we want to add another one for heightmaps?
-			collisionShape = new btCylinderShape(btVector3(0.1, 0.1, 0.1));
-			btTransform position;
-			position.setIdentity();
-			compoundShape->addChildShape(position, collisionShape);
-		}
-		else if (objectType == "terrain") { // for terrainShapes based on heightmaps
-
-			
-			//SDL_Surface* image = IMG_Load("test/test.png");
-
-			// btHeightfieldTerrainShape (int heightStickWidth, int heightStickLength, const void *heightfieldData, btScalar heightScale, btScalar minHeight, btScalar maxHeight, int upAxis, PHY_ScalarType heightDataType, bool flipQuadEdges)
-
-			/*float numHeightfieldRows = 256;
-			float numHeightfieldColumns = 256;
-			float heightfieldData[] = {0};
-			for (int j = 0; j <= int(numHeightfieldColumns / 2); j++) {
-				for (int i = 0; i <= int(numHeightfieldRows / 2); i++) {
-					height = random.uniform(0, heightPerturbationRange)
-						heightfieldData[2 * i + 2 * j * numHeightfieldRows] = height
-						heightfieldData[2 * i + 1 + 2 * j * numHeightfieldRows] = height
-						heightfieldData[2 * i + (2 * j + 1) * numHeightfieldRows] = height
-						heightfieldData[2 * i + 1 + (2 * j + 1) * numHeightfieldRows] = height
-				}
-			}*/
-
-			//float test[] = {1, 1, 1, 0, 0, 0, 4};
-
-			//collisionShape = new btHeightfieldTerrainShape(1, 1, 0, 1, 0, 1, 1, PHY_FLOAT, false); // test values
+		if (isTerrain) { // for terrainShapes based on heightmaps
 
 			collisionShape = new btBvhTriangleMeshShape(model->getMeshInterface(), false, true);
 
