@@ -37,7 +37,13 @@ add_executable (RallySportRacing
     "Networking/Networking.h"
     "Networking/Networking.cpp"
     "Networking/Player.h"
-    "Networking/Player.cpp" "Rendering/ParticleSystem.h" "Rendering/ParticleSystem.cpp")
+    "Networking/Player.cpp"
+    "Rendering/ParticleSystem.h"
+    "Rendering/ParticleSystem.cpp"
+    "Utils/Random.h"
+    "Utils/Random.cpp"
+    "Utils/GameTimer.h"
+    "Utils/GameTimer.cpp")
 
 find_package(OpenGL REQUIRED)
 
