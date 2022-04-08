@@ -1,97 +1,106 @@
 #include "ParticleSystem.h"
 #include <GL/glew.h>
 #include <algorithm>
+#include <Utils/GameTimer.h>
 
-void ParticleSystem::setup() {
-	glGenVertexArrays(1, &VAO);
-	glGenBuffers(1, &VBO);
+using namespace Utils;
 
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, ParticleSystem::maxSize * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
-}
+namespace Rendering {
 
-void ParticleSystem::createParticle(float lifeLength, glm::vec3 velocity, glm::vec3 pos) {
-	Particle particle;
-	particle.lifetime = 0;
-	particle.lifeLength = lifeLength;
-	particle.velocity = velocity;
-	particle.pos = pos;
+	GameTimer* gameTimer;
 
-	addParticleToParticleSystem(particle);
-}
+	ParticleSystem::ParticleSystem(unsigned int maxSize, unsigned int texture) {
+		this->maxSize = maxSize;
+		this->texture = texture;
+		setup();
 
-void ParticleSystem::addParticleToParticleSystem(Particle particle) {
-	if (particles.size() < maxSize) {
-		particles.push_back(particle);
+		//Populate particles.
+		particles.resize(maxSize);
 	}
-}
 
-void ParticleSystem::killParticle(int index) {
-	particles.erase(particles.begin() + index);
-}
+	void ParticleSystem::setup() {
+		gameTimer = GameTimer::Instance();
+		glGenVertexArrays(1, &VAO);
+		glGenBuffers(1, &VBO);
 
-//MIGHT NEED TO CHANGE THIS TO ONLY HAVE 1 LOOP.
-void ParticleSystem::updateParticles(float deltaTime) {
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, ParticleSystem::maxSize * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
+	}
 
-	//Remove dead particles.
-	for (int i = 0; i < particles.size(); i++) {
-		if (particles[i].lifetime > particles[i].lifeLength) {
-			killParticle(i);
+	void ParticleSystem::emitParticle(glm::vec3 pos, glm::vec3 velocity, float lifeLength) {
+		if (nrActiveParticles < maxSize){
+			particles.at(nrActiveParticles).pos = pos;
+			particles.at(nrActiveParticles).velocity = velocity;
+			particles.at(nrActiveParticles).lifeLength = lifeLength;
+			particles.at(nrActiveParticles).lifetime = 0;
+			particles.at(nrActiveParticles).active = true;
+			nrActiveParticles++;
 		}
 	}
 
-	for (int i = 0; i < particles.size(); i++) {
-		particles[i].pos += deltaTime * particles[i].velocity;
-		particles[i].lifetime += deltaTime;
+	//Deactivate dead particles and updates data for alive partivles.
+	void ParticleSystem::updateParticles() {
+		for (int i = 0; i < nrActiveParticles; i++){
+
+			if (particles.at(i).lifetime > particles.at(i).lifeLength) {
+				particles.at(i).active = false;
+				nrActiveParticles -= 1;
+				std::swap(particles.at(i), particles.at(nrActiveParticles));
+			}
+			particles.at(i).pos += gameTimer->getDeltaTime() * particles.at(i).velocity;
+			particles.at(i).lifetime += gameTimer->getDeltaTime();
+		}
 	}
 
-}
-
-void ParticleSystem::renderParticleSystem(GLint programID, glm::mat4 projectionMatrix, glm::mat4 viewMatrix, float screenWidth, float screenHeight, unsigned int texture) {
-	handleData(extractData(viewMatrix));
-	render(programID, projectionMatrix, screenWidth, screenHeight, texture);
-}
-
-//Collect, convert and sort data from particle system.
-vector<glm::vec4> ParticleSystem::extractData(glm::mat4 viewMatrix) {
-	vector<glm::vec4> data;
-
-	//Add data vector containing position in view space and lifetime for each particle in the system.
-	for (int i = 0; i < particles.size(); i++) {
-		glm::vec3 posViewSpace = glm::vec3(viewMatrix * glm::vec4(particles[i].pos, 1));
-		data.push_back(glm::vec4(posViewSpace, particles[i].lifetime));
+	void ParticleSystem::render(GLint programID, glm::mat4 projectionMatrix, glm::mat4 viewMatrix, float screenWidth, float screenHeight){
+		updateParticles();
+		handleData(extractData(viewMatrix));
+		renderParticleSystem(programID, projectionMatrix, screenWidth, screenHeight);
 	}
 
-	sort(data.begin(), next(data.begin(), particles.size()), [](const glm::vec4& lhs, const glm::vec4& rhs) { return lhs.z < rhs.z; });
+	//Collect, convert and sort data from particle system.
+	vector<glm::vec4> ParticleSystem::extractData(glm::mat4 viewMatrix) {
+		vector<glm::vec4> data;
 
-	return data;
-}
+		//Add data vector containing position in view space and lifetime for each active particle in the system.
+		for (int i = 0; i < nrActiveParticles; i++) {
+			glm::vec3 posViewSpace = glm::vec3(viewMatrix * glm::vec4(particles.at(i).pos, 1));
+			data.push_back(glm::vec4(posViewSpace, particles.at(i).lifetime));
+		}
 
-//Add data to buffer.
-void ParticleSystem::handleData(vector<glm::vec4> data) {
-	glBindVertexArray(VAO);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * particles.size(), data.data());
+		return data;
+	}
+
+	//Add data for every active particle to buffer.
+	void ParticleSystem::handleData(vector<glm::vec4> data) {
+		glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * nrActiveParticles, data.data());
 
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0 , 0);
-}
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	}
 
-//ToDo CHANGE AND COMMENT THIS
-void ParticleSystem::render(GLint programID, glm::mat4 projectionMatrix, float screenWidth, float screenHeight, unsigned int texture) {
-	glUseProgram(programID);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	//ToDo CHANGE AND COMMENT THIS
+	void ParticleSystem::renderParticleSystem(GLint programID, glm::mat4 projectionMatrix, float screenWidth, float screenHeight) {
+		glUseProgram(programID);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
-	glUniform1i(glGetUniformLocation(programID, "textureIn"), 0);
-	glUniformMatrix4fv(glGetUniformLocation(programID, "projMat"), 1, GL_FALSE, &projectionMatrix[0][0]);
-	glUniform1f(glGetUniformLocation(programID, "screen_x"), screenWidth);
-	glUniform1f(glGetUniformLocation(programID, "screen_y"), screenHeight);
+		glUniform1i(glGetUniformLocation(programID, "textureIn"), 0);
+		glUniformMatrix4fv(glGetUniformLocation(programID, "projMat"), 1, GL_FALSE, &projectionMatrix[0][0]);
+		glUniform1f(glGetUniformLocation(programID, "screen_x"), screenWidth);
+		glUniform1f(glGetUniformLocation(programID, "screen_y"), screenHeight);
 
-	glEnable(GL_PROGRAM_POINT_SIZE);
+		glEnable(GL_PROGRAM_POINT_SIZE);
 
-	glBindVertexArray(VAO);
-	glDrawArrays(GL_POINTS, 0, particles.size());
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_POINTS, 0, particles.size());
+	}
+
+	ParticleSystem::~ParticleSystem() {
+	}
+
 }
