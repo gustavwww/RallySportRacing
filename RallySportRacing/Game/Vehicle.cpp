@@ -124,8 +124,8 @@ namespace Game {
 
 	void Vehicle::drive(int direction)
 	{
-		cout << "km/h: " << vehicle->getCurrentSpeedKmHour() <<endl;
-		if (vehicle->getCurrentSpeedKmHour() <= 150) {
+		//cout << "km/h: " << vehicle->getCurrentSpeedKmHour() <<endl;
+		if (vehicle->getCurrentSpeedKmHour() <= 150) { // max speed
 			vehicle->applyEngineForce(direction * engineForce, 1);
 			vehicle->applyEngineForce(direction * engineForce, 0);
 		}

@@ -55,56 +55,58 @@ namespace Game {
 	}
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
-
 		physics = new Physics();
 		handler = windowHandler;
-
-		// environment 1 
-		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
-		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel, true, 4.0f, physics->dynamicsWorld); // use false if not terrain
-		gameObjects.push_back(environment);
-		environment->setInitialPosition(btVector3(0, 0, 0));
-
-		// environment 2 
-		Rendering::Model* environmentModel2 = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true);
-		windowHandler->addModel(environmentModel2);
-		environment2 = new GameObject(environmentModel2, true, 1.0f, physics->dynamicsWorld);
-		gameObjects.push_back(environment2);
-		environment2->setInitialPosition(btVector3(-50, 0, 0));
 
 		// test environment finished track
 		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf", true);
 		windowHandler->addModel(test);
 		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
-		test1->setInitialPosition(btVector3(-40, -300, 0));
+		test1->setInitialPosition(btVector3(-700, -90, 0));
 
 		// test wall
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf", false);
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel, physics->dynamicsWorld);
 		gameObjects.push_back(wall);
-		wall->setInitialPosition(btVector3(-60, 6, 0));
+		wall->setInitialPosition(btVector3(-70, 4, 0));
 		wall->setInitialRotation(btQuaternion(0,0,1,1));
 
-		//Light Debugging Environment
-		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false); // 
-		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
-		gameObjects.push_back(debugEnvironment);
-		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));
 
+		// player vehicle, use setInitialpos to change position when starting the game
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
+		//vehicle->setInitialPosition(btVector3(-40, -100, 0));
 
 		debugDrawer = new DebugDraw();
 
 
 		// Multiplayer setup
 		Networking::setupNetwork(vehicle, windowHandler);
+
+		// environment 1 test
+		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
+		windowHandler->addModel(environmentModel);
+		environment = new GameObject(environmentModel, true, 4.0f, physics->dynamicsWorld); // use false if not terrain or use another constructor
+		gameObjects.push_back(environment);
+		environment->setInitialPosition(btVector3(0, 0, 0));*/
+
+		// environment 2 test
+		/*Rendering::Model* environmentModel2 = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true);
+		windowHandler->addModel(environmentModel2);
+		environment2 = new GameObject(environmentModel2, true, 1.0f, physics->dynamicsWorld);
+		gameObjects.push_back(environment2);
+		environment2->setInitialPosition(btVector3(-50, 0, 0));*/
+
+		//Light Debugging Environment
+		/*Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false); //
+		windowHandler->addModel(debugEnvironmentModel);
+		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
+		gameObjects.push_back(debugEnvironment);
+		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));*/
 	}
 
 	bool toScreen = true;
@@ -124,7 +126,7 @@ namespace Game {
 	glm::vec3 camOffsetVector;
 	glm::vec3 camOffset;
 
-	int perspective = 1; // 1 = normal thirdperson, 2 = from side, 3 = from a static camera above in a corner
+	int perspective = 1; // 1 = normal thirdperson, 2 = reverse, 3 = from a static camera above in a corner
 	float radius = 10;
 	float maxDistance = 30;
 	float minDistance = 4;
@@ -153,6 +155,7 @@ namespace Game {
 		//physics->dynamicsWorld->setDebugDrawer(debugDrawer);
 		//physics->dynamicsWorld->debugDrawWorld(); 
 
+		// updates position and orientation of all gameObjects
 		for (int i = 0; i < gameObjects.size(); i++) {
 			gameObjects[i]->updateTransform();
 		}
@@ -171,9 +174,7 @@ namespace Game {
 
 		SDL_PumpEvents();
 		buttons = SDL_GetMouseState(&x, &y);
-		if (keyboard_state_array[SDL_SCANCODE_H]) {
-			//car1->updateTransform();
-		}
+
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
 
@@ -228,13 +229,13 @@ namespace Game {
 			camOffset = glm::vec3(11 * vehicle->getOrientation().x, 3, 11 * vehicle->getOrientation().z); //offset 20. Height 5
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
 			camDirection = camPosition + (vehicle->getPosition() - camPosition) * 0.5f;
-			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.25f;
+			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.1f;
 		}
 
 		// Perspective 2 => for reversing
 		else if (perspective == 2) {
 			camOffset = glm::vec3(15 * vehicle->getOrientation().x * -1, 3, 15 * vehicle->getOrientation().z * -1); //offset 20. Height 5
-			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
+
 			camDirection = vehicle->getPosition();
 			camPosition = camOffset + vehicle->getPosition();
 		}
@@ -281,7 +282,7 @@ namespace Game {
 				}
 
 				if (keyboard_state_array[SDL_SCANCODE_LSHIFT]) {
-					cameraSpeed = 30.0f;
+					cameraSpeed = 100.0f;
 				}
 				else {
 					cameraSpeed = 10.0f;

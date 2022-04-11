@@ -180,8 +180,9 @@ namespace Rendering {
 					}
 				}
 
-				for (int i = 0; i < accessorIndices.count; i++) {
-					if (isTerrain) {
+				// Calculates a meshinterface of the model if it is a terrain
+				if (isTerrain) {
+					for (int i = 0; i < accessorIndices.count; i++) {
 						if ((i + 1) % 3 == 0) {
 							meshInterface->addTriangle(
 								btVector3(vertices[indices[i-2]].position.x, vertices[indices[i - 2]].position.y, vertices[indices[i - 2]].position.z),
@@ -206,15 +207,18 @@ namespace Rendering {
 		return model;
 	}
 
+	// Gives the meshinterface for terrainmodels. 
 	btTriangleMesh* Model::getMeshInterface()
 	{
 		return meshInterface;
 	}
 
+	// Gives outer bounds shape of the model
 	btVector3 Model::generateCollisionShape() {
-		//vertices[0].
 		return btVector3((maxX-minX)/2, (maxY - minY)/2, (maxZ - minZ) / 2);
 	}
+
+	// Gives centerpoint of the model
 	btVector3 Model::generateCollisionShapeOffset() {
 		return btVector3((maxX + minX) / 2, (maxY + minY) / 2, (maxZ + minZ) / 2);
 	}

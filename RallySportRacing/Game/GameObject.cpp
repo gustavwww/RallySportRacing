@@ -13,7 +13,8 @@
 
 namespace Game{
 
-	GameObject::GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
+	GameObject::GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) 
+	{
 		this->model = model;
 		position = glm::vec3(0.0f);
 		orientation = glm::vec3(0.0f);
@@ -21,7 +22,8 @@ namespace Game{
 		setupRigidbody();
 	}
 
-	GameObject::GameObject(Rendering::Model* model, bool isTerrain, float friction, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) {
+	GameObject::GameObject(Rendering::Model* model, bool isTerrain, float friction, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) 
+	{
 		this->model = model;
 		position = glm::vec3(0.0f);
 		orientation = glm::vec3(0.0f);
@@ -31,7 +33,7 @@ namespace Game{
 		setupRigidbody();
 	}
 
-	Game::GameObject::GameObject(Rendering::Model* model)
+	Game::GameObject::GameObject(Rendering::Model* model) 
 	{
 		this->model = model;
 		position = glm::vec3(0.0f);
