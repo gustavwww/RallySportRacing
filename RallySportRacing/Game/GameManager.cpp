@@ -10,6 +10,10 @@
 #include "Utils/GameTimer.h"
 #include "Rendering/ParticleSystem.h"
 
+#include <imgui.h>
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_opengl3.h"
+
 using namespace std;
 using namespace Utils;
 
@@ -31,7 +35,7 @@ namespace Game {
 	GameObject* debugEnvironment;
 
 	Rendering::SDLWindowHandler* handler;
-	GameTimer* gameTimer;
+	GameTimer* gameTimer;	
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 		gameTimer = GameTimer::Instance();
@@ -39,8 +43,8 @@ namespace Game {
 		handler = windowHandler;
 		
 		//Load and add smokeParticles to particle render list.
-		smokeTexture = handler->loadTexture("../Textures/explosion.png");
-		smokeParticlesObject = Rendering::ParticleSystem(1000, smokeTexture);
+		smokeTexture = handler->loadTexture("../Textures/smokeTexture.png");
+		smokeParticlesObject = Rendering::ParticleSystem(1000000, smokeTexture);
 		smokeParticlesPointer = &smokeParticlesObject;
 		handler->addParticleSystem(smokeParticlesPointer);
 
@@ -107,7 +111,6 @@ namespace Game {
 
 	void update() {
 		// Called before every render.
-
 		// Calculate deltaTime
 		if (firstTime) {
 			camOrientation = glm::vec3(0, 1, 0);
@@ -125,6 +128,9 @@ namespace Game {
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
 			if (keyboard_state_array[SDL_SCANCODE_W]) {
 				car1->translate(directionVector * gameTimer->getDeltaTime() * speed);
+				glm::vec3 smokeOffset = glm::vec3(1.8f, 0.23f, 0);
+				smokeParticlesObject.emitParticle(car1->getPosition() + smokeOffset, glm::vec3(1, 0, 0), 3);
+				
 			}
 
 			if (keyboard_state_array[SDL_SCANCODE_S]) {

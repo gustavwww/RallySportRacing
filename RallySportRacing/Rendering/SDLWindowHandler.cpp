@@ -246,7 +246,7 @@ namespace Rendering {
 			}
 
 			for (ParticleSystem* p : particleSystems) {
-				p->emitParticle(glm::vec3(0, 5, 0), glm::vec3(0, 0, 0), 1);
+				//p->emitParticle(glm::vec3(0, 5, 0), glm::vec3(0, 0, 0), 1);
 				p->render(particleProgramID, projection, view, width, height);
 			}
 
