@@ -15,7 +15,6 @@ namespace Rendering {
 		glm::vec3 velocity;
 		float lifeLength;
 		float lifetime = 0;
-		bool active = false;
 	};
 
 	class ParticleSystem {

@@ -34,19 +34,22 @@ namespace Rendering {
 			particles.at(nrActiveParticles).velocity = velocity;
 			particles.at(nrActiveParticles).lifeLength = lifeLength;
 			particles.at(nrActiveParticles).lifetime = 0;
-			particles.at(nrActiveParticles).active = true;
 			nrActiveParticles++;
 		}
 	}
 
-	//Deactivate dead particles and updates data for alive partivles.
+	//Deactivate dead particles and updates data for alive particles.
 	void ParticleSystem::updateParticles() {
 		for (int i = 0; i < nrActiveParticles; i++){
 
 			if (particles.at(i).lifetime > particles.at(i).lifeLength) {
-				particles.at(i).active = false;
 				nrActiveParticles -= 1;
 				std::swap(particles.at(i), particles.at(nrActiveParticles));
+
+				//Alternativ swapping
+				//Particle temp = particles.at(i);
+				//particles.at(i) = particles.at(nrActiveParticles);
+				//particles.at(nrActiveParticles) = temp;
 			}
 			particles.at(i).pos += gameTimer->getDeltaTime() * particles.at(i).velocity;
 			particles.at(i).lifetime += gameTimer->getDeltaTime();
@@ -78,12 +81,11 @@ namespace Rendering {
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(glm::vec4) * nrActiveParticles, data.data());
 
-
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
 	}
 
-	//ToDo CHANGE AND COMMENT THIS
+	//Make all neseccery gl commands before a single rendering call.
 	void ParticleSystem::renderParticleSystem(GLint programID, glm::mat4 projectionMatrix, float screenWidth, float screenHeight) {
 		glUseProgram(programID);
 		glActiveTexture(GL_TEXTURE0);
@@ -94,10 +96,21 @@ namespace Rendering {
 		glUniform1f(glGetUniformLocation(programID, "screen_x"), screenWidth);
 		glUniform1f(glGetUniformLocation(programID, "screen_y"), screenHeight);
 
-		glEnable(GL_PROGRAM_POINT_SIZE);
+		//Enable and set blending function. 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+		//Change depth function and depthMask.
+		glDepthFunc(GL_LEQUAL);
+		glDepthMask(GL_FALSE);
+
+		glEnable(GL_PROGRAM_POINT_SIZE);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_POINTS, 0, particles.size());
+		glDrawArrays(GL_POINTS, 0, nrActiveParticles);
+
+		//Reset depth function and depthMask.
+		glDepthFunc(GL_LESS);
+		glDepthMask(GL_TRUE);
 	}
 
 	ParticleSystem::~ParticleSystem() {
