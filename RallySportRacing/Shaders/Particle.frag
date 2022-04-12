@@ -1,8 +1,6 @@
 #version 420 compatibility
 
 in float life;
-uniform float screen_x;
-uniform float screen_y;
 uniform sampler2D textureIn;
 
 void main()
