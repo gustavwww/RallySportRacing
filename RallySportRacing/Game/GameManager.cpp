@@ -1,5 +1,4 @@
 #include "GameManager.h"
-#include <chrono>
 #include <iostream>
 #include <cmath>
 #include <thread>
@@ -21,12 +20,19 @@
 #include "Services/Protocol/ProtocolParser.h"
 #include "Services/Protocol/Command.h"
 #include "Networking/Networking.h"
+#include "Utils/GameTimer.h"
+#include "Rendering/ParticleSystem.h"
 
+#include <imgui.h>
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_opengl3.h"
 
 using namespace std;
+using namespace Utils;
 
 namespace Game {
 
+	GameObject* car1;
 	GameObject* environment;
 	GameObject* environment2;
 	GameObject* wall;
@@ -35,10 +41,18 @@ namespace Game {
 
 	Vehicle* vehicle;
 
+	//Textures
+	unsigned int smokeTexture;
+
+	//ParticleSystems
+	Rendering::ParticleSystem smokeParticlesObject;
+	Rendering::ParticleSystem* smokeParticlesPointer;
+
 	//Debug GameObject
 	GameObject* debugEnvironment;
 
 	Rendering::SDLWindowHandler* handler;
+	GameTimer* gameTimer;	
 	Physics* physics;
 
 	//Colors to select from when creating a model
@@ -56,7 +70,14 @@ namespace Game {
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 		physics = new Physics();
+		gameTimer = GameTimer::Instance();
 		handler = windowHandler;
+
+		//Load and add smokeParticles to particle render list.
+		smokeTexture = handler->loadTexture("../Textures/smokeTexture.png");
+		smokeParticlesObject = Rendering::ParticleSystem(1000000, smokeTexture);
+		smokeParticlesPointer = &smokeParticlesObject;
+		handler->addParticleSystem(smokeParticlesPointer);
 
 		// test environment finished track
 		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf", true);
@@ -76,6 +97,7 @@ namespace Game {
 
 		// player vehicle, use setInitialpos to change position when starting the game
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
+
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
@@ -111,9 +133,6 @@ namespace Game {
 
 	bool toScreen = true;
 	bool firstTime = true;
-	chrono::steady_clock::time_point previousTime;
-	chrono::steady_clock::time_point currentTime;
-
 
 	const Uint8* keyboard_state_array = SDL_GetKeyboardState(NULL);
 
@@ -146,9 +165,6 @@ namespace Game {
 	// vertical angle : 0, look at the horizon
 	float verticalAngle = 0.f;
 
-
-
-
 	void update() {
 
 		// debug drawing, takes a lot of performance
@@ -165,13 +181,12 @@ namespace Game {
 		if (firstTime) {
 			camOrientation = glm::vec3(0, 1, 0);
 			firstTime = false;
-			currentTime = chrono::high_resolution_clock::now();
+			gameTimer->startGameTime();
 		}
-		previousTime = currentTime;
-		currentTime = chrono::high_resolution_clock::now();
-		float deltaTime = chrono::duration<float, milli>(currentTime - previousTime).count() * 0.001;
+		gameTimer->updateGameTime();
 
-
+		// TODO:
+		// gonna fix the code so it is more simple and clear?
 		SDL_PumpEvents();
 		buttons = SDL_GetMouseState(&x, &y);
 
@@ -181,6 +196,8 @@ namespace Game {
 			// driving 
 			if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->drive(1);
+				glm::vec3 smokeOffset = glm::vec3(1.8f, 0.23f, 0);
+				smokeParticlesObject.emitParticle(car1->getPosition() + smokeOffset, glm::vec3(1, 0, 0), 3);
 			}
 			else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->drive(-1);
@@ -194,10 +211,10 @@ namespace Game {
 
 			// steering
 			if (keyboard_state_array[SDL_SCANCODE_D]) {
-				vehicle->steerLeft(deltaTime);
+				vehicle->steerLeft(gameTimer->getDeltaTime());
 			}
 			else if (keyboard_state_array[SDL_SCANCODE_A]) {
-				vehicle->steerRight(deltaTime);
+				vehicle->steerRight(gameTimer->getDeltaTime());
 			}
 			else {
 				vehicle->steerNeutral();
@@ -247,8 +264,8 @@ namespace Game {
 				SDL_SetRelativeMouseMode(SDL_TRUE);
 				SDL_WarpMouseInWindow(NULL, WIDTH / 2, HEIGHT / 2);
 				// Compute new orientation
-				horizontalAngle += mouseSpeed * deltaTime * float(WIDTH / 2 - x); // widht and height of window
-				verticalAngle += mouseSpeed * deltaTime * float(HEIGHT / 2 - y);
+				horizontalAngle += mouseSpeed * gameTimer->getDeltaTime() * float(WIDTH / 2 - x); // widht and height of window
+				verticalAngle += mouseSpeed * gameTimer->getDeltaTime() * float(HEIGHT / 2 - y);
 				// Direction : Spherical coordinates to Cartesian coordinates conversion
 				glm::vec3 direction(
 					cos(verticalAngle) * sin(horizontalAngle),
@@ -266,19 +283,19 @@ namespace Game {
 
 				// Cam movement
 				if (keyboard_state_array[SDL_SCANCODE_W]) {
-					camPosition += direction * deltaTime * cameraSpeed;
+					camPosition += direction * gameTimer->getDeltaTime()  * cameraSpeed;
 				}
 
 				if (keyboard_state_array[SDL_SCANCODE_S]) {
-					camPosition -= direction * deltaTime * cameraSpeed;
+					camPosition -= direction * gameTimer->getDeltaTime() * cameraSpeed;
 				}
 
 				if (keyboard_state_array[SDL_SCANCODE_D]) {
-					camPosition += right * deltaTime * cameraSpeed;
+					camPosition += right * gameTimer->getDeltaTime() * cameraSpeed;
 				}
 
 				if (keyboard_state_array[SDL_SCANCODE_A]) {
-					camPosition -= right * deltaTime * cameraSpeed;
+					camPosition -= right * gameTimer->getDeltaTime()  * cameraSpeed;
 				}
 
 				if (keyboard_state_array[SDL_SCANCODE_LSHIFT]) {
@@ -296,7 +313,7 @@ namespace Game {
 		}
 
 		adjustCamPosition();
-		physics->dynamicsWorld->stepSimulation(deltaTime, 1);
+		physics->dynamicsWorld->stepSimulation(gameTimer->getDeltaTime(), 1);
 	}
 
 	void adjustCamPosition() {

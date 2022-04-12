@@ -2,6 +2,8 @@
 #define SDLWINDOWHANDLER
 
 #include "Model.h"
+//Remove this
+#include "ParticleSystem.h"
 #include <SDL.h>
 #include <GL/glew.h>
 #include <SDL_opengl.h>
@@ -18,9 +20,13 @@ namespace Rendering {
 		void initSDLWindow(string caption);
 		GLuint loadShader(const string& vertexShader, const string& fragmentShader);
 		void SDLWindowHandler::beginRenderingLoop(void (*preRender)() = nullptr);
+		unsigned int loadTexture(const char* textureFilePath);
 
 		void addModel(Model* model);
 		void removeModel(Model* model);
+
+		void addParticleSystem(ParticleSystem* particleSystem);
+		void removeParticlesSystem(ParticleSystem* particleSystem);
 
 		SDL_Window* getSDLWindow();
 		void Destroy();
@@ -38,6 +44,8 @@ namespace Rendering {
 		int width;
 		int height;
 		unordered_set<Model*> models;
+		unordered_set<ParticleSystem*> particleSystems;
+
 		GLint debugID;
 		glm::vec3 camPosition = glm::vec3(0, 0, 20);
 		glm::vec3 camDirection = glm::vec3(0, 0, 0);

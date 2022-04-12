@@ -6,12 +6,12 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <stb_image.h>
 
 #include <imgui.h>
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 #include "Game/GameManager.h"
-
 
 using namespace std;
 
@@ -35,7 +35,6 @@ namespace Rendering {
 	{
 		camDirection = camDir;
 	}
-
 
 	void Rendering::SDLWindowHandler::setCamOrientation(glm::vec3 camOr)
 	{
@@ -163,9 +162,40 @@ namespace Rendering {
 		return programID;
 	}
 
+	unsigned int SDLWindowHandler::loadTexture(const char* textureFilePath) {
+
+		ifstream textureStream(textureFilePath, ios::in);
+		if (!textureStream.is_open()) {
+			printf("Could not open %s. Maybe in the wrong directory?\n", textureFilePath);
+			return 0;
+		}
+
+		int width, height, nrChannels;
+		unsigned char* image = stbi_load(textureFilePath, &width, &height, &nrChannels, STBI_rgb_alpha);
+		unsigned int textureID;
+
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+		free(image);
+
+		//Set wrapping type.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		//Mipmap and filtering.
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+
+		return textureID;
+	}
+
 	void SDLWindowHandler::beginRenderingLoop(void (*preRender)()) {
 
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
+		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
@@ -199,6 +229,7 @@ namespace Rendering {
 
 			//Toggle DebugGUI with 'G'.
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_g) {
+
 				showDebugGUI = !showDebugGUI;
 			}
 			
@@ -221,6 +252,10 @@ namespace Rendering {
 			for (Model* m : models) {
 				m->render(projection, view, programID);
 			}
+
+			for (ParticleSystem* p : particleSystems) {
+				p->render(particleProgramID, projection, view, width, height);
+			}
 			Game::drawDebug();
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
@@ -240,6 +275,13 @@ namespace Rendering {
 
 	void SDLWindowHandler::removeModel(Model* model) {
 		models.erase(model);
+	}
+
+	void SDLWindowHandler::addParticleSystem(ParticleSystem* particleSystem) {
+		particleSystems.insert(particleSystem);
+	}
+	void SDLWindowHandler::removeParticlesSystem(ParticleSystem* particleSystem) {
+		particleSystems.erase(particleSystem);
 	}
 
 	SDL_Window* SDLWindowHandler::getSDLWindow() {
