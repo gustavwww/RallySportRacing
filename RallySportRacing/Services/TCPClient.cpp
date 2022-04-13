@@ -8,8 +8,6 @@ namespace Server {
 	TCPClient::TCPClient() {
 
 		connectSocket = INVALID_SOCKET;
-
-		WSADATA wsaData;
 		
 		int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
 		if (result != 0) {
@@ -23,7 +21,7 @@ namespace Server {
 			WSACleanup();
 			throw "Socket could not be initialized.";
 		}
-		cout << "Client socket created." << endl;
+		cout << "TCP socket created." << endl;
 
 		serverAddress.sin_family = AF_INET;
 		serverAddress.sin_port = htons(PORT);

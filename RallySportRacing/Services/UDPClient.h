@@ -1,5 +1,5 @@
-#ifndef TCPCLIENT
-#define TCPCLIENT
+#ifndef UDPCLIENT
+#define UDPCLIENT
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -21,17 +21,16 @@ using namespace std;
 
 namespace Server {
 
-	class TCPClient {
+	class UDPClient {
 	public:
-		TCPClient();
-		void connectToServer();
+		UDPClient();
 		void listen();
 		void sendPacket(string msg);
 
 		void addCallback(void (*func)(string str));
 
 	private:
-		SOCKET connectSocket;
+		SOCKET sock;
 		SOCKADDR_IN serverAddress;
 		WSADATA wsaData;
 		vector<void (*)(string str)> funcs;
