@@ -125,7 +125,7 @@ namespace Game {
 	void Vehicle::drive(int direction)
 	{
 
-		if (direction == -1 && vehicle->getCurrentSpeedKmHour() > 0) {
+		if (direction == -1 && vehicle->getCurrentSpeedKmHour() > 1) {
 			vehicle->setBrake(100, 1);
 			vehicle->setBrake(100, 0);
 			vehicle->setBrake(100, 2);
