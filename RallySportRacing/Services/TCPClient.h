@@ -33,6 +33,7 @@ namespace Server {
 	private:
 		SOCKET connectSocket;
 		SOCKADDR_IN serverAddress;
+		WSADATA wsaData;
 		vector<void (*)(string str)> funcs;
 	};
 

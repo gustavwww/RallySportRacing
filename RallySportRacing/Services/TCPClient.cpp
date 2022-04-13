@@ -8,8 +8,6 @@ namespace Server {
 	TCPClient::TCPClient() {
 
 		connectSocket = INVALID_SOCKET;
-
-		WSADATA wsaData;
 		
 		int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
 		if (result != 0) {
