@@ -28,6 +28,7 @@ using namespace std;
 namespace Game {
 
 	GameObject* environment;
+	GameObject* environment2;
 	GameObject* wall;
 
 	Vehicle* vehicle;
@@ -46,7 +47,8 @@ namespace Game {
 
 	DebugDraw* debugDrawer;
 
-	bool isWheel = 1;
+	string isWheel = "wheel";
+	string isTerrainShape = "terrain";
 
 	Rendering::SDLWindowHandler* Game::getHandler()
 	{
@@ -58,14 +60,26 @@ namespace Game {
 		physics = new Physics();
 		handler = windowHandler;
 
+		// environment 1 
 		Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
 		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel,  physics->dynamicsWorld);
+		environment = new GameObject(environmentModel, 5.0f,  physics->dynamicsWorld);
+		environment->setInitialPosition(btVector3(0, 0, 0));
+
+
+		// environment 2 
+		Rendering::Model* environmentModel2 = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf");
+		windowHandler->addModel(environmentModel2);
+		environment2 = new GameObject(environmentModel2, 1.0f, physics->dynamicsWorld);
+		environment2->setInitialPosition(btVector3(-50, 0, 0));
+
+
+		// test wall
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf");
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel, physics->dynamicsWorld);
-		wall->setInitialPosition(btVector3(-400, -5, 0));
-		wall->setInitialRotation(btQuaternion(1,0,0,1));
+		wall->setInitialPosition(btVector3(-60, 6, 0));
+		wall->setInitialRotation(btQuaternion(0,0,1,1));
 
 		//Light Debugging Environment
 		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf");
@@ -132,6 +146,7 @@ namespace Game {
 		wall->updateTransform();
 		debugEnvironment->updateTransform();
 		environment->updateTransform();
+		environment2->updateTransform();
 		vehicle->updateTransform();
 		//wheel1->updateTransform();
 		//wheel2->updateTransform();

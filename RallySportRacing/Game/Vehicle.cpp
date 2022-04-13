@@ -5,18 +5,18 @@
 namespace Game {
 
 
-	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, 0, dynamicsWorld)
+	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, dynamicsWorld)
 	{
-		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel1Model);
-		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* wheel2Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel2Model);
-		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* wheel3Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel3Model);
-		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/SimpleCarAppliedTransforms.gltf");
+		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf");
 		getHandler()->addModel(wheel4Model);
 
-		isWheel = 1;
+		string isWheel = "wheel";
 
 		//test wheels but have no model, using wallmodel temporary
 		wheel1 = new GameObject(wheel1Model, isWheel, dynamicsWorld);
@@ -30,13 +30,13 @@ namespace Game {
 		wheels.push_back(wheel4);
 
 
-		steeringClamp = 0.2;
-		steeringIncrement = 0.5;
+		steeringClamp = 0.4;
+		steeringIncrement = 1.5;
 		engineForce = 5;
 
 		btScalar chassisMass(1.0);
 		btVector3 chassisInertia(0.0f, 0.0f, 0.0f);
-		btVector3 shape = btVector3(0.9, 0.5, 2.3); // could use automatically generated cshape from model but requires a little bit of fine tunements
+		btVector3 shape = btVector3(0.9, 0.5, 2.2); // could use automatically generated cshape from model but requires a little bit of fine tunements
 		collisionShape = new btBoxShape(shape); 
 
 		btQuaternion initalRotation = btQuaternion(0, 0, 0, 1);
@@ -48,9 +48,9 @@ namespace Game {
 		compoundShape = new btCompoundShape();
 		btTransform position;
 		position.setIdentity();
-		position.setOrigin(btVector3(0, 1, 0.25));  // offset
+		position.setOrigin(btVector3(0, 0.8, 0.4));  // offset
 		compoundShape->addChildShape(position, collisionShape);
-		shape = shape + btVector3(0, 1, -0.25); // adjust shape with offset 
+		shape = shape + btVector3(0, 1, -0.13); // adjust shape with offset 
 
 		btRigidBody::btRigidBodyConstructionInfo chassisRigidBodyCI(chassisMass, motionState, compoundShape, chassisInertia);
 		rigidBody = new btRigidBody(chassisRigidBodyCI);
@@ -64,8 +64,8 @@ namespace Game {
 		tuning.m_suspensionDamping = 2.3f;
 		tuning.m_suspensionCompression = 4.4f;
 		tuning.m_maxSuspensionForce = 11600.0;
-		tuning.m_maxSuspensionTravelCm = 30.0;
-		tuning.m_frictionSlip = 100.5;
+		tuning.m_maxSuspensionTravelCm = 10.0;
+		tuning.m_frictionSlip = 100.5; // not used
 
 
 		vehicle = new btRaycastVehicle(tuning, rigidBody, raycaster);
@@ -78,9 +78,9 @@ namespace Game {
 
 		btScalar suspensionRestLength(0.7);
 
-		btScalar wheelWidth(0.4);
+		btScalar wheelWidth(0.32);
 
-		btScalar wheelRadius(0.5);
+		btScalar wheelRadius(0.32);
 
 		//The height where the wheels are connected to the chassis
 		btScalar connectionHeight(shape.y() - wheelRadius);
@@ -88,15 +88,19 @@ namespace Game {
 		//All the wheel configuration assumes the vehicle is centered at the origin and a right handed coordinate system is used
 		btVector3 wheelConnectionPoint(shape.x(), connectionHeight, shape.z() - wheelWidth); // these will be needed to be adjusted depending on the model
 
+		// front wheels offset
+		btVector3 frontWheelsOffset = btVector3(-0.06, -0.14, -0.06);
 		//Adds the front wheels
-		vehicle->addWheel(wheelConnectionPoint, wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
+		vehicle->addWheel(wheelConnectionPoint + frontWheelsOffset, wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
-		vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, 1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
+		vehicle->addWheel((wheelConnectionPoint + frontWheelsOffset) * btVector3(-1, 1, 1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
+		// Rear wheels offset
+		btVector3 rearWheelsOffset = btVector3(-0.06, -0.15, -0.83);
 		//Adds the rear wheels
-		vehicle->addWheel(wheelConnectionPoint * btVector3(1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
+		vehicle->addWheel((wheelConnectionPoint + rearWheelsOffset) * btVector3(1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
 
-		vehicle->addWheel(wheelConnectionPoint * btVector3(-1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
+		vehicle->addWheel((wheelConnectionPoint + rearWheelsOffset) * btVector3(-1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
 
 		for (int i = 0; i < vehicle->getNumWheels(); i++)
 		{
@@ -106,10 +110,12 @@ namespace Game {
 			wheel.m_wheelsDampingRelaxation = btScalar(0.5) * 2 * btSqrt(wheel.m_suspensionStiffness);
 			wheel.m_frictionSlip = btScalar(4);
 			wheel.m_rollInfluence = 1;
+			
 		}
 
 		dynamicsWorld->addVehicle(vehicle);
 
+		
 	}
 
 	Vehicle::~Vehicle()
@@ -129,7 +135,7 @@ namespace Game {
 		vehicle->applyEngineForce(0, 2);
 		vehicle->applyEngineForce(0, 3);
 
-		//Default braking force, always added otherwise there is no friction on the wheels, (This is axis friction)
+		// Default braking force, always added otherwise there is no friction on the wheels, (This is axis friction)
 		// I can change this depending on ground? One way to simulate friction. Same with frictionslip
 		// Real rolling friction is not possible using a raycastvehicle because a ray is infinitely thin and thus cannot cause friction. Other wise you would have to simulate a rolling cylinder
 		vehicle->setBrake(1, 2);
@@ -170,20 +176,33 @@ namespace Game {
 	void Vehicle::updateTransform()
 	{
 		GameObject::updateTransform();
-		//m_groundObject = vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; dont know what to do with this????
 
-		//btCollisionObject* groundObject =
-			//static_cast<btCollisionObject*>(vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject);
-
-		//class btRigidBody* groundObject =
-			//(class btRigidBody*)vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; Saw something similar to this but in Java. Gives a runtime error
-
-		//if (groundObject->getFriction() != 0) { test
-			//float test = *groundObject;
-			//cout << "friction: " << test << endl;
-		//}
 		for (int i = 0; i < 4; i++) {
-			//vehicle->getWheelInfo(1).m_raycastInfo.m_groundObject; Returns a void *...
+
+			if (vehicle->getWheelInfo(i).m_raycastInfo.m_isInContact) {
+
+				btTransform location = vehicle->getWheelInfo(i).m_worldTransform;
+				btVector3 start = location.getOrigin();
+				btVector3 wheelRadiusOffset = btVector3(0, vehicle->getWheelInfo(i).m_wheelsRadius, 0);
+				btVector3 end = start - wheelRadiusOffset;
+
+
+				btCollisionWorld::ClosestRayResultCallback RayCallback(start, end);
+
+				dynamicsWorld->rayTest(
+					start,
+					end,
+					RayCallback
+				);
+
+				if (RayCallback.hasHit()) {
+					float friction = (float)RayCallback.m_collisionObject->getFriction();
+					vehicle->getWheelInfo(i).m_frictionSlip = friction;
+					//cout << "friction " << friction << endl;
+				}
+
+			}
+
 			vehicle->updateWheelTransform(i, true);
 			wheels[i]->updateTransform(vehicle->getWheelInfo(i).m_worldTransform);
 		}
