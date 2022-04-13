@@ -23,7 +23,7 @@ namespace Server {
 			WSACleanup();
 			throw "Socket could not be initialized.";
 		}
-		cout << "Client socket created." << endl;
+		cout << "TCP socket created." << endl;
 
 		serverAddress.sin_family = AF_INET;
 		serverAddress.sin_port = htons(PORT);
