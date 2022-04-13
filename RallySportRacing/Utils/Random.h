@@ -18,6 +18,7 @@ namespace Utils {
 
 		static float Float()
 		{
+			#undef max
 			return (float)s_Distribution(s_RandomEngine) / (float)std::numeric_limits<uint32_t>::max();
 		}
 
