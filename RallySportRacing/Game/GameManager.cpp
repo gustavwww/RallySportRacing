@@ -26,11 +26,14 @@
 #include <imgui.h>
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
+//#include <Utils/Random.h>
 
 using namespace std;
 using namespace Utils;
 
 namespace Game {
+
+	//Random random;
 
 	GameObject* car1;
 	GameObject* environment;
@@ -107,7 +110,7 @@ namespace Game {
 
 
 		// Multiplayer setup
-		//Networking::setupNetwork(vehicle, windowHandler);
+		Networking::setupNetwork(vehicle, windowHandler);
 
 		// environment 1 test
 		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
@@ -179,6 +182,7 @@ namespace Game {
 
 		// Calculate deltaTime
 		if (firstTime) {
+
 			camOrientation = glm::vec3(0, 1, 0);
 			firstTime = false;
 			gameTimer->startGameTime();
@@ -196,17 +200,21 @@ namespace Game {
 			// driving 
 			if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->drive(1);
-				glm::vec3 smokeOffset = glm::vec3(1.8f, 0.23f, 0);
-				smokeParticlesObject.emitParticle(/*ToDo add car position here*/ smokeOffset, glm::vec3(1, 0, 0), 3);
+				glm::vec3 smokeOffset = glm::vec3(-0.1f, 0.23f, 0);
+				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1, 0, 0), 3);
 			}
 			else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->drive(-1);
+				glm::vec3 smokeOffset = glm::vec3(-0.1f, 0.23f, 0);
+				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1, 0, 0), 1);
 			}
 			if (keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->handBrake();
 			}
 			if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->notGasing();
+				glm::vec3 smokeOffset = glm::vec3(-0.1f, 0.23f, 0);
+				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1, 0, 0), 3);
 			}
 
 			// steering

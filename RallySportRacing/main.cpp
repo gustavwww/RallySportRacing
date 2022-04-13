@@ -6,7 +6,7 @@
 #include "Services/TCPClient.h"
 #include <thread>
 
-const int WIDTH = 1280, HEIGHT = 720;
+const int WIDTH = 1920, HEIGHT = 1080;
 
 using namespace Rendering;
 
