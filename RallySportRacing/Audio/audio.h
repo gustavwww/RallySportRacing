@@ -12,13 +12,16 @@ using namespace irrklang;
 class Audio {
 public:
 	Audio();
-	void engine();
+	void engine(float speed);
 	void horn(bool x);
 	void exhaust();
-	void volume(float volume);
+	void volumeUp();
+	void volumeDown();
+	void volumeSet(float v);
 
 private:
-	float volumeNr;
+	float volume;
+	float playBackSpeed;
 
 	ISoundEngine* SoundEngine;
 	irrklang::ISound* engineSound;

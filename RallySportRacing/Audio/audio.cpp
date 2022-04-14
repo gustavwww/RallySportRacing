@@ -9,7 +9,8 @@ using namespace irrklang;
 
 #pragma comment(lib, "../../External/irrKlang/irrKlang.lib")
 
-float volumeNr;
+float volume;
+float playBackSpeed;
 
 ISoundEngine* SoundEngine;
 irrklang::ISound* engineSound;
@@ -19,23 +20,20 @@ irrklang::ISoundSource* exhaustSound;
 
 	Audio::Audio() {
 		SoundEngine = createIrrKlangDevice();
-		 hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
+		hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
+		exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
+		volume = 1.0F;
+		playBackSpeed = 1.0F;
 
-		//SoundEngine->play2D("../RallySportRacing/Audio/breakout.mp3", true);
+		engineSound = SoundEngine->play2D("../RallySportRacing/Audio/ES_Formula one Race Car 2 - SFX Producer.mp3", true, false, false, ESM_AUTO_DETECT, true);
+		engineSound->setVolume(0.3F);
+
+		SoundEngine->play2D("../RallySportRacing/Audio/breakout.mp3", true);
 	}
 
-	void Audio::engine() {
-		engineSound = SoundEngine->play2D("../RallySportRacing/Audio/ES_Formula one Race Car 2 - SFX Producer.mp3", true, false, false, ESM_AUTO_DETECT, true);
-		
-		if (engineSound)
-		{
-			irrklang::ISoundEffectControl* fx = engineSound->getSoundEffectControl();
-			if (fx)
-			{
-				// enable the echo sound effect for this sound
-				fx->enableEchoSoundEffect();
-			}
-		}
+	void Audio::engine(float speed) {
+		playBackSpeed = 1.0 + speed/100;
+		engineSound->setPlaybackSpeed(playBackSpeed);
 	}
 
 	void Audio::horn(bool x) {
@@ -51,9 +49,25 @@ irrklang::ISoundSource* exhaustSound;
 	}
 
 	void Audio::exhaust() {
-
+		SoundEngine->play2D(exhaustSound);
 	}
 
-	void Audio::volume(float volume) {
+	void Audio::volumeUp() {
+		if (volume < 1.0F) {
+			volume = volume + 0.05F;
+		}
 		SoundEngine->setSoundVolume(volume);
 	}
+
+	void Audio::volumeDown() {
+		if (volume > 0.0F) {
+			volume = volume - 0.05F;
+		}
+		SoundEngine->setSoundVolume(volume);
+	}
+
+	void Audio::volumeSet(float v) {
+		volume = v;
+		SoundEngine->setSoundVolume(volume);
+	}
+

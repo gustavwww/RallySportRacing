@@ -70,6 +70,7 @@ namespace Game {
 	Physics* physics;
 
 	Audio* sound;
+	int volumeButtonDelay = 0;
 
 	//Colors to select from when creating a model
 	glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
@@ -244,6 +245,7 @@ namespace Game {
 				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(2 * random.Float() * vehicle->getOrientation().x, 2 * random.Float(), 2 * random.Float() * vehicle->getOrientation().z), 3);
 				if (vehicle->getSpeed() >= 100 && toggleFire == true) {
 					// spela upp ljud explosion
+					sound->exhaust();
 					for (int i = 0; i < 200; i++) {
 						glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
 						explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
@@ -271,6 +273,21 @@ namespace Game {
 			else {
 				sound->horn(false);
 			}
+			// engine sound
+			sound->engine(vehicle->getSpeed());
+			// volume change
+			if (volumeButtonDelay > 0) {
+				volumeButtonDelay--;
+			}
+			if (keyboard_state_array[SDL_SCANCODE_O] && volumeButtonDelay == 0) {
+				sound->volumeUp();
+				volumeButtonDelay = 20;
+			}
+			if (keyboard_state_array[SDL_SCANCODE_L] && volumeButtonDelay == 0) {
+				sound->volumeDown();
+				volumeButtonDelay = 20;
+			}
+			
 		}
 
 		// Different perspectives
