@@ -27,6 +27,8 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 
+#include "Audio/audio.h"
+
 using namespace std;
 using namespace Utils;
 
@@ -55,6 +57,8 @@ namespace Game {
 	GameTimer* gameTimer;	
 	Physics* physics;
 
+	Audio* sound;
+
 	//Colors to select from when creating a model
 	glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
 	glm::vec3 blue = glm::vec3(0.f, 0.f, 1.f);
@@ -72,6 +76,9 @@ namespace Game {
 		physics = new Physics();
 		gameTimer = GameTimer::Instance();
 		handler = windowHandler;
+
+		// Initialize audio
+		sound = new Audio();
 
 		//Load and add smokeParticles to particle render list.
 		smokeTexture = handler->loadTexture("../Textures/smokeTexture.png");
@@ -218,6 +225,14 @@ namespace Game {
 			}
 			else {
 				vehicle->steerNeutral();
+			}
+
+			// horn sound
+			if (keyboard_state_array[SDL_SCANCODE_H]) {
+				sound->horn(true);
+			}
+			else {
+				sound->horn(false);
 			}
 		}
 
