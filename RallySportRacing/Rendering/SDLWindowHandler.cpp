@@ -192,7 +192,7 @@ namespace Rendering {
 		return textureID;
 	}
 
-	void SDLWindowHandler::beginRenderingLoop(void (*preRender)()) {
+	void SDLWindowHandler::beginRenderingLoop(void (*preRender)(), void (*onQuit)()) {
 
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
@@ -216,7 +216,12 @@ namespace Rendering {
 			// This needs to be the first thing checked for imgui to work well
 			if (SDL_PollEvent(&windowEvent)) {
 				ImGui_ImplSDL2_ProcessEvent(&windowEvent);
-				if (windowEvent.type == SDL_QUIT) break;
+				if (windowEvent.type == SDL_QUIT) {
+					if (onQuit) {
+						(*onQuit)();
+					}
+					break;
+				}
 			}
 			//ImGui Setup
 			ImGui_ImplOpenGL3_NewFrame();

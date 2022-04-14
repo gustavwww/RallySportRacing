@@ -19,7 +19,7 @@ namespace Rendering {
 		SDLWindowHandler(int width, int height);
 		void initSDLWindow(string caption);
 		GLuint loadShader(const string& vertexShader, const string& fragmentShader);
-		void SDLWindowHandler::beginRenderingLoop(void (*preRender)() = nullptr);
+		void SDLWindowHandler::beginRenderingLoop(void (*preRender)() = nullptr, void (*onQuit)() = nullptr);
 		unsigned int loadTexture(const char* textureFilePath);
 
 		void addModel(Model* model);

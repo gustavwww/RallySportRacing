@@ -361,4 +361,9 @@ namespace Game {
 
 		debugDrawer->doDebugDraw();
 	}
+
+	void Game::applicationExit() {
+		Networking::terminateNetwork();
+	}
+
 }
