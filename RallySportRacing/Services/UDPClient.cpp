@@ -5,6 +5,8 @@ using namespace std;
 
 namespace Server {
 
+	atomic<bool> terminated{ false };
+
 	UDPClient::UDPClient() {
 
 		sock = INVALID_SOCKET;
@@ -38,6 +40,10 @@ namespace Server {
 
 		int result;
 		do {
+			if (terminated) {
+				break;
+			}
+
 			result = recvfrom(sock, receiveBuffer, receiveBufLen, 0, (SOCKADDR*)&serverAddress, &addressLen);
 			if (result == SOCKET_ERROR) {
 				cout << "Error receiving UDP packet " << WSAGetLastError() << endl;
@@ -56,9 +62,9 @@ namespace Server {
 			}
 			
 		} while (result != 0);
-
-		closesocket(sock);
-		WSACleanup();
+		
+		//closesocket(sock);
+		//WSACleanup();
 	}
 
 	void UDPClient::sendPacket(string msg) {
@@ -82,6 +88,7 @@ namespace Server {
 			closesocket(sock);
 			WSACleanup();
 		}
+		terminated = true;
 	}
 
 	void UDPClient::addCallback(void (*func)(string str)) {

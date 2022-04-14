@@ -5,6 +5,8 @@ using namespace std;
 
 namespace Server {
 
+	atomic<bool> tcpterminated{ false };
+
 	TCPClient::TCPClient() {
 
 		connectSocket = INVALID_SOCKET;
@@ -51,6 +53,10 @@ namespace Server {
 
 		int result;
 		do {
+			if (tcpterminated) {
+				break;
+			}
+
 			result = recv(connectSocket, receiveBuffer, receiveBufLen, 0);
 
 			string str(receiveBuffer);
@@ -71,9 +77,9 @@ namespace Server {
 		} else {
 			throw "Error receiving packet from server";
 		}
-
-		closesocket(connectSocket);
-		WSACleanup();
+		
+		//closesocket(connectSocket);
+		//WSACleanup();
 	}
 
 	void TCPClient::sendPacket(string msg) {
@@ -97,6 +103,7 @@ namespace Server {
 			closesocket(connectSocket);
 			WSACleanup();
 		}
+		tcpterminated = true;
 	}
 
 	void TCPClient::addCallback(void (*func)(string str)) {
