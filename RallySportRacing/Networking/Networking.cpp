@@ -103,7 +103,7 @@ namespace Networking {
 					handler->addModel(model);
 					Game::GameObject* obj = new Game::GameObject(model);
 					obj->setPosition(glm::vec3(posX, posY, posZ));
-					obj->setQuaternion(glm::quat(quX, quY, quZ, quW));
+					obj->setQuaternion(glm::quat(quW, quX, quY, quZ));
 
 					Player* p = new Player(name, obj);
 					players.insert(pair<int, Player*>(id, p));
@@ -112,7 +112,7 @@ namespace Networking {
 					// Player already created, updating position...
 					Player* p = el->second;
 					p->setPosition(glm::vec3(posX, posY, posZ));
-					p->setQuaternion(glm::quat(quX, quY, quZ, quW));
+					p->setQuaternion(glm::quat(quW, quX, quY, quZ));
 				}
 
 			}
