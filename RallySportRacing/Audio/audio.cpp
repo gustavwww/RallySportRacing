@@ -27,7 +27,7 @@ irrklang::ISoundSource* exhaustSound;
 		exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
 
 		// Init master volume
-		volume = 0.4F;
+		volume = 0.3F;
 
 		// Init engine sound and set volume
 		playBackSpeed = 1.0F;
