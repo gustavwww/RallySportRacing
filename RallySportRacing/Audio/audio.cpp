@@ -35,7 +35,7 @@ irrklang::ISoundSource* exhaustSound;
 		engineSound->setVolume(volume/2.0);
 
 		// Init background music and set volume
-		SoundEngine->play2D("../RallySportRacing/Audio/breakout.mp3", true);
+		//SoundEngine->play2D("../RallySportRacing/Audio/breakout.mp3", true);
 		SoundEngine->setSoundVolume(volume);
 	}
 
