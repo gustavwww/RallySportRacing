@@ -126,10 +126,10 @@ namespace Game {
 	{
 
 		if (direction == -1 && vehicle->getCurrentSpeedKmHour() > 1) {
-			vehicle->setBrake(100, 1);
-			vehicle->setBrake(100, 0);
-			vehicle->setBrake(100, 2);
-			vehicle->setBrake(100, 3);
+			vehicle->setBrake(150, 1);
+			vehicle->setBrake(150, 0);
+			vehicle->setBrake(150, 2);
+			vehicle->setBrake(150, 3);
 			vehicle->applyEngineForce(0, 1);
 			vehicle->applyEngineForce(0, 0);
 			vehicle->applyEngineForce(0, 2);
