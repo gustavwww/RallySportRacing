@@ -19,16 +19,24 @@ irrklang::ISoundSource* hornSound;
 irrklang::ISoundSource* exhaustSound;
 
 	Audio::Audio() {
+		// Init sound engine
 		SoundEngine = createIrrKlangDevice();
+
+		// Init various sounds
 		hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
 		exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
-		volume = 1.0F;
+
+		// Init master volume
+		volume = 0.4F;
+
+		// Init engine sound and set volume
 		playBackSpeed = 1.0F;
-
 		engineSound = SoundEngine->play2D("../RallySportRacing/Audio/ES_Formula one Race Car 2 - SFX Producer.mp3", true, false, false, ESM_AUTO_DETECT, true);
-		engineSound->setVolume(0.3F);
+		engineSound->setVolume(volume/2.0);
 
+		// Init background music and set volume
 		SoundEngine->play2D("../RallySportRacing/Audio/breakout.mp3", true);
+		SoundEngine->setSoundVolume(volume);
 	}
 
 	void Audio::engine(float speed) {
