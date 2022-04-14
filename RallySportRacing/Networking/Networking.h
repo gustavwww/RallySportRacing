@@ -9,12 +9,13 @@
 using namespace std;
 
 namespace Networking {
-
+	
 	void setupNetwork(Game::GameObject* playerObj, Rendering::SDLWindowHandler* windowHandler);
 	void joinGame(string id, string name);
 	void tcpPacketReceived(string str);
 	void udpPacketReceived(string str);
 	void sendStatusPacket();
+	void terminateNetwork();
 }
 
 #endif

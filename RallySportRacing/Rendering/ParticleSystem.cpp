@@ -69,7 +69,7 @@ namespace Rendering {
 		//Add data vector containing position in view space and lifetime for each active particle in the system.
 		for (int i = 0; i < nrActiveParticles; i++) {
 			glm::vec3 posViewSpace = glm::vec3(viewMatrix * glm::vec4(particles.at(i).pos, 1));
-			data.push_back(glm::vec4(posViewSpace, particles.at(i).lifetime));
+			data.push_back(glm::vec4(posViewSpace, particles.at(i).lifetime/particles.at(i).lifeLength));
 		}
 
 		return data;

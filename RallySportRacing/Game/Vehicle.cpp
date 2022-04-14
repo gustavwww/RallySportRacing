@@ -62,7 +62,7 @@ namespace Game {
 		tuning.m_suspensionDamping = 2.3f;
 		tuning.m_suspensionCompression = 4.4f;
 		tuning.m_maxSuspensionForce = 11600.0;
-		tuning.m_maxSuspensionTravelCm = 10.0;
+		tuning.m_maxSuspensionTravelCm = 25.0;
 		tuning.m_frictionSlip = 100.5; // not used
 
 
@@ -87,14 +87,14 @@ namespace Game {
 		btVector3 wheelConnectionPoint(shape.x(), connectionHeight, shape.z() - wheelWidth); // these will be needed to be adjusted depending on the model
 
 		// front wheels offset
-		btVector3 frontWheelsOffset = btVector3(-0.06, -0.14, -0.06);
+		btVector3 frontWheelsOffset = btVector3(-0.06, -0.20, -0.06);
 		//Adds the front wheels
 		vehicle->addWheel(wheelConnectionPoint + frontWheelsOffset, wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
 		vehicle->addWheel((wheelConnectionPoint + frontWheelsOffset) * btVector3(-1, 1, 1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
 		// Rear wheels offset
-		btVector3 rearWheelsOffset = btVector3(-0.06, -0.15, -0.83);
+		btVector3 rearWheelsOffset = btVector3(-0.06, -0.27, -0.83);
 		//Adds the rear wheels
 		vehicle->addWheel((wheelConnectionPoint + rearWheelsOffset) * btVector3(1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
 
@@ -103,7 +103,7 @@ namespace Game {
 		for (int i = 0; i < vehicle->getNumWheels(); i++)
 		{
 			btWheelInfo& wheel = vehicle->getWheelInfo(i);
-			wheel.m_suspensionStiffness = 50;
+			wheel.m_suspensionStiffness = 20;
 			wheel.m_wheelsDampingCompression = btScalar(0.3) * 2 * btSqrt(wheel.m_suspensionStiffness);
 			wheel.m_wheelsDampingRelaxation = btScalar(0.5) * 2 * btSqrt(wheel.m_suspensionStiffness);
 			wheel.m_frictionSlip = btScalar(4);
@@ -124,17 +124,30 @@ namespace Game {
 
 	void Vehicle::drive(int direction)
 	{
-		//cout << "km/h: " << vehicle->getCurrentSpeedKmHour() <<endl;
-		if (vehicle->getCurrentSpeedKmHour() <= 150) { // max speed
+
+		if (direction == -1 && vehicle->getCurrentSpeedKmHour() > 1) {
+			vehicle->setBrake(100, 1);
+			vehicle->setBrake(100, 0);
+			vehicle->setBrake(100, 2);
+			vehicle->setBrake(100, 3);
+			vehicle->applyEngineForce(0, 1);
+			vehicle->applyEngineForce(0, 0);
+			vehicle->applyEngineForce(0, 2);
+			vehicle->applyEngineForce(0, 3);
+		}
+		else if (vehicle->getCurrentSpeedKmHour() <= 200) { // max speed
 			vehicle->applyEngineForce(direction * engineForce, 1);
 			vehicle->applyEngineForce(direction * engineForce, 0);
+			vehicle->setBrake(0, 2);
+			vehicle->setBrake(0, 3);
 		}
 		else {
 			vehicle->applyEngineForce(0, 1);
 			vehicle->applyEngineForce(0, 0);
+			vehicle->setBrake(0, 2);
+			vehicle->setBrake(0, 3);
 		}
-		vehicle->setBrake(0, 2);
-		vehicle->setBrake(0, 3);
+
 	}
 
 	void Vehicle::notGasing()
@@ -180,6 +193,11 @@ namespace Game {
 		vehicle->setBrake(500000, 3);
 	}
 
+	float Game::Vehicle::getSpeed()
+	{
+		return vehicle->getCurrentSpeedKmHour();
+	}
+
 	void Vehicle::updateTransform()
 	{
 		GameObject::updateTransform();
@@ -213,6 +231,7 @@ namespace Game {
 			vehicle->updateWheelTransform(i, true);
 			wheels[i]->updateTransform(vehicle->getWheelInfo(i).m_worldTransform);
 		}
+
 	}
 
 

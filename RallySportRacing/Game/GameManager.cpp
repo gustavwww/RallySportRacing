@@ -26,6 +26,7 @@
 #include <imgui.h>
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
+#include <Utils/Random.h>
 
 #include "Audio/audio.h"
 
@@ -34,10 +35,13 @@ using namespace Utils;
 
 namespace Game {
 
+	Random random;
+
 	GameObject* car1;
 	GameObject* environment;
 	GameObject* environment2;
 	GameObject* wall;
+	GameObject* wall2;
 	GameObject* test1;
 	vector<GameObject*> gameObjects;
 
@@ -45,10 +49,18 @@ namespace Game {
 
 	//Textures
 	unsigned int smokeTexture;
+	unsigned int explosionTexture;
+	unsigned int blueexplosionTexture;
 
 	//ParticleSystems
 	Rendering::ParticleSystem smokeParticlesObject;
 	Rendering::ParticleSystem* smokeParticlesPointer;
+
+	Rendering::ParticleSystem explosionParticlesObject;
+	Rendering::ParticleSystem* explosionParticlesPointer;
+
+	Rendering::ParticleSystem blueexplosionParticlesObject;
+	Rendering::ParticleSystem* blueexplosionParticlesPointer;
 
 	//Debug GameObject
 	GameObject* debugEnvironment;
@@ -86,8 +98,20 @@ namespace Game {
 		smokeParticlesPointer = &smokeParticlesObject;
 		handler->addParticleSystem(smokeParticlesPointer);
 
+		//Load and add testExplosionBlue to particle render list.
+		blueexplosionTexture = handler->loadTexture("../Textures/blueExplosion.png");
+		blueexplosionParticlesObject = Rendering::ParticleSystem(1000000, blueexplosionTexture);
+		blueexplosionParticlesPointer = &blueexplosionParticlesObject;
+		handler->addParticleSystem(blueexplosionParticlesPointer);
+
+		//Load and add testExplosion to particle render list.
+		explosionTexture = handler->loadTexture("../Textures/explosion.png");
+		explosionParticlesObject = Rendering::ParticleSystem(1000000, explosionTexture);
+		explosionParticlesPointer = &explosionParticlesObject;
+		handler->addParticleSystem(explosionParticlesPointer);
+
 		// test environment finished track
-		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf", true);
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape2.gltf", true);
 		windowHandler->addModel(test);
 		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
@@ -101,10 +125,8 @@ namespace Game {
 		wall->setInitialPosition(btVector3(-70, 4, 0));
 		wall->setInitialRotation(btQuaternion(0,0,1,1));
 
-
 		// player vehicle, use setInitialpos to change position when starting the game
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
-
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
@@ -114,7 +136,7 @@ namespace Game {
 
 
 		// Multiplayer setup
-		//Networking::setupNetwork(vehicle, windowHandler);
+		Networking::setupNetwork(vehicle, windowHandler);
 
 		// environment 1 test
 		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
@@ -172,6 +194,8 @@ namespace Game {
 	// vertical angle : 0, look at the horizon
 	float verticalAngle = 0.f;
 
+	bool toggleFire = false;
+
 	void update() {
 
 		// debug drawing, takes a lot of performance
@@ -186,6 +210,7 @@ namespace Game {
 
 		// Calculate deltaTime
 		if (firstTime) {
+
 			camOrientation = glm::vec3(0, 1, 0);
 			firstTime = false;
 			gameTimer->startGameTime();
@@ -203,8 +228,9 @@ namespace Game {
 			// driving 
 			if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->drive(1);
-				glm::vec3 smokeOffset = glm::vec3(1.8f, 0.23f, 0);
-				smokeParticlesObject.emitParticle(/*ToDo add car position here*/ smokeOffset, glm::vec3(1, 0, 0), 3);
+				glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
+				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3);
+				toggleFire = true;
 			}
 			else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->drive(-1);
@@ -214,6 +240,17 @@ namespace Game {
 			}
 			if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 				vehicle->notGasing();
+				glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
+				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(2 * random.Float() * vehicle->getOrientation().x, 2 * random.Float(), 2 * random.Float() * vehicle->getOrientation().z), 3);
+				if (vehicle->getSpeed() >= 100 && toggleFire == true) {
+					// spela upp ljud explosion
+					for (int i = 0; i < 200; i++) {
+						glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
+						explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
+						blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
+					}
+					toggleFire = false;
+				}
 			}
 
 			// steering
@@ -370,4 +407,9 @@ namespace Game {
 
 		debugDrawer->doDebugDraw();
 	}
+
+	void Game::applicationExit() {
+		Networking::terminateNetwork();
+	}
+
 }

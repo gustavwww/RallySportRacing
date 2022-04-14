@@ -26,6 +26,7 @@ namespace Server {
 		UDPClient();
 		void listen();
 		void sendPacket(string msg);
+		void terminate();
 
 		void addCallback(void (*func)(string str));
 
