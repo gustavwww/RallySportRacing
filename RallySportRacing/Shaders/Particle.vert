@@ -19,5 +19,5 @@ void main()
 	gl_Position = projMat * particle_viewspace;
 
 	//Scale size based on lifetime.
-	gl_PointSize = scaleFactor * mix(0.0, 0.1, pow(life, 1.0 / 4.0));
+	gl_PointSize = scaleFactor * mix(0.0, 0.2, pow(life, 1.0 / 4.0));
 }

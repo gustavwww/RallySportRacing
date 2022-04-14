@@ -15,6 +15,7 @@ namespace Game{
 		void steerNeutral();
 		void Vehicle::notGasing();
 		void Vehicle::handBrake();
+		float Vehicle::getSpeed();
 
 		void* m_groundObject; // the object the vehicle is in contact with
 	

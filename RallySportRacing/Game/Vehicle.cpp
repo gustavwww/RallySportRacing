@@ -193,6 +193,11 @@ namespace Game {
 		vehicle->setBrake(500000, 3);
 	}
 
+	float Game::Vehicle::getSpeed()
+	{
+		return vehicle->getCurrentSpeedKmHour();
+	}
+
 	void Vehicle::updateTransform()
 	{
 		GameObject::updateTransform();
@@ -226,6 +231,7 @@ namespace Game {
 			vehicle->updateWheelTransform(i, true);
 			wheels[i]->updateTransform(vehicle->getWheelInfo(i).m_worldTransform);
 		}
+
 	}
 
 

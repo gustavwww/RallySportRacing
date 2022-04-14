@@ -62,7 +62,7 @@ namespace Game{
 
 	void Game::GameObject::setQuaternion(glm::quat quaternion)
 	{
-		(*model).setRotationMatrix(glm::rotate(glm::toMat4(quaternion), PI, glm::vec3(0, 0, 1)));
+		(*model).setRotationMatrix(glm::toMat4(quaternion));
 	}
 
 	glm::quat Game::GameObject::getQuaternion()
