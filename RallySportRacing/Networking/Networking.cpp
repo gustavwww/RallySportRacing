@@ -27,9 +27,9 @@ namespace Networking {
 	Game::GameObject* obj;
 	Rendering::SDLWindowHandler* handler;
 
-	int clientID;
-
 	bool inGame = false;
+
+	int clientID;
 
 	map<int, Player*> players;
 
@@ -134,6 +134,13 @@ namespace Networking {
 				+ to_string(qu.w));
 			this_thread::sleep_for(2ms);
 		}
+	}
+
+	void terminateNetwork() {
+		cout << "Terminating network..." << endl;
+		inGame = false;
+		tcpClient.terminate();
+		udpClient.terminate();
 	}
 
 

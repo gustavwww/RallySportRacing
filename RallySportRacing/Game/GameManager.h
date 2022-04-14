@@ -15,6 +15,7 @@ namespace Game {
 	glm::vec3 bulletToGlm(const btVector3& v);
 	glm::quat bulletToGlm(const btQuaternion& q);
 	void drawDebug();
+	void applicationExit();
 	Rendering::SDLWindowHandler* getHandler();
 }
 

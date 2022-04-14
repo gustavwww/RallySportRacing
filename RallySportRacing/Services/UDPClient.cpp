@@ -54,8 +54,8 @@ namespace Server {
 					(*func)(str);
 				}
 			}
-
-		} while (true);
+			
+		} while (result != 0);
 
 		closesocket(sock);
 		WSACleanup();
@@ -74,6 +74,13 @@ namespace Server {
 			closesocket(sock);
 			WSACleanup();
 			cout << "Error sending UDP message, " << WSAGetLastError() << endl;
+		}
+	}
+
+	void UDPClient::terminate() {
+		if (sock != INVALID_SOCKET) {
+			closesocket(sock);
+			WSACleanup();
 		}
 	}
 

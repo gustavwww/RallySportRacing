@@ -92,6 +92,13 @@ namespace Server {
 		}
 	}
 
+	void TCPClient::terminate() {
+		if (connectSocket != INVALID_SOCKET) {
+			closesocket(connectSocket);
+			WSACleanup();
+		}
+	}
+
 	void TCPClient::addCallback(void (*func)(string str)) {
 		funcs.push_back(func);
 	}
