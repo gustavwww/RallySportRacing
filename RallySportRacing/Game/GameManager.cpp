@@ -196,6 +196,7 @@ namespace Game {
 	float verticalAngle = 0.f;
 
 	bool toggleFire = false;
+	bool isOn = false;
 
 	void update() {
 
@@ -226,55 +227,72 @@ namespace Game {
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
 
-			// driving 
-			if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
-				vehicle->drive(1);
-				glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
-				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3);
-				toggleFire = true;
+			if (keyboard_state_array[SDL_SCANCODE_E] && isOn == false) {
+				isOn = true;
+				sound->engineStart(true);
 			}
-			else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
-				vehicle->drive(-1);
+			else if (keyboard_state_array[SDL_SCANCODE_R] && isOn == true && vehicle->getSpeed() < abs(3)) {
+				isOn = false;
+				sound->engineOff();
 			}
-			if (keyboard_state_array[SDL_SCANCODE_SPACE]) {
+
+			if (isOn == true) {
+				// engine sound
+				sound->engine(vehicle->getSpeed());
+
+				// driving 
+				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
+					vehicle->drive(1);
+					glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
+					smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3);
+					toggleFire = true;
+				}
+				else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
+					vehicle->drive(-1);
+				}
+				if (keyboard_state_array[SDL_SCANCODE_SPACE]) {
+					vehicle->handBrake();
+				}
+				if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
+					vehicle->notGasing();
+					glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
+					smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3); // only z axis. Simulate wind effect on the smoke
+					if (vehicle->getSpeed() >= 100 && toggleFire == true) {
+						// spela upp ljud explosion
+						sound->exhaust();
+						for (int i = 0; i < 200; i++) {
+							glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
+							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
+							blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.01 * random.Float() * vehicle->getOrientation().x, 0.01 * random.Float(), 0.01 * random.Float() * vehicle->getOrientation().z), 0.05f);
+						}
+						toggleFire = false;
+					}
+				}
+				// steering
+				if (keyboard_state_array[SDL_SCANCODE_D]) {
+					vehicle->steerLeft(gameTimer->getDeltaTime());
+				}
+				else if (keyboard_state_array[SDL_SCANCODE_A]) {
+					vehicle->steerRight(gameTimer->getDeltaTime());
+				}
+				else {
+					vehicle->steerNeutral();
+				}
+
+				// horn sound
+				if (keyboard_state_array[SDL_SCANCODE_H]) {
+					sound->horn(true);
+				}
+				else {
+					sound->horn(false);
+				}
+
+			}
+			else  {
+				vehicle->steerNeutral();
 				vehicle->handBrake();
 			}
-			if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
-				vehicle->notGasing();
-				glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
-				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(2 * random.Float() * vehicle->getOrientation().x, 2 * random.Float(), 2 * random.Float() * vehicle->getOrientation().z), 3);
-				if (vehicle->getSpeed() >= 100 && toggleFire == true) {
-					// spela upp ljud explosion
-					sound->exhaust();
-					for (int i = 0; i < 200; i++) {
-						glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
-						explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
-						blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
-					}
-					toggleFire = false;
-				}
-			}
 
-			// steering
-			if (keyboard_state_array[SDL_SCANCODE_D]) {
-				vehicle->steerLeft(gameTimer->getDeltaTime());
-			}
-			else if (keyboard_state_array[SDL_SCANCODE_A]) {
-				vehicle->steerRight(gameTimer->getDeltaTime());
-			}
-			else {
-				vehicle->steerNeutral();
-			}
-
-			// horn sound
-			if (keyboard_state_array[SDL_SCANCODE_H]) {
-				sound->horn(true);
-			}
-			else {
-				sound->horn(false);
-			}
-			// engine sound
-			sound->engine(vehicle->getSpeed());
 			// volume change
 			if (volumeButtonDelay > 0) {
 				volumeButtonDelay--;
@@ -291,11 +309,11 @@ namespace Game {
 		}
 
 		// Different perspectives
-		if (keyboard_state_array[SDL_SCANCODE_1]) {
+		if (keyboard_state_array[SDL_SCANCODE_1] || (buttons & SDL_BUTTON_LMASK) == SDL_BUTTON_LMASK) {
 			perspective = 1;
 			camOrientation = glm::vec3(0, 1, 0);
 		}
-		if (keyboard_state_array[SDL_SCANCODE_2]) {
+		if (keyboard_state_array[SDL_SCANCODE_C] || (buttons & SDL_BUTTON_RMASK) == SDL_BUTTON_RMASK) {
 			perspective = 2;
 			camOrientation = glm::vec3(0, 1, 0);
 		}

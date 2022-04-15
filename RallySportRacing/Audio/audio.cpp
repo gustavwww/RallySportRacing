@@ -17,6 +17,8 @@ irrklang::ISound* engineSound;
 
 irrklang::ISoundSource* hornSound;
 irrklang::ISoundSource* exhaustSound;
+irrklang::ISoundSource* engineStartSound;
+irrklang::ISoundSource* engineOffSound;
 
 	Audio::Audio() {
 		// Init sound engine
@@ -25,13 +27,15 @@ irrklang::ISoundSource* exhaustSound;
 		// Init various sounds
 		hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
 		exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
+		engineStartSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineStart2.mp3");
+		engineOffSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineOff.mp3");
 
 		// Init master volume
 		volume = 0.3F;
 
 		// Init engine sound and set volume
 		playBackSpeed = 1.0F;
-		engineSound = SoundEngine->play2D("../RallySportRacing/Audio/ES_Formula one Race Car 2 - SFX Producer.mp3", true, false, false, ESM_AUTO_DETECT, true);
+		engineSound = SoundEngine->play2D("../RallySportRacing/Audio/ES_Formula one Race Car 2 - SFX Producer.mp3", true, true, false, ESM_AUTO_DETECT, true);
 		engineSound->setVolume(volume/2.0);
 
 		// Init background music and set volume
@@ -42,6 +46,12 @@ irrklang::ISoundSource* exhaustSound;
 	void Audio::engine(float speed) {
 		playBackSpeed = 1.0 + speed/100;
 		engineSound->setPlaybackSpeed(playBackSpeed);
+		engineSound->setIsPaused(false);
+	}
+
+	void Audio::engineOff() {
+		engineSound->setIsPaused(true);
+		SoundEngine->play2D(engineOffSound);
 	}
 
 	void Audio::horn(bool x) {
@@ -58,6 +68,17 @@ irrklang::ISoundSource* exhaustSound;
 
 	void Audio::exhaust() {
 		SoundEngine->play2D(exhaustSound);
+	}
+
+	void Audio::engineStart(bool x) {
+		if (x) {
+			if (!SoundEngine->isCurrentlyPlaying(engineStartSound)) {
+				SoundEngine->play2D(engineStartSound);
+			}
+		}
+		else {
+			SoundEngine->stopAllSoundsOfSoundSource(engineStartSound);
+		}
 	}
 
 	void Audio::volumeUp() {
