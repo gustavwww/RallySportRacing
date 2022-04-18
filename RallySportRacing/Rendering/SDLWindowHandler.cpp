@@ -20,6 +20,7 @@ namespace Rendering {
 	//Global variables
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
+	int volume = 50;
 
 	GLint Rendering::SDLWindowHandler::getDebugID()
 	{
@@ -238,6 +239,17 @@ namespace Rendering {
 				showDebugGUI = !showDebugGUI;
 			}
 			
+			//Volume control menu
+			if (ImGui::ArrowButton("volDownButton", 0)) { if (volume >= 5) { volume = volume - 5; cout << "Left button!\n"; } }
+			ImGui::SameLine(50);
+			ImGui::Text("VOLUME: ");
+			ImGui::SameLine(150);
+			std::string volString = std::to_string(volume) + "%%";
+			char const* volChar = volString.c_str();
+			ImGui::Text(volChar);
+			ImGui::SameLine(200);
+			if (ImGui::ArrowButton("volUpButton", 1)) { if (volume <= 95) { volume = volume + 5; cout << "Right button!\n"; } }
+
 			view = glm::lookAt(camPosition, camDirection, camOrientation);
 			glm::vec4 viewSpaceLightPos = view * lightPos;
 			if (preRender) {
