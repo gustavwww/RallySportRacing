@@ -12,6 +12,7 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 #include "Game/GameManager.h"
+#include "Game/Vehicle.h"
 
 using namespace std;
 
@@ -21,6 +22,13 @@ namespace Rendering {
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 	int volume = 50;
+	float speed = 0.0f;
+
+	bool startMenu = true;
+	int menuButtonWidth = 300;
+	int menuButtonHeight = 150;
+
+	Game::Vehicle* vehicle;
 
 	GLint Rendering::SDLWindowHandler::getDebugID()
 	{
@@ -199,6 +207,7 @@ namespace Rendering {
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
+		int backgroundTexture = loadTexture("../IMGS/MVP.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 5000.0f);
@@ -208,12 +217,18 @@ namespace Rendering {
 		
 		//GUI bool
 		bool showDebugGUI = false;
+		bool mainMenu = false;
+		bool settingsMenu = false;
+
+		int counterTest = 0;
+
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 		
 		SDL_Event windowEvent; 
 		while (true) {
+
 			// This needs to be the first thing checked for imgui to work well
 			if (SDL_PollEvent(&windowEvent)) {
 				ImGui_ImplSDL2_ProcessEvent(&windowEvent);
@@ -228,27 +243,84 @@ namespace Rendering {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame(window);
 			ImGui::NewFrame();
-			
-			//Set slider to change in scene.
-			ImGui::DragFloat3("light pos", &lightPos.x);
-			ImGui::DragFloat3("light color", &lightColor.x);
 
-			//Toggle DebugGUI with 'G'.
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_g) {
-
 				showDebugGUI = !showDebugGUI;
 			}
+
+			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_m) {
+				mainMenu = !mainMenu;
+			}
+
+			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_6) {
+				//speed = vehicle->getSpeed();		How is this done properly?
+			}
+
+
+			if (mainMenu) {
+			ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+			ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+			ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+			//ImGui::BeginChildFrame('h', ImVec2(width, height));
+			ImGui::Image((void*)(intptr_t)backgroundTexture, ImVec2(width, height));
+			//ImGui::EndChildFrame();
+
+			ImGui::End();
+
+			ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+			ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+			ImGui::Begin("Inner Main Menu", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+			ImGui::Indent(width / 2 - menuButtonWidth / 2);
+			//ImGui::SameLine();
+			ImGui::Dummy(ImVec2(0, 300));
+			if (ImGui::Button("Start race", ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; }
+
+			ImGui::Dummy(ImVec2(0, 150));
+			if (ImGui::Button("Settings", ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = true; }
 			
-			//Volume control menu
-			if (ImGui::ArrowButton("volDownButton", 0)) { if (volume >= 5) { volume = volume - 5; cout << "Left button!\n"; } }
-			ImGui::SameLine(50);
-			ImGui::Text("VOLUME: ");
-			ImGui::SameLine(150);
-			std::string volString = std::to_string(volume) + "%%";
-			char const* volChar = volString.c_str();
-			ImGui::Text(volChar);
-			ImGui::SameLine(200);
-			if (ImGui::ArrowButton("volUpButton", 1)) { if (volume <= 95) { volume = volume + 5; cout << "Right button!\n"; } }
+			ImGui::End();
+			}
+			else if(settingsMenu) {
+
+			}
+			else {
+				ImGui::SetNextWindowSize(ImVec2(200, 200), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::Begin("Speedometer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+				
+				std::string speedString = std::to_string(speed);
+				char const* speedChar = speedString.c_str();
+				ImGui::Text(speedChar);
+				ImGui::End();
+			}
+
+
+			if (showDebugGUI) {
+				ImGui::SetNextWindowSize(ImVec2(300, 300), 0);
+				ImGui::SetNextWindowPos(ImVec2(300, 300), 0);
+				ImGui::Begin("Options", 0, 0);
+
+				//Set slider to change in scene.
+				ImGui::DragFloat3("light pos", &lightPos.x);
+				ImGui::DragFloat3("light color", &lightColor.x);
+
+				//Toggle DebugGUI with 'G'.
+
+				//Volume control menu
+				if (ImGui::ArrowButton("volDownButton", 0)) { if (volume >= 5) { volume = volume - 5; cout << "Left button!\n"; } }
+				ImGui::SameLine(50);
+				ImGui::Text("VOLUME: ");
+				ImGui::SameLine(150);
+				std::string volString = std::to_string(volume) + "%%";
+				char const* volChar = volString.c_str();
+				ImGui::Text(volChar);
+				ImGui::SameLine(200);
+				if (ImGui::ArrowButton("volUpButton", 1)) { if (volume <= 95) { volume = volume + 5; cout << "Right button!\n"; } }
+
+				ImGui::End();
+			}
 
 			view = glm::lookAt(camPosition, camDirection, camOrientation);
 			glm::vec4 viewSpaceLightPos = view * lightPos;
@@ -278,10 +350,9 @@ namespace Rendering {
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
 			ImGui::Render();
-			if (showDebugGUI) {
-				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			}
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			SDL_GL_SwapWindow(window);
+			
 		}
 
 	}
