@@ -6,6 +6,7 @@ precision highp float;
 ////////////////////////////////
 // Materials
 ////////////////////////////////
+uniform sampler2D test;
 uniform vec3 albedo;
 uniform float metallic;
 uniform float roughness;

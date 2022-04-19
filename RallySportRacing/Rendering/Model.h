@@ -15,6 +15,12 @@ using namespace std;
 namespace Rendering {
 
 	struct Material {
+
+		//ToDo remove old values.
+		unsigned int baseColorTexture;
+		unsigned int ambientOcclusionTexture;
+		unsigned int roughnessTexture;
+		unsigned int metallicTexture;
 		glm::vec3 albedo;
 		float metallic;
 		float roughness;
@@ -38,6 +44,7 @@ namespace Rendering {
 		btVector3 Model::generateCollisionShapeOffset();
 
 		static Model* loadModel(const char* file, bool isTerrain);
+		static unsigned int loadModelTexture(const char* filePath, GLint channels);
 
 		btTriangleMesh* getMeshInterface();
 

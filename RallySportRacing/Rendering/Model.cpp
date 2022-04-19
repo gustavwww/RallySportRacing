@@ -66,6 +66,39 @@ namespace Rendering {
 			m.renderMesh(programID);
 		}
 	}
+	
+	//ToDo finish method.
+	unsigned int Model::loadModelTexture(const char* filePath, GLint channels) {
+		
+		ifstream textureStream(filePath, ios::in);
+		if (!textureStream.is_open()) {
+			printf("Could not open %s. Maybe in the wrong directory?\n", filePath);
+			return 0;
+		}
+
+		int width, height, nrChannels;
+		unsigned char* image = stbi_load(filePath, &width, &height, &nrChannels, STBI_rgb_alpha);
+		unsigned int textureID;
+
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, channels, width, height, 0, channels, GL_UNSIGNED_BYTE, image);
+		free(image);
+
+		//Set wrapping type.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		//Mipmap and filtering.
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+
+		return textureID;
+	}
+	
+	
 	double maxX = 0;
 	double maxY = 0;
 	double maxZ = 0;
@@ -103,6 +136,21 @@ namespace Rendering {
 			material.metallic = gltfMaterial.pbrMetallicRoughness.metallicFactor;
 			material.roughness = gltfMaterial.pbrMetallicRoughness.roughnessFactor;
 			material.albedo = glm::vec3(gltfMaterial.pbrMetallicRoughness.baseColorFactor[0], gltfMaterial.pbrMetallicRoughness.baseColorFactor[1], gltfMaterial.pbrMetallicRoughness.baseColorFactor[2]);
+		
+			//Basecolor texture
+			int baseColorTextureIndex = gltfMaterial.pbrMetallicRoughness.baseColorTexture.index;
+			const char* baseColorTexturePath = gltfmodel.images[baseColorTextureIndex].uri.c_str();
+			material.baseColorTexture = loadModelTexture(baseColorTexturePath, GL_RGBA);
+
+			//ToDo finish loading textures.
+			//Metallic roughness texture
+			int metallicRoughnessTextureIndex = gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index;
+			const char* metallicRoughnessTexturePath = gltfmodel.images[metallicRoughnessTextureIndex].uri.c_str();
+			material.ambientOcclusionTexture = loadModelTexture(metallicRoughnessTexturePath, GL_RED);
+			material.roughnessTexture = loadModelTexture(metallicRoughnessTexturePath, GL_GREEN);
+			material.metallicTexture = loadModelTexture(metallicRoughnessTexturePath, GL_BLUE);
+			
+
 			materials.push_back(material);
 		}
 
@@ -118,10 +166,8 @@ namespace Rendering {
 				vector<Vertex> vertices;
 				vector<unsigned int> indices;
 
-
 				//Temp variable
 				Vertex vertex;
-
 				//Positions accessor.
 				const tinygltf::Accessor& accessorPositions = gltfmodel.accessors[primitive.attributes["POSITION"]];
 				const tinygltf::BufferView& bufferViewPositions = gltfmodel.bufferViews[accessorPositions.bufferView];
@@ -133,7 +179,6 @@ namespace Rendering {
 				const tinygltf::BufferView& bufferViewNormals = gltfmodel.bufferViews[accessorNormals.bufferView];
 				const tinygltf::Buffer& bufferNormals = gltfmodel.buffers[bufferViewNormals.buffer];
 				const float* normals = reinterpret_cast<const float*>(&bufferNormals.data[bufferViewNormals.byteOffset + accessorNormals.byteOffset]);
-
 
 
 				//Contructing vertices.
