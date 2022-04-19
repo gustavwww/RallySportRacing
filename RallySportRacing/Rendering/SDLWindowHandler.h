@@ -19,8 +19,12 @@ namespace Rendering {
 		SDLWindowHandler(int width, int height);
 		void initSDLWindow(string caption);
 		GLuint loadShader(const string& vertexShader, const string& fragmentShader);
-		void SDLWindowHandler::beginRenderingLoop(void (*preRender)() = nullptr, void (*onQuit)() = nullptr);
+		void beginRenderingLoop(void (*preRender)() = nullptr, void (*onQuit)() = nullptr);
+		
 		unsigned int loadTexture(const char* textureFilePath);
+		unsigned int loadCubeMap(std::string folderDir);
+		void renderBackground(GLint programID, unsigned int textureID, glm::mat4 view, glm::mat4 proj);
+		void setupBackground();
 
 		void addModel(Model* model);
 		void removeModel(Model* model);
