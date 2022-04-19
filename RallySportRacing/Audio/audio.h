@@ -13,11 +13,13 @@ class Audio {
 public:
 	Audio();
 	void engine(float speed);
+	void engineOff();
 	void horn(bool x);
 	void exhaust();
 	void volumeUp();
 	void volumeDown();
 	void volumeSet(float v);
+	void Audio::engineStart(bool x);
 
 private:
 	float volume;
@@ -26,6 +28,8 @@ private:
 	ISoundEngine* SoundEngine;
 	irrklang::ISound* engineSound;
 	irrklang::ISoundSource* hornSound;
+	irrklang::ISoundSource* engineStartSound;
+	irrklang::ISoundSource* engineOffSound;
 };
 
 #endif

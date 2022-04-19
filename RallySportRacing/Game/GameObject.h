@@ -35,6 +35,8 @@ namespace Game {
 		glm::vec3 bulletToGlm(const btVector3& v);
 		glm::quat bulletToGlm(const btQuaternion& q);
 
+		Rendering::Model* getModel();
+
 	protected:
 		Rendering::Model* model;
 		glm::vec3 position;

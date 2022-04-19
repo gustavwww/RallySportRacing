@@ -79,6 +79,11 @@ namespace Networking {
 
 		if (command == "game") {
 
+			// Store players already in game to eventuelly remove them.
+			vector<int> playersInGame;
+			for (auto el : players)
+				playersInGame.push_back(el.first);
+
 			for (int i = 1; i < cmd.getArgsSize(); i += 10) {
 				int id = stoi(cmd.getArgs()[i]);
 				if (id == clientID) {
@@ -113,8 +118,22 @@ namespace Networking {
 					Player* p = el->second;
 					p->setPosition(glm::vec3(posX, posY, posZ));
 					p->setQuaternion(glm::quat(quW, quX, quY, quZ));
+					playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
 				}
 
+			}
+
+			// Remove players no longer in game.
+			for (int id : playersInGame) {
+				auto el = players.find(id);
+				if (el != players.end()) {
+					Player* p = el->second;
+					handler->removeModel(p->getModel());
+					players.erase(el);
+					cout << "A player has left the game: " << p->getName() << endl;
+					// TODO: Fix player deletion, currently kills the game..
+					//delete p;
+				}
 			}
 
 		}
@@ -139,8 +158,9 @@ namespace Networking {
 	void terminateNetwork() {
 		cout << "Terminating network..." << endl;
 		inGame = false;
-		tcpClient.terminate();
-		udpClient.terminate();
+		sendThread.join();
+		//udpClient.terminate();
+		//tcpClient.terminate();
 	}
 
 

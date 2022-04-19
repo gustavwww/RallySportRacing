@@ -177,6 +177,9 @@ namespace Game{
 		return glm::quat(q.getW(), q.getX(), q.getY(), q.getZ());
 	}
 
+	Rendering::Model* GameObject::getModel() {
+		return model;
+	}
 
 
 

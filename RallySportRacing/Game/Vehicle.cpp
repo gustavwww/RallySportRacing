@@ -113,7 +113,6 @@ namespace Game {
 
 		dynamicsWorld->addVehicle(vehicle);
 
-		
 	}
 
 	Vehicle::~Vehicle()
