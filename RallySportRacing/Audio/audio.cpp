@@ -35,8 +35,8 @@ irrklang::ISoundSource* engineOffSound;
 
 		// Init engine sound and set volume
 		playBackSpeed = 1.0F;
-		engineSound = SoundEngine->play2D("../RallySportRacing/Audio/ES_Formula one Race Car 2 - SFX Producer.mp3", true, true, false, ESM_AUTO_DETECT, true);
-		engineSound->setVolume(volume/2.0);
+		engineSound = SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, false, ESM_AUTO_DETECT, true);
+		//engineSound->setVolume(volume);
 
 		// Init background music and set volume
 		//SoundEngine->play2D("../RallySportRacing/Audio/breakout.mp3", true);

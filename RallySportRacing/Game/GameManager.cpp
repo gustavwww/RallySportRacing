@@ -197,6 +197,8 @@ namespace Game {
 
 	bool toggleFire = false;
 	bool isOn = false;
+	bool canPress = true;
+	float time;
 
 	void update() {
 
@@ -227,13 +229,24 @@ namespace Game {
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
 
-			if (keyboard_state_array[SDL_SCANCODE_E] && isOn == false) {
-				isOn = true;
-				sound->engineStart(true);
+			if (canPress) {
+				if (keyboard_state_array[SDL_SCANCODE_E] && isOn == false) {
+					isOn = true;
+					sound->engineStart(true);
+					canPress = false;
+					time = 0;
+				}
+				else if (keyboard_state_array[SDL_SCANCODE_E] && isOn == true && vehicle->getSpeed() < abs(3)) {
+					isOn = false;
+					sound->engineOff();
+					canPress = false;
+					time = 0;
+				}
+
 			}
-			else if (keyboard_state_array[SDL_SCANCODE_R] && isOn == true && vehicle->getSpeed() < abs(3)) {
-				isOn = false;
-				sound->engineOff();
+			time += gameTimer->getDeltaTime();
+			if (time >= 1) {
+				canPress = true;
 			}
 
 			if (isOn == true) {
