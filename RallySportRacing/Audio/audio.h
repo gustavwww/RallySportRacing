@@ -12,24 +12,14 @@ using namespace irrklang;
 class Audio {
 public:
 	Audio();
-	void engine(float speed);
-	void engineOff();
-	void horn(bool x);
-	void exhaust();
+
 	void volumeUp();
 	void volumeDown();
 	void volumeSet(float v);
-	void Audio::engineStart(bool x);
 
-private:
-	float volume;
-	float playBackSpeed;
-
-	ISoundEngine* SoundEngine;
-	irrklang::ISound* engineSound;
-	irrklang::ISoundSource* hornSound;
-	irrklang::ISoundSource* engineStartSound;
-	irrklang::ISoundSource* engineOffSound;
+	void createSoundSource(string ID, tuple <float, float, float> position);
+	void updateSoundSource(string ID, tuple <float, float, float> position,float speed, bool honk);
+	void removeSoundSource(string ID);
 };
 
 #endif

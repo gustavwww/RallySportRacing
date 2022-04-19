@@ -110,6 +110,8 @@ namespace Networking {
 					obj->setPosition(glm::vec3(posX, posY, posZ));
 					obj->setQuaternion(glm::quat(quW, quX, quY, quZ));
 
+					// Create sound source
+
 					Player* p = new Player(name, obj);
 					players.insert(pair<int, Player*>(id, p));
 				}
@@ -119,6 +121,9 @@ namespace Networking {
 					p->setPosition(glm::vec3(posX, posY, posZ));
 					p->setQuaternion(glm::quat(quW, quX, quY, quZ));
 					playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
+
+					// Update sound source
+
 				}
 
 			}
@@ -133,6 +138,9 @@ namespace Networking {
 					cout << "A player has left the game: " << p->getName() << endl;
 					// TODO: Fix player deletion, currently kills the game..
 					//delete p;
+
+					// Delete sound source
+
 				}
 			}
 

@@ -71,6 +71,7 @@ namespace Game {
 
 	Audio* sound;
 	int volumeButtonDelay = 0;
+	bool honk = false;
 
 	//Colors to select from when creating a model
 	glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
@@ -132,6 +133,9 @@ namespace Game {
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
 		//vehicle->setInitialPosition(btVector3(-40, -100, 0));
+
+		// Create player sound source
+		sound->createSoundSource("self", make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z));
 
 		debugDrawer = new DebugDraw();
 
@@ -232,13 +236,13 @@ namespace Game {
 			if (canPress) {
 				if (keyboard_state_array[SDL_SCANCODE_E] && isOn == false) {
 					isOn = true;
-					sound->engineStart(true);
+					//sound->engineStart(true);
 					canPress = false;
 					time = 0;
 				}
 				else if (keyboard_state_array[SDL_SCANCODE_E] && isOn == true && vehicle->getSpeed() < abs(3)) {
 					isOn = false;
-					sound->engineOff();
+					//sound->engineOff();
 					canPress = false;
 					time = 0;
 				}
@@ -251,7 +255,7 @@ namespace Game {
 
 			if (isOn == true) {
 				// engine sound
-				sound->engine(vehicle->getSpeed());
+				//sound->engine(vehicle->getSpeed());
 
 				// driving 
 				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
@@ -272,7 +276,7 @@ namespace Game {
 					smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3); // only z axis. Simulate wind effect on the smoke
 					if (vehicle->getSpeed() >= 100 && toggleFire == true) {
 						// spela upp ljud explosion
-						sound->exhaust();
+						
 						for (int i = 0; i < 200; i++) {
 							glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
 							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
@@ -292,31 +296,10 @@ namespace Game {
 					vehicle->steerNeutral();
 				}
 
-				// horn sound
-				if (keyboard_state_array[SDL_SCANCODE_H]) {
-					sound->horn(true);
-				}
-				else {
-					sound->horn(false);
-				}
-
 			}
 			else  {
 				vehicle->steerNeutral();
 				vehicle->handBrake();
-			}
-
-			// volume change
-			if (volumeButtonDelay > 0) {
-				volumeButtonDelay--;
-			}
-			if (keyboard_state_array[SDL_SCANCODE_O] && volumeButtonDelay == 0) {
-				sound->volumeUp();
-				volumeButtonDelay = 20;
-			}
-			if (keyboard_state_array[SDL_SCANCODE_L] && volumeButtonDelay == 0) {
-				sound->volumeDown();
-				volumeButtonDelay = 20;
 			}
 			
 		}
@@ -414,6 +397,30 @@ namespace Game {
 
 		adjustCamPosition();
 		physics->dynamicsWorld->stepSimulation(gameTimer->getDeltaTime(), 1);
+
+		// horn sound
+		if (keyboard_state_array[SDL_SCANCODE_H]) {
+			honk = true;
+		}
+		else {
+			honk = false;
+		}
+
+		// volume change
+		if (volumeButtonDelay > 0) {
+			volumeButtonDelay--;
+		}
+		if (keyboard_state_array[SDL_SCANCODE_O] && volumeButtonDelay == 0) {
+			sound->volumeUp();
+			volumeButtonDelay = 20;
+		}
+		if (keyboard_state_array[SDL_SCANCODE_L] && volumeButtonDelay == 0) {
+			sound->volumeDown();
+			volumeButtonDelay = 20;
+		}
+
+		// Update "self" sound source
+		sound->updateSoundSource("self", make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z), vehicle->getSpeed(), honk);
 	}
 
 	void adjustCamPosition() {

@@ -4,99 +4,56 @@
 #include <windows.h>
 #include "../../External/irrKlang/include/irrKlang.h"
 
+#include <tuple>
+#include <map>
+#include <Audio/SoundSource.h>
+
 using namespace std;
 using namespace irrklang;
 
 #pragma comment(lib, "../../External/irrKlang/irrKlang.lib")
 
 float volume;
-float playBackSpeed;
 
 ISoundEngine* SoundEngine;
-irrklang::ISound* engineSound;
 
-irrklang::ISoundSource* hornSound;
-irrklang::ISoundSource* exhaustSound;
-irrklang::ISoundSource* engineStartSound;
-irrklang::ISoundSource* engineOffSound;
+map<string, SoundSource*> sources;
 
-	Audio::Audio() {
-		// Init sound engine
-		SoundEngine = createIrrKlangDevice();
+Audio::Audio() {
+	// Init sound engine
+	SoundEngine = createIrrKlangDevice();
 
-		// Init various sounds
-		hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
-		exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
-		engineStartSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineStart2.mp3");
-		engineOffSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineOff.mp3");
+	// Init master volume
+	volume = 0.3F;
+}
 
-		// Init master volume
-		volume = 0.3F;
-
-		// Init engine sound and set volume
-		playBackSpeed = 1.0F;
-		engineSound = SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, false, ESM_AUTO_DETECT, true);
-		//engineSound->setVolume(volume);
-
-		// Init background music and set volume
-		//SoundEngine->play2D("../RallySportRacing/Audio/breakout.mp3", true);
-		SoundEngine->setSoundVolume(volume);
+void Audio::volumeUp() {
+	if (volume < 1.0F) {
+		volume = volume + 0.05F;
 	}
+	SoundEngine->setSoundVolume(volume);
+}
 
-	void Audio::engine(float speed) {
-		playBackSpeed = 1.0 + speed/100;
-		engineSound->setPlaybackSpeed(playBackSpeed);
-		engineSound->setIsPaused(false);
+void Audio::volumeDown() {
+	if (volume > 0.0F) {
+		volume = volume - 0.05F;
 	}
+	SoundEngine->setSoundVolume(volume);
+}
 
-	void Audio::engineOff() {
-		engineSound->setIsPaused(true);
-		SoundEngine->play2D(engineOffSound);
-	}
+void Audio::volumeSet(float v) {
+	volume = v;
+	SoundEngine->setSoundVolume(volume);
+}
 
-	void Audio::horn(bool x) {
+void Audio::createSoundSource(string ID, tuple <float, float, float> position) {
+	sources.insert(pair<string, SoundSource*>(ID, new SoundSource(position, SoundEngine)));
+}
 
-		if (x) {
-			if (!SoundEngine->isCurrentlyPlaying(hornSound)) {
-				SoundEngine->play2D(hornSound);
-			}
-		}
-		else {
-			SoundEngine->stopAllSoundsOfSoundSource(hornSound);
-		}
-	}
+void Audio::updateSoundSource(string ID, tuple<float, float, float> position, float speed, bool honk) {
+	sources.at(ID)->update(position, speed, honk);
+}
 
-	void Audio::exhaust() {
-		SoundEngine->play2D(exhaustSound);
-	}
-
-	void Audio::engineStart(bool x) {
-		if (x) {
-			if (!SoundEngine->isCurrentlyPlaying(engineStartSound)) {
-				SoundEngine->play2D(engineStartSound);
-			}
-		}
-		else {
-			SoundEngine->stopAllSoundsOfSoundSource(engineStartSound);
-		}
-	}
-
-	void Audio::volumeUp() {
-		if (volume < 1.0F) {
-			volume = volume + 0.05F;
-		}
-		SoundEngine->setSoundVolume(volume);
-	}
-
-	void Audio::volumeDown() {
-		if (volume > 0.0F) {
-			volume = volume - 0.05F;
-		}
-		SoundEngine->setSoundVolume(volume);
-	}
-
-	void Audio::volumeSet(float v) {
-		volume = v;
-		SoundEngine->setSoundVolume(volume);
-	}
-
+void Audio::removeSoundSource(string ID) {
+	sources.erase(ID);
+}
