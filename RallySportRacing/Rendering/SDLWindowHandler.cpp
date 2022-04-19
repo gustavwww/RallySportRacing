@@ -208,6 +208,10 @@ namespace Rendering {
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 		int backgroundTexture = loadTexture("../IMGS/MVP.png");
+		int testButtonTexture = loadTexture("../IMGS/testbutton.png");
+		int settingsTexture = loadTexture("../IMGS/settingsbackground.png");
+		int testButtonTexture2 = loadTexture("../IMGS/testbutton.png");
+		int testButtonTexture3 = loadTexture("../IMGS/testbutton.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 5000.0f);
@@ -275,15 +279,38 @@ namespace Rendering {
 			ImGui::Indent(width / 2 - menuButtonWidth / 2);
 			//ImGui::SameLine();
 			ImGui::Dummy(ImVec2(0, 300));
-			if (ImGui::Button("Start race", ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; }
+			if (ImGui::ImageButton((void*)(intptr_t)testButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; }
 
+			
 			ImGui::Dummy(ImVec2(0, 150));
-			if (ImGui::Button("Settings", ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = true; }
+			if (ImGui::ImageButton((void*)(intptr_t)testButtonTexture2, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = true; }
 			
 			ImGui::End();
 			}
 			else if(settingsMenu) {
+				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
+				//ImGui::BeginChildFrame('h', ImVec2(width, height));
+				ImGui::Image((void*)(intptr_t)settingsTexture, ImVec2(width, height));
+				//ImGui::EndChildFrame();
+
+				ImGui::End();
+
+				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::Begin("Inner Main Menu", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::Indent(width / 2 - menuButtonWidth / 2);
+				//ImGui::SameLine();
+				ImGui::Dummy(ImVec2(0, 300));
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
+				if (ImGui::ImageButton((void*)(intptr_t)testButtonTexture3, ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = false; }
+				ImGui::PopStyleColor(3);
+				ImGui::End();
 			}
 			else {
 				ImGui::SetNextWindowSize(ImVec2(200, 200), 0);
