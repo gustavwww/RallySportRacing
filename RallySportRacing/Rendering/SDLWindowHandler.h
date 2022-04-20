@@ -22,7 +22,7 @@ namespace Rendering {
 		void beginRenderingLoop(void (*preRender)() = nullptr, void (*onQuit)() = nullptr);
 		
 		unsigned int loadTexture(const char* textureFilePath);
-		unsigned int loadCubeMap(std::string folderDir);
+		unsigned int loadCubeMap(std::string folderDir, std::string format);
 		void renderBackground(GLint programID, unsigned int textureID, glm::mat4 view, glm::mat4 proj);
 		void setupBackground();
 
