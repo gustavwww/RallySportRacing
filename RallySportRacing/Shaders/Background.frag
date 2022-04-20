@@ -4,11 +4,11 @@
 in vec3 TexCoords;
 
 //Outputs
-out vec4 FragColor;
+out vec4 fragmentColor;
 
 //Uniforms
 uniform samplerCube background;
 
 void main(){
-	FragColor = texture(background, TexCoords);
+	fragmentColor = texture(background, TexCoords);
 }
