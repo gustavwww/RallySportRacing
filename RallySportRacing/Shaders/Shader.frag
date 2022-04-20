@@ -4,12 +4,33 @@
 precision highp float;
 
 ////////////////////////////////
-// Materials
+// Material textures
 ////////////////////////////////
-uniform sampler2D test;
-uniform vec3 albedo;
-uniform float metallic;
-uniform float roughness;
+uniform sampler2D baseColorTexture;
+uniform sampler2D metallicTexture;
+uniform sampler2D roughnessTexture;
+
+////////////////////////////////
+// Material values
+////////////////////////////////
+uniform vec3 albedoValue;
+uniform float metallicValue;
+uniform float roughnessValue;
+
+////////////////////////////////
+// Material bools
+////////////////////////////////
+uniform unsigned int useBaseColorTexture;
+uniform unsigned int useMetallicTexture;
+uniform unsigned int useRoughnessTexture;
+
+////////////////////////////////
+// Used Material 
+////////////////////////////////
+vec3 albedo;
+float metallic;
+float roughness;
+
 ////////////////////////////////
 // Envoirment
 ////////////////////////////////
@@ -76,11 +97,37 @@ vec3 fresnelSchlick(float HdotV, vec3 baseReflectivity){
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - HdotV, 5.0);
 }
 
+void loadPBRValues(){
+		//BaseColor / Albedo
+		if(useBaseColorTexture == 0){
+			albedo = albedoValue;
+		}else{
+			albedo = texture(baseColorTexture, texCoord).rgb;
+		}
+		
+		//Metallic
+		if(useMetallicTexture == 0){
+			metallic = metallicValue;
+		}else{
+			metallic = texture(metallicTexture, texCoord).r;
+		}
+
+		//Roughness
+		if(useRoughnessTexture == 0){
+			roughness = roughnessValue;
+		}else{
+			roughness = texture(roughnessTexture, texCoord).r;
+		}
+}
+
 void main(){
 
 	/////////////////////////////////
 	//NEW PBR PIPELINE
 	/////////////////////////////////
+	
+	loadPBRValues();
+	
 	//Normalize direction vector and normal vector.
 	vec3 normal = normalize(normal_viewspace);
 	vec3 viewDir = normalize(vec3(0,0,0) - vertexPosition_viewspace);

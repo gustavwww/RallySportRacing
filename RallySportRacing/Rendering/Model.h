@@ -14,18 +14,6 @@ using namespace std;
 
 namespace Rendering {
 
-	struct Material {
-
-		//ToDo remove old values.
-		unsigned int baseColorTexture;
-		unsigned int ambientOcclusionTexture;
-		unsigned int roughnessTexture;
-		unsigned int metallicTexture;
-		glm::vec3 albedo;
-		float metallic;
-		float roughness;
-	};
-
 	class Model {
 	public:
 		vector<Mesh> meshes;
