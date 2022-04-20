@@ -112,6 +112,7 @@ namespace Networking {
 
 					// Create sound source
 
+
 					Player* p = new Player(name, obj);
 					players.insert(pair<int, Player*>(id, p));
 				}

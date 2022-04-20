@@ -42,16 +42,20 @@ SoundSource::SoundSource(tuple<float, float, float> positionXYZ, ISoundEngine* S
 
 	// Init engine sound and set volume
 	playBackSpeed = 1.0F;
-	engineSound = this->SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, false, false, ESM_AUTO_DETECT, true);
+	engineSound = this->SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
 
 }
 
 // Function that updates source
-void SoundSource::update(tuple <float, float, float> positionXYZ, float speed, bool honk) {
+void SoundSource::update(tuple <float, float, float> positionXYZ, float speed, string sounds) {
 	//engineSound->setPosition();
-	engine(speed);
-		
-	horn(honk);
+
+	horn(sounds[1] == '1');
+	exhaust(sounds[2] == '1');
+
+	engineStart(sounds[0] == '1');
+	engine(sounds[0] == '2', speed);
+	engineOff(sounds[0] == '3');
 }
 
 // Function that plays horn sound
@@ -68,8 +72,12 @@ void SoundSource::horn(bool x) {
 }
 
 // Function that plays exhaust sound
-void SoundSource::exhaust() {
-	this->SoundEngine->play2D(exhaustSound);
+void SoundSource::exhaust(bool x) {
+	if (x) {
+		if (!this->SoundEngine->isCurrentlyPlaying(exhaustSound)) {
+			this->SoundEngine->play2D(exhaustSound);
+		}
+	}
 }
 
 // Function that plays engine start sound
@@ -79,20 +87,23 @@ void SoundSource::engineStart(bool x) {
 			this->SoundEngine->play2D(engineStartSound);
 		}
 	}
-	else {
-		this->SoundEngine->stopAllSoundsOfSoundSource(engineStartSound);
-	}
 }
 
 // Function that plays engine sound
-void SoundSource::engine(float speed) {
+void SoundSource::engine(bool x, float speed) {
+	if (x) {
+		if (engineSound->getIsPaused()) {
+			engineSound->setIsPaused(false);
+		}
+	}
 	playBackSpeed = 1.0 + speed / 100;
 	engineSound->setPlaybackSpeed(playBackSpeed);
-	engineSound->setIsPaused(false);
 }
 
 // Function that plays engine off sound
-void SoundSource::engineOff() {
-	engineSound->setIsPaused(true);
-	this->SoundEngine->play2D(engineOffSound);
+void SoundSource::engineOff(bool x) {
+	if (x) {
+		engineSound->setIsPaused(true);
+		this->SoundEngine->play2D(engineOffSound);
+	}
 }

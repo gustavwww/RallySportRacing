@@ -18,7 +18,7 @@ public:
 	void volumeSet(float v);
 
 	void createSoundSource(string ID, tuple <float, float, float> position);
-	void updateSoundSource(string ID, tuple <float, float, float> position,float speed, bool honk);
+	void updateSoundSource(string ID, tuple <float, float, float> position,float speed, string sounds);
 	void removeSoundSource(string ID);
 };
 

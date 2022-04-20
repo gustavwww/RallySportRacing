@@ -50,8 +50,8 @@ void Audio::createSoundSource(string ID, tuple <float, float, float> position) {
 	sources.insert(pair<string, SoundSource*>(ID, new SoundSource(position, SoundEngine)));
 }
 
-void Audio::updateSoundSource(string ID, tuple<float, float, float> position, float speed, bool honk) {
-	sources.at(ID)->update(position, speed, honk);
+void Audio::updateSoundSource(string ID, tuple<float, float, float> position, float speed, string sounds) {
+	sources.at(ID)->update(position, speed, sounds);
 }
 
 void Audio::removeSoundSource(string ID) {
