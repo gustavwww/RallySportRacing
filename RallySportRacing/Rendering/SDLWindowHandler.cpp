@@ -198,16 +198,18 @@ namespace Rendering {
 		return textureID;
 	}
 
-	unsigned int SDLWindowHandler::loadCubeMap(std::string folderDir) {
+	//FolderDir should look like this: "../Textures/Background/"
+	//Format should look like this: "png" or "jpg".
+	unsigned int SDLWindowHandler::loadCubeMap(std::string folderDir, std::string format) {
 
 		vector<std::string> faces
 		{
-			"../Textures/Background/right.jpg",
-			"../Textures/Background/left.jpg",
-			"../Textures/Background/top.jpg",
-			"../Textures/Background/bottom.jpg",
-			"../Textures/Background/front.jpg",
-			"../Textures/Background/back.jpg"
+			folderDir + "posx." + format,
+			folderDir + "negx." + format,
+			folderDir + "posy." + format,
+			folderDir + "negy." + format,
+			folderDir + "posz." + format,
+			folderDir + "negz." + format
 		};
 
 		//Generate and bind texture ID.
@@ -216,12 +218,20 @@ namespace Rendering {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
 		int width, height, nrChannels;
+		GLint colorChannels;
+
+		if (format == "png") {
+			colorChannels = GL_RGBA;
+		}
+		else {
+			colorChannels = GL_RGB;
+		}
 
 		//Load in each image to their respective cube map face.
-		for (unsigned int i = 0; i < faces.size(); i++) {
+		for (int i = 0; i < faces.size(); i++) {
 			unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
 			if (data) {
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, colorChannels, width, height, 0, colorChannels, GL_UNSIGNED_BYTE, data);
 				stbi_image_free(data);
 			}
 			else {
@@ -331,7 +341,8 @@ namespace Rendering {
 		glm::mat4 view;
 
 		//Load background.
-		unsigned int background = loadCubeMap("../Textures/Background/");
+		unsigned int background = loadCubeMap("../Textures/Background/", "png");
+		setupBackground();
 		
 		//GUI bool
 		bool showDebugGUI = false;
@@ -402,7 +413,7 @@ namespace Rendering {
 			}
 
 			//ToDo draw background here.
-			//renderBackground(backgroundProgramID, background, view, projection);
+			renderBackground(backgroundProgramID, background, view, projection);
 
 			Game::drawDebug();
 
