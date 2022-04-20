@@ -1,3 +1,6 @@
+#ifndef VEHICLE
+#define VEHICLE
+
 #include "GameObject.h"
 #include <btBulletDynamicsCommon.h>
 
@@ -32,3 +35,5 @@ namespace Game{
 		vector<GameObject*> wheels;
 	};
 }
+
+#endif

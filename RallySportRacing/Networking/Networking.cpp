@@ -9,7 +9,6 @@
 #include "Services/Protocol/Command.h"
 #include "Services/Protocol/ProtocolParser.h"
 #include "Game/GameObject.h"
-#include "Game/Vehicle.h"
 #include "Player.h"
 #include "Rendering/SDLWindowHandler.h"
 #include "Rendering/Model.h"
