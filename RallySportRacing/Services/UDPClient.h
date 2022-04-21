@@ -12,8 +12,8 @@
 
 #pragma comment (lib, "Ws2_32.lib")
 
-#define ADDRESS "167.71.13.30"
-//#define ADDRESS "127.0.0.1"
+//#define ADDRESS "167.71.13.30"
+#define ADDRESS "127.0.0.1"
 #define PORT 2005
 
 #define BUFLEN 1024

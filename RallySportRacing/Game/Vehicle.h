@@ -22,11 +22,12 @@ namespace Game{
 
 		void* m_groundObject; // the object the vehicle is in contact with
 	
-	protected:
 		GameObject* wheel1;
 		GameObject* wheel2;
 		GameObject* wheel3;
 		GameObject* wheel4;
+
+	protected:
 		float steering;
 		float steeringClamp;
 		float steeringIncrement;

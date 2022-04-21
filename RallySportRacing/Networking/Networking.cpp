@@ -86,7 +86,7 @@ namespace Networking {
 			for (auto el : players)
 				playersInGame.push_back(el.first);
 
-			for (int i = 1; i < cmd.getArgsSize(); i += 10) {
+			for (int i = 1; i < cmd.getArgsSize(); i += 38) {
 				int id = stoi(cmd.getArgs()[i]);
 				if (id == clientID) {
 					continue;
@@ -133,13 +133,51 @@ namespace Networking {
 		while (inGame) {
 			glm::vec3 pos = vehicle->getPosition();
 			glm::quat qu = vehicle->getQuaternion();
+			glm::vec3 frontLeftPos = vehicle->wheel1->getPosition();
+			glm::quat frontLeftOr = vehicle->wheel1->getQuaternion();
+			glm::vec3 frontRightPos = vehicle->wheel2->getPosition();
+			glm::quat frontRightOr = vehicle->wheel2->getQuaternion();
+			glm::vec3 backLeftPos = vehicle->wheel3->getPosition();
+			glm::quat backLeftOr = vehicle->wheel3->getQuaternion();
+			glm::vec3 backRightPos = vehicle->wheel4->getPosition();
+			glm::quat backRightOr = vehicle->wheel4->getQuaternion();
 			udpClient.sendPacket(to_string(clientID) + "-" + "pos:" + to_string(pos.x) + ", "
 				+ to_string(pos.y) + ","
 				+ to_string(pos.z) + ","
 				+ to_string(qu.x) + ","
 				+ to_string(qu.y) + ","
 				+ to_string(qu.z) + ","
-				+ to_string(qu.w));
+				+ to_string(qu.w) + ","
+				+ to_string(frontLeftPos.x) + ","
+				+ to_string(frontLeftPos.y) + ","
+				+ to_string(frontLeftPos.z) + ","
+				+ to_string(frontLeftOr.x) + ","
+				+ to_string(frontLeftOr.y) + ","
+				+ to_string(frontLeftOr.z) + ","
+				+ to_string(frontLeftOr.w) + ","
+				+ to_string(frontRightPos.x) + ","
+				+ to_string(frontRightPos.y) + ","
+				+ to_string(frontRightPos.z) + ","
+				+ to_string(frontRightOr.x) + ","
+				+ to_string(frontRightOr.y) + ","
+				+ to_string(frontRightOr.z) + ","
+				+ to_string(frontRightOr.w) + ","
+				+ to_string(backLeftPos.x) + ","
+				+ to_string(backLeftPos.y) + ","
+				+ to_string(backLeftPos.z) + ","
+				+ to_string(backLeftOr.x) + ","
+				+ to_string(backLeftOr.y) + ","
+				+ to_string(backLeftOr.z) + ","
+				+ to_string(backLeftOr.w) + ","
+				+ to_string(backRightPos.x) + ","
+				+ to_string(backRightPos.y) + ","
+				+ to_string(backRightPos.z) + ","
+				+ to_string(backRightOr.x) + ","
+				+ to_string(backRightOr.y) + ","
+				+ to_string(backRightOr.z) + ","
+				+ to_string(backRightOr.w)
+			);
+
 			int rate = 1000 / TICK_RATE;
 			this_thread::sleep_for(chrono::milliseconds(rate));
 		}

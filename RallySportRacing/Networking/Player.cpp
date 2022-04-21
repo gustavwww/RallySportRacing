@@ -14,7 +14,7 @@ namespace Networking {
 		obj = new Game::GameObject(model);
 		obj->setPosition(playerData.pos);
 		obj->setQuaternion(playerData.orientation);
-		/*
+		
 		Rendering::Model* frontLeftModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
 		windowHandler->addModel(frontLeftModel);
 		frontLeft = new Game::GameObject(frontLeftModel);
@@ -38,7 +38,7 @@ namespace Networking {
 		backRight = new Game::GameObject(backRightModel);
 		backRight->setPosition(playerData.backRightPos);
 		backRight->setQuaternion(playerData.backRightOr);
-		*/
+		
 		
 
 	}
@@ -46,6 +46,14 @@ namespace Networking {
 	void Player::updateState(PlayerData data) {
 		obj->setPosition(data.pos);
 		obj->setQuaternion(data.orientation);
+		frontLeft->setPosition(data.frontLeftPos);
+		frontLeft->setQuaternion(data.frontLeftOr);
+		frontRight->setPosition(data.frontRightPos);
+		frontRight->setQuaternion(data.frontRightOr);
+		backLeft->setPosition(data.backLeftPos);
+		backLeft->setQuaternion(data.backLeftOr);
+		backRight->setPosition(data.backRightPos);
+		backRight->setQuaternion(data.backRightOr);
 	}
 
 	Player::~Player() {
