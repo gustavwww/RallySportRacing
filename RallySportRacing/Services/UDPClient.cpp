@@ -72,7 +72,7 @@ namespace Server {
 			cout << "Attempted to send packet. Invalid socket." << endl;
 			return;
 		}
-		string msg_nl = msg + "\n";
+		string msg_nl = msg;
 		const char* str = msg_nl.c_str();
 
 		int result = sendto(sock, str, strlen(str), 0, (SOCKADDR*) &serverAddress, sizeof(serverAddress));

@@ -14,7 +14,7 @@
 #include "Rendering/Model.h"
 #include <glm/gtx/quaternion.hpp>
 
-#include "Audio/audio.h"
+#define TICK_RATE 120;
 
 using namespace std;
 
@@ -26,11 +26,8 @@ namespace Networking {
 	thread udpThread;
 	thread sendThread;
 
-	Game::GameObject* obj;
+	Game::Vehicle* vehicle;
 	Rendering::SDLWindowHandler* handler;
-
-	// Audio
-	Audio* sound;
 
 	bool inGame = false;
 
@@ -38,8 +35,8 @@ namespace Networking {
 
 	map<int, Player*> players;
 
-	void setupNetwork(Game::GameObject* playerObj, Rendering::SDLWindowHandler* windowHandler) {
-		obj = playerObj;
+	void setupNetwork(Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler) {
+		vehicle = playerObj;
 		handler = windowHandler;
 
 		tcpClient.addCallback(Networking::tcpPacketReceived);
@@ -49,9 +46,6 @@ namespace Networking {
 
 		tcpThread = thread(&Server::TCPClient::listen, tcpClient);
 		udpThread = thread(&Server::UDPClient::listen, udpClient);
-
-		// Gain access to Audio instance
-		sound = Audio::Instance();
 	}
 
 	void joinGame(string id, string name) {
@@ -92,47 +86,28 @@ namespace Networking {
 			for (auto el : players)
 				playersInGame.push_back(el.first);
 
-			for (int i = 1; i < cmd.getArgsSize(); i += 10) {
+			for (int i = 1; i < cmd.getArgsSize(); i += 38) {
 				int id = stoi(cmd.getArgs()[i]);
 				if (id == clientID) {
 					continue;
 				}
 
-				string name = cmd.getArgs()[i + 1];
-				float posX = stof(cmd.getArgs()[i + 2]);
-				float posY = stof(cmd.getArgs()[i + 3]);
-				float posZ = stof(cmd.getArgs()[i + 4]);
-				float quX = stof(cmd.getArgs()[i + 5]);
-				float quY = stof(cmd.getArgs()[i + 6]);
-				float quZ = stof(cmd.getArgs()[i + 7]);
-				float quW = stof(cmd.getArgs()[i + 8]);
+				PlayerData data(cmd, i);
 
 				// TODO: Spawn model if player not already spawned.
 				auto el = players.find(id);
 				if (el == players.end()) {
 					// Player not initialized, creating player...
-					cout << "A player has joined the game: " << name << endl;
-					Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
-					handler->addModel(model);
-					Game::GameObject* obj = new Game::GameObject(model);
-					obj->setPosition(glm::vec3(posX, posY, posZ));
-					obj->setQuaternion(glm::quat(quW, quX, quY, quZ));
-
-					// Create sound source
-					sound->createSoundSource(id, make_tuple(posX, posY, posZ));
-
-					Player* p = new Player(name, obj);
+					
+					Player* p = new Player(handler, data);
 					players.insert(pair<int, Player*>(id, p));
+					cout << "A player has joined the game: " << p->getName() << endl;
 				}
 				else {
 					// Player already created, updating position...
 					Player* p = el->second;
-					p->setPosition(glm::vec3(posX, posY, posZ));
-					p->setQuaternion(glm::quat(quW, quX, quY, quZ));
+					p->updateState(data);
 					playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
-
-					// Update sound source
-					sound->updateSoundSource(id, make_tuple(posX, posY, posZ), 0.0F, "000");
 				}
 
 			}
@@ -147,9 +122,6 @@ namespace Networking {
 					cout << "A player has left the game: " << p->getName() << endl;
 					// TODO: Fix player deletion, currently kills the game..
 					//delete p;
-
-					// Delete sound source
-					sound->removeSoundSource(id);
 				}
 			}
 
@@ -159,16 +131,55 @@ namespace Networking {
 
 	void sendStatusPacket() {
 		while (inGame) {
-			glm::vec3 pos = obj->getPosition();
-			glm::quat qu = obj->getQuaternion();
+			glm::vec3 pos = vehicle->getPosition();
+			glm::quat qu = vehicle->getQuaternion();
+			glm::vec3 frontLeftPos = vehicle->wheel1->getPosition();
+			glm::quat frontLeftOr = vehicle->wheel1->getQuaternion();
+			glm::vec3 frontRightPos = vehicle->wheel2->getPosition();
+			glm::quat frontRightOr = vehicle->wheel2->getQuaternion();
+			glm::vec3 backLeftPos = vehicle->wheel3->getPosition();
+			glm::quat backLeftOr = vehicle->wheel3->getQuaternion();
+			glm::vec3 backRightPos = vehicle->wheel4->getPosition();
+			glm::quat backRightOr = vehicle->wheel4->getQuaternion();
 			udpClient.sendPacket(to_string(clientID) + "-" + "pos:" + to_string(pos.x) + ", "
 				+ to_string(pos.y) + ","
 				+ to_string(pos.z) + ","
 				+ to_string(qu.x) + ","
 				+ to_string(qu.y) + ","
 				+ to_string(qu.z) + ","
-				+ to_string(qu.w));
-			this_thread::sleep_for(2ms);
+				+ to_string(qu.w) + ","
+				+ to_string(frontLeftPos.x) + ","
+				+ to_string(frontLeftPos.y) + ","
+				+ to_string(frontLeftPos.z) + ","
+				+ to_string(frontLeftOr.x) + ","
+				+ to_string(frontLeftOr.y) + ","
+				+ to_string(frontLeftOr.z) + ","
+				+ to_string(frontLeftOr.w) + ","
+				+ to_string(frontRightPos.x) + ","
+				+ to_string(frontRightPos.y) + ","
+				+ to_string(frontRightPos.z) + ","
+				+ to_string(frontRightOr.x) + ","
+				+ to_string(frontRightOr.y) + ","
+				+ to_string(frontRightOr.z) + ","
+				+ to_string(frontRightOr.w) + ","
+				+ to_string(backLeftPos.x) + ","
+				+ to_string(backLeftPos.y) + ","
+				+ to_string(backLeftPos.z) + ","
+				+ to_string(backLeftOr.x) + ","
+				+ to_string(backLeftOr.y) + ","
+				+ to_string(backLeftOr.z) + ","
+				+ to_string(backLeftOr.w) + ","
+				+ to_string(backRightPos.x) + ","
+				+ to_string(backRightPos.y) + ","
+				+ to_string(backRightPos.z) + ","
+				+ to_string(backRightOr.x) + ","
+				+ to_string(backRightOr.y) + ","
+				+ to_string(backRightOr.z) + ","
+				+ to_string(backRightOr.w)
+			);
+
+			int rate = 1000 / TICK_RATE;
+			this_thread::sleep_for(chrono::milliseconds(rate));
 		}
 	}
 

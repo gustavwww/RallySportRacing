@@ -11,7 +11,7 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
-#include "vehicle.h"
+#include "Vehicle.h"
 
 #include "Debugging/DebugDraw.h"
 
