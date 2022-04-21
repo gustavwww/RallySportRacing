@@ -57,7 +57,7 @@ float normaldistrubutionGGX(float NdotH, float roughness){
 }
 
 //Geometry function Schlick-GGX together with Smith's method. 
-//Schlick-GGX remaps rougness to simulate direct illumination: (n dot v) / ( (n dot v) * (1 - k) + k )
+//Schlick-GGX remaps roughness to simulate direct illumination: (n dot v) / ( (n dot v) * (1 - k) + k )
 //Smith's method result in a float between [0.0, 1.0] that describe the microfacet selfshadowing: Geometryfunction(n,v,k) * Geometryfunction(n,l,k).
 float geometryFunction(float NdotV, float NdotL, float roughness){
 
