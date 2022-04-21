@@ -81,6 +81,11 @@ namespace Networking {
 		
 		if (command == "game") {
 
+			if (cmd.getArgsSize() % 38 != 0) {
+				// Skip corrupt UDP packets.
+				return;
+			}
+
 			// Store players already in game to eventuelly remove them.
 			vector<int> playersInGame;
 			for (auto el : players)
