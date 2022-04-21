@@ -22,6 +22,10 @@ namespace Rendering {
 	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
 	int volume = 50;
 
+	glm::vec3 SDLWindowHandler::getLightPosition() {
+		return glm::vec3(lightPos);
+	}
+
 	GLint Rendering::SDLWindowHandler::getDebugID()
 	{
 		return this->debugID;
