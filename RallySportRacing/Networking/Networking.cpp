@@ -13,6 +13,7 @@
 #include "Rendering/SDLWindowHandler.h"
 #include "Rendering/Model.h"
 #include <glm/gtx/quaternion.hpp>
+#include <Audio/audio.h>
 
 #define TICK_RATE 60;
 
@@ -33,6 +34,8 @@ namespace Networking {
 
 	int clientID;
 
+	Audio* sound;
+
 	map<int, Player*> players;
 
 	void setupNetwork(Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler) {
@@ -46,6 +49,8 @@ namespace Networking {
 
 		tcpThread = thread(&Server::TCPClient::listen, tcpClient);
 		udpThread = thread(&Server::UDPClient::listen, udpClient);
+
+		sound = Audio::Instance();
 	}
 
 	void joinGame(string id, string name) {
@@ -96,6 +101,9 @@ namespace Networking {
 
 					PlayerData data(cmd, i);
 
+					// Get sounds from player
+					string sounds = cmd.getArgs().back();
+
 					// TODO: Spawn model if player not already spawned.
 					auto el = players.find(id);
 					if (el == players.end()) {
@@ -104,12 +112,18 @@ namespace Networking {
 						Player* p = new Player(handler, data);
 						players.insert(pair<int, Player*>(id, p));
 						cout << "A player has joined the game: " << p->getName() << endl;
+
+						// Create sound source
+						sound->createSoundSource(id, make_tuple(0, 0, 0));
 					}
 					else {
 						// Player already created, updating position...
 						Player* p = el->second;
 						p->updateState(data);
 						playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
+
+						// Update sound source
+						sound->updateSoundSource(id, make_tuple(0, 0, 0), 0, sounds);
 					}
 
 				}
@@ -126,6 +140,9 @@ namespace Networking {
 					cout << "A player has left the game: " << p->getName() << endl;
 					// TODO: Fix player deletion, currently kills the game..
 					//delete p;
+
+					// Remove sound source
+					sound->removeSoundSource(id);
 				}
 			}
 
@@ -179,7 +196,8 @@ namespace Networking {
 				+ to_string(backRightOr.x) + ","
 				+ to_string(backRightOr.y) + ","
 				+ to_string(backRightOr.z) + ","
-				+ to_string(backRightOr.w)
+				+ to_string(backRightOr.w) + ","
+				+ sound->getSoundsSourceSounds(0)
 			);
 
 			int rate = 1000 / TICK_RATE;

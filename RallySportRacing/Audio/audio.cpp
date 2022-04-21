@@ -67,18 +67,19 @@ void Audio::volumeSet(float v) {
 
 void Audio::createSoundSource(int ID, tuple <float, float, float> position) {
 	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(position)));
-	cout << "Creted sound source with ID: " + to_string(ID) + " ";
+	cout << "Creted sound source with ID: " + to_string(ID) << endl;
 }
 
 void Audio::updateSoundSource(int ID, tuple<float, float, float> position, float speed, string sounds) {
 	sources.at(ID)->update(position, speed, sounds);
 	/*if (ID != 0) {
-		cout << "Updated sound source with ID: " + to_string(ID) + " ";
+		cout << "Updated sound source with ID: " + to_string(ID) << endl;
 	}*/
 }
 
 void Audio::removeSoundSource(int ID) {
 	sources.erase(ID);
+	cout << "Removed sound source: " + to_string(ID) << endl;
 }
 
 string Audio::getSoundsSourceSounds(int ID) {
