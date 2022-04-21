@@ -16,7 +16,7 @@
 //#define ADDRESS "127.0.0.1"
 #define PORT 2005
 
-#define BUFLEN 1024
+#define BUFLEN 8192
 
 using namespace std;
 

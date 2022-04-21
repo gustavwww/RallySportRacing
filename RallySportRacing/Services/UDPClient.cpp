@@ -50,10 +50,10 @@ namespace Server {
 			}
 
 			string str(receiveBuffer);
+			
 			str.erase(find_if(str.begin(), str.end(), [](unsigned char c) {
 				return c == '\n';
 				}), str.end());
-			
 
 			for (void(*func)(string str) : funcs) {
 				if (func) {
@@ -72,7 +72,7 @@ namespace Server {
 			cout << "Attempted to send packet. Invalid socket." << endl;
 			return;
 		}
-		string msg_nl = msg;
+		string msg_nl = msg + "\n";
 		const char* str = msg_nl.c_str();
 
 		int result = sendto(sock, str, strlen(str), 0, (SOCKADDR*) &serverAddress, sizeof(serverAddress));
