@@ -87,8 +87,9 @@ namespace Networking {
 				playersInGame.push_back(el.first);
 			
 			for (int i = 0; i < cmd.getArgsSize(); i++) {
-				if (cmd.getArgs()[i] == "player") {
+				if (cmd.getArgs()[i] == "player" && (i+37) <= cmd.getArgsSize()) {
 					i++;
+
 					int id = stoi(cmd.getArgs()[i]);
 					if (id == clientID) {
 						continue;
