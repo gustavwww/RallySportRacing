@@ -6,7 +6,7 @@
 
 #include <tuple>
 #include <map>
-#include <Audio/SoundSource.h>
+#include "SoundSource.h"
 
 using namespace std;
 using namespace irrklang;
@@ -19,12 +19,31 @@ ISoundEngine* SoundEngine;
 
 map<string, SoundSource*> sources;
 
+Audio* Audio::instance = nullptr;
+
+Audio* Audio::Instance() {
+	if (instance == nullptr) {
+		instance = new Audio();
+	}
+	return instance;
+}
+
+// Init sound engine
+ISoundEngine* Audio::SoundEngine = createIrrKlangDevice();
+
+// Init various sounds
+irrklang::ISoundSource* Audio::hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
+irrklang::ISoundSource* Audio::exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
+irrklang::ISoundSource* Audio::engineStartSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineStart2.mp3");
+irrklang::ISoundSource* Audio::engineOffSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineOff.mp3");
+
+irrklang::ISound* Audio::engineSound = SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
+
 Audio::Audio() {
-	// Init sound engine
-	SoundEngine = createIrrKlangDevice();
 
 	// Init master volume
 	volume = 0.3F;
+	SoundEngine->setSoundVolume(volume);
 }
 
 void Audio::volumeUp() {
@@ -47,7 +66,7 @@ void Audio::volumeSet(float v) {
 }
 
 void Audio::createSoundSource(string ID, tuple <float, float, float> position) {
-	sources.insert(pair<string, SoundSource*>(ID, new SoundSource(position, SoundEngine)));
+	sources.insert(pair<string, SoundSource*>(ID, new SoundSource(position)));
 }
 
 void Audio::updateSoundSource(string ID, tuple<float, float, float> position, float speed, string sounds) {

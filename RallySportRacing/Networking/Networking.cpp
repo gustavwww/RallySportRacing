@@ -14,6 +14,8 @@
 #include "Rendering/Model.h"
 #include <glm/gtx/quaternion.hpp>
 
+#include "Audio/audio.h"
+
 using namespace std;
 
 namespace Networking {
@@ -26,6 +28,9 @@ namespace Networking {
 
 	Game::GameObject* obj;
 	Rendering::SDLWindowHandler* handler;
+
+	// Audio
+	Audio* sound;
 
 	bool inGame = false;
 
@@ -44,6 +49,9 @@ namespace Networking {
 
 		tcpThread = thread(&Server::TCPClient::listen, tcpClient);
 		udpThread = thread(&Server::UDPClient::listen, udpClient);
+
+		// Gain access to Audio instance
+		sound = Audio::Instance();
 	}
 
 	void joinGame(string id, string name) {
@@ -111,7 +119,7 @@ namespace Networking {
 					obj->setQuaternion(glm::quat(quW, quX, quY, quZ));
 
 					// Create sound source
-
+					sound->createSoundSource(name, make_tuple(posX, posY, posZ));
 
 					Player* p = new Player(name, obj);
 					players.insert(pair<int, Player*>(id, p));
@@ -124,7 +132,7 @@ namespace Networking {
 					playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
 
 					// Update sound source
-
+					sound->updateSoundSource(name, make_tuple(posX, posY, posZ), 0.0F, "010");
 				}
 
 			}
@@ -141,7 +149,7 @@ namespace Networking {
 					//delete p;
 
 					// Delete sound source
-
+					sound->removeSoundSource(p->getName());
 				}
 			}
 

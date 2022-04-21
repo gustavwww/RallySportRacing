@@ -11,6 +11,7 @@ using namespace irrklang;
 
 class Audio {
 public:
+	static Audio* Instance();
 	Audio();
 
 	void volumeUp();
@@ -20,6 +21,18 @@ public:
 	void createSoundSource(string ID, tuple <float, float, float> position);
 	void updateSoundSource(string ID, tuple <float, float, float> position,float speed, string sounds);
 	void removeSoundSource(string ID);
+
+	static ISoundEngine* SoundEngine;
+
+	static irrklang::ISoundSource* hornSound;
+	static irrklang::ISoundSource* exhaustSound;
+	static irrklang::ISoundSource* engineStartSound;
+	static irrklang::ISoundSource* engineOffSound;
+
+	static irrklang::ISound* engineSound;
+
+private:
+	static Audio* instance;
 };
 
 #endif

@@ -11,12 +11,10 @@ using namespace irrklang;
 
 class SoundSource {
 public:
-	SoundSource(tuple <float, float, float> position, ISoundEngine* SoundEngine);
+	SoundSource(tuple <float, float, float> position);
 	void update(tuple <float, float, float> positionXYZ, float speed, string sounds);
 
 private:
-	ISoundEngine* SoundEngine;
-	
 	void horn(bool x);
 	void exhaust(bool x);
 	void engineStart(bool x);

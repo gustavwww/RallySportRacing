@@ -92,7 +92,7 @@ namespace Game {
 		handler = windowHandler;
 
 		// Initialize audio
-		sound = new Audio();
+		sound = Audio::Instance();
 
 		//Load and add smokeParticles to particle render list.
 		smokeTexture = handler->loadTexture("../Textures/smokeTexture.png");
