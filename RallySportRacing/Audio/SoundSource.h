@@ -13,6 +13,7 @@ class SoundSource {
 public:
 	SoundSource(tuple <float, float, float> position);
 	void update(tuple <float, float, float> positionXYZ, float speed, string sounds);
+	string getSounds();
 
 private:
 	void horn(bool x);
@@ -20,6 +21,8 @@ private:
 	void engineStart(bool x);
 	void engine(bool x, float speed);
 	void engineOff(bool x);
+
+	string sounds;
 };
 
 #endif

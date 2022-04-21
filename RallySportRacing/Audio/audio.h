@@ -18,9 +18,10 @@ public:
 	void volumeDown();
 	void volumeSet(float v);
 
-	void createSoundSource(string ID, tuple <float, float, float> position);
-	void updateSoundSource(string ID, tuple <float, float, float> position,float speed, string sounds);
-	void removeSoundSource(string ID);
+	void createSoundSource(int ID, tuple <float, float, float> position);
+	void updateSoundSource(int ID, tuple <float, float, float> position,float speed, string sounds);
+	void removeSoundSource(int ID);
+	string getSoundsSourceSounds(int ID);
 
 	static ISoundEngine* SoundEngine;
 

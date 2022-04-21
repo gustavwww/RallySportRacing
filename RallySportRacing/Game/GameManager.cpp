@@ -135,7 +135,7 @@ namespace Game {
 		//vehicle->setInitialPosition(btVector3(-40, -100, 0));
 
 		// Create player sound source
-		sound->createSoundSource("self", make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z));
+		sound->createSoundSource(0, make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z));
 
 		debugDrawer = new DebugDraw();
 
@@ -420,7 +420,7 @@ namespace Game {
 		}
 
 		// Update "self" sound source
-		sound->updateSoundSource("self", make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z), vehicle->getSpeed(), sounds);
+		sound->updateSoundSource(0, make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z), vehicle->getSpeed(), sounds);
 
 		// Reset sounds
 		sounds = "000";

@@ -17,7 +17,7 @@ float volume;
 
 ISoundEngine* SoundEngine;
 
-map<string, SoundSource*> sources;
+map<int, SoundSource*> sources;
 
 Audio* Audio::instance = nullptr;
 
@@ -65,14 +65,22 @@ void Audio::volumeSet(float v) {
 	SoundEngine->setSoundVolume(volume);
 }
 
-void Audio::createSoundSource(string ID, tuple <float, float, float> position) {
-	sources.insert(pair<string, SoundSource*>(ID, new SoundSource(position)));
+void Audio::createSoundSource(int ID, tuple <float, float, float> position) {
+	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(position)));
+	cout << "Creted sound source with ID: " + to_string(ID) + " ";
 }
 
-void Audio::updateSoundSource(string ID, tuple<float, float, float> position, float speed, string sounds) {
+void Audio::updateSoundSource(int ID, tuple<float, float, float> position, float speed, string sounds) {
 	sources.at(ID)->update(position, speed, sounds);
+	/*if (ID != 0) {
+		cout << "Updated sound source with ID: " + to_string(ID) + " ";
+	}*/
 }
 
-void Audio::removeSoundSource(string ID) {
+void Audio::removeSoundSource(int ID) {
 	sources.erase(ID);
+}
+
+string Audio::getSoundsSourceSounds(int ID) {
+	return sources.at(ID)->getSounds();
 }

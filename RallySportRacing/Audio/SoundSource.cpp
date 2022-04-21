@@ -26,18 +26,21 @@ SoundSource::SoundSource(tuple<float, float, float> positionXYZ)
 	// Init engine sound
 	playBackSpeed = 1.0F;
 
+	this->sounds = "000";
 }
 
 // Function that updates source
 void SoundSource::update(tuple <float, float, float> positionXYZ, float speed, string sounds) {
 	//engineSound->setPosition();
 
-	horn(sounds[1] == '1');
-	exhaust(sounds[2] == '1');
+	this->sounds = sounds;
 
-	engineStart(sounds[0] == '1');
-	engine(sounds[0] == '2', speed);
-	engineOff(sounds[0] == '3');
+	horn(this->sounds[1] == '1');
+	exhaust(this->sounds[2] == '1');
+
+	engineStart(this->sounds[0] == '1');
+	engine(this->sounds[0] == '2', speed);
+	engineOff(this->sounds[0] == '3');
 }
 
 // Function that plays horn sound
@@ -88,4 +91,8 @@ void SoundSource::engineOff(bool x) {
 		Audio::engineSound->setIsPaused(true);
 		Audio::SoundEngine->play2D(Audio::engineOffSound);
 	}
+}
+
+string SoundSource::getSounds() {
+	return this->sounds;
 }

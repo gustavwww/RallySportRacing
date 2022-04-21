@@ -119,7 +119,7 @@ namespace Networking {
 					obj->setQuaternion(glm::quat(quW, quX, quY, quZ));
 
 					// Create sound source
-					sound->createSoundSource(name, make_tuple(posX, posY, posZ));
+					sound->createSoundSource(id, make_tuple(posX, posY, posZ));
 
 					Player* p = new Player(name, obj);
 					players.insert(pair<int, Player*>(id, p));
@@ -132,7 +132,7 @@ namespace Networking {
 					playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
 
 					// Update sound source
-					sound->updateSoundSource(name, make_tuple(posX, posY, posZ), 0.0F, "010");
+					sound->updateSoundSource(id, make_tuple(posX, posY, posZ), 0.0F, "000");
 				}
 
 			}
@@ -149,7 +149,7 @@ namespace Networking {
 					//delete p;
 
 					// Delete sound source
-					sound->removeSoundSource(p->getName());
+					sound->removeSoundSource(id);
 				}
 			}
 
