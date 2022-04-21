@@ -152,7 +152,8 @@ namespace Rendering {
 			int metallicRoughnessTextureIndex = gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index;
 			//If no texture found.
 			if (metallicRoughnessTextureIndex != -1) {
-				const char* metallicRoughnessTexturePath = gltfmodel.images[metallicRoughnessTextureIndex].uri.c_str();
+				string path = "../Models/" + gltfmodel.images[metallicRoughnessTextureIndex].uri;
+				const char* metallicRoughnessTexturePath = path.c_str();
 				material.ambientOcclusionTexture = loadModelTexture(metallicRoughnessTexturePath, GL_RED);
 				material.roughnessTexture = loadModelTexture(metallicRoughnessTexturePath, GL_GREEN);
 				material.metallicTexture = loadModelTexture(metallicRoughnessTexturePath, GL_BLUE);

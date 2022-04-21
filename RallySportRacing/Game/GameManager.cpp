@@ -119,12 +119,12 @@ namespace Game {
 		test1->setInitialPosition(btVector3(-700, -90, 0));
 
 		// test wall
-		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf", false);
+		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/test.gltf", false);
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel, physics->dynamicsWorld);
 		gameObjects.push_back(wall);
-		wall->setInitialPosition(btVector3(-70, 4, 0));
-		wall->setInitialRotation(btQuaternion(0,0,1,1));
+		wall->setInitialPosition(btVector3(-70, 2, 0));
+		//wall->setInitialRotation(btQuaternion(0,0,1,1));
 
 		// player vehicle, use setInitialpos to change position when starting the game
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
