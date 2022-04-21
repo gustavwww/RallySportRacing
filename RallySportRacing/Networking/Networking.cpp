@@ -14,7 +14,7 @@
 #include "Rendering/Model.h"
 #include <glm/gtx/quaternion.hpp>
 
-#define TICK_RATE 120;
+#define TICK_RATE 60;
 
 using namespace std;
 
@@ -78,36 +78,40 @@ namespace Networking {
 	void udpPacketReceived(string str) {
 		Protocol::Command cmd = Protocol::parseMessage(str);
 		string command = cmd.getCommand();
-
+		
 		if (command == "game") {
 
 			// Store players already in game to eventuelly remove them.
 			vector<int> playersInGame;
 			for (auto el : players)
 				playersInGame.push_back(el.first);
+			
+			for (int i = 0; i < cmd.getArgsSize(); i++) {
+				if (cmd.getArgs()[i] == "player") {
+					i++;
+					int id = stoi(cmd.getArgs()[i]);
+					if (id == clientID) {
+						continue;
+					}
 
-			for (int i = 1; i < cmd.getArgsSize(); i += 38) {
-				int id = stoi(cmd.getArgs()[i]);
-				if (id == clientID) {
-					continue;
-				}
+					PlayerData data(cmd, i);
 
-				PlayerData data(cmd, i);
-
-				// TODO: Spawn model if player not already spawned.
-				auto el = players.find(id);
-				if (el == players.end()) {
-					// Player not initialized, creating player...
+					// TODO: Spawn model if player not already spawned.
+					auto el = players.find(id);
+					if (el == players.end()) {
+						// Player not initialized, creating player...
 					
-					Player* p = new Player(handler, data);
-					players.insert(pair<int, Player*>(id, p));
-					cout << "A player has joined the game: " << p->getName() << endl;
-				}
-				else {
-					// Player already created, updating position...
-					Player* p = el->second;
-					p->updateState(data);
-					playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
+						Player* p = new Player(handler, data);
+						players.insert(pair<int, Player*>(id, p));
+						cout << "A player has joined the game: " << p->getName() << endl;
+					}
+					else {
+						// Player already created, updating position...
+						Player* p = el->second;
+						p->updateState(data);
+						playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
+					}
+
 				}
 
 			}
