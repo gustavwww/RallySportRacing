@@ -102,7 +102,6 @@ namespace Networking {
 
 					PlayerData data(cmd, i);
 
-					// TODO: Spawn model if player not already spawned.
 					auto el = players.find(id);
 					if (el == players.end()) {
 						// Player not initialized, creating player...
@@ -127,11 +126,9 @@ namespace Networking {
 				auto el = players.find(id);
 				if (el != players.end()) {
 					Player* p = el->second;
-					handler->removeModel(p->getModel());
 					players.erase(el);
 					cout << "A player has left the game: " << p->getName() << endl;
-					// TODO: Fix player deletion, currently kills the game..
-					//delete p;
+					delete p;
 				}
 			}
 

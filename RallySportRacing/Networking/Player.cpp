@@ -6,7 +6,8 @@ using namespace std;
 namespace Networking {
 
 	Player::Player(Rendering::SDLWindowHandler* windowHandler, Networking::PlayerData playerData) {
-		
+		this->windowHandler = windowHandler;
+
 		name = playerData.name;
 
 		Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
@@ -57,15 +58,22 @@ namespace Networking {
 	}
 
 	Player::~Player() {
+		windowHandler->removeModel(obj->getModel());
+		windowHandler->removeModel(frontLeft->getModel());
+		windowHandler->removeModel(frontRight->getModel());
+		windowHandler->removeModel(backLeft->getModel());
+		windowHandler->removeModel(backRight->getModel());
+		/*
 		delete obj;
+		delete frontLeft;
+		delete frontRight;
+		delete backLeft;
+		delete backRight;
+		*/
 	}
 
 	string Player::getName() {
 		return name;
-	}
-
-	Rendering::Model* Player::getModel() {
-		return obj->getModel();
 	}
 
 }

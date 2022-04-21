@@ -23,6 +23,7 @@ namespace Networking {
 		Rendering::Model* getModel();
 
 	private:
+		Rendering::SDLWindowHandler* windowHandler;
 		string name;
 		Game::GameObject* obj;
 		Game::GameObject* frontLeft;
