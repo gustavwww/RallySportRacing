@@ -86,7 +86,7 @@ namespace Networking {
 		
 		if (command == "game") {
 
-			if (cmd.getArgsSize() % 38 != 0) {
+			if (cmd.getArgsSize() % 39 != 0) {
 				// Skip corrupt UDP packets.
 				return;
 			}
@@ -97,7 +97,7 @@ namespace Networking {
 				playersInGame.push_back(el.first);
 			
 			for (int i = 0; i < cmd.getArgsSize(); i++) {
-				if (cmd.getArgs()[i] == "player" && (i+37) <= cmd.getArgsSize()) {
+				if (cmd.getArgs()[i] == "player" && (i+38) <= cmd.getArgsSize()) {
 					i++;
 
 					int id = stoi(cmd.getArgs()[i]);
