@@ -21,7 +21,7 @@ public:
 	void createSoundSource(int ID, tuple <float, float, float> position);
 	void updateSoundSource(int ID, tuple <float, float, float> position,float speed, string sounds);
 	void removeSoundSource(int ID);
-	string getSoundsSourceSounds(int ID);
+	string getSoundSourceSounds(int ID);
 
 	static ISoundEngine* SoundEngine;
 

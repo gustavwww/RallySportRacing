@@ -15,6 +15,7 @@ namespace Networking {
 		string name;
 		glm::vec3 pos;
 		glm::quat orientation;
+		string soundString;
 
 		glm::vec3 frontLeftPos;
 		glm::quat frontLeftOr;

@@ -101,9 +101,6 @@ namespace Networking {
 
 					PlayerData data(cmd, i);
 
-					// Get sounds from player
-					string sounds = cmd.getArgs().back();
-
 					// TODO: Spawn model if player not already spawned.
 					auto el = players.find(id);
 					if (el == players.end()) {
@@ -123,7 +120,8 @@ namespace Networking {
 						playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
 
 						// Update sound source
-						sound->updateSoundSource(id, make_tuple(0, 0, 0), 0, sounds);
+						
+						sound->updateSoundSource(id, make_tuple(0, 0, 0), 0, data.soundString);
 					}
 
 				}
@@ -169,6 +167,7 @@ namespace Networking {
 				+ to_string(qu.y) + ","
 				+ to_string(qu.z) + ","
 				+ to_string(qu.w) + ","
+				+ sound->getSoundSourceSounds(0) + ","
 				+ to_string(frontLeftPos.x) + ","
 				+ to_string(frontLeftPos.y) + ","
 				+ to_string(frontLeftPos.z) + ","
@@ -196,8 +195,7 @@ namespace Networking {
 				+ to_string(backRightOr.x) + ","
 				+ to_string(backRightOr.y) + ","
 				+ to_string(backRightOr.z) + ","
-				+ to_string(backRightOr.w) + ","
-				+ sound->getSoundsSourceSounds(0)
+				+ to_string(backRightOr.w)
 			);
 
 			int rate = 1000 / TICK_RATE;

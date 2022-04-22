@@ -82,6 +82,6 @@ void Audio::removeSoundSource(int ID) {
 	cout << "Removed sound source: " + to_string(ID) << endl;
 }
 
-string Audio::getSoundsSourceSounds(int ID) {
+string Audio::getSoundSourceSounds(int ID) {
 	return sources.at(ID)->getSounds();
 }
