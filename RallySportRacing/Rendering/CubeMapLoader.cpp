@@ -1,27 +1,58 @@
 #include "CubemapLoader.h"
+#include <stb_image.h>
+#include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Rendering {
 
-	unsigned int CubemapLoader::convertHDRTextureToEnvironmentMap(GLint shaderProgram, string textureFilePath) {
+    //Framebuffer
+    static unsigned int FBO;
+    static unsigned int RBO;
+
+    //Vertax array object
+    static unsigned int cubeVAO;
+    static unsigned int cubeVBO;
+    static unsigned int skyboxVAO;
+
+    //Texture related
+    static unsigned int texture;
+    static unsigned int cubemap;
+
+    //Bool
+    static bool isSkyboxVAOSetup;
+
+    static glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
+    //View for all 6 faces of a cubemap.
+    static glm::mat4 captureViews[] =
+    {
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f, 0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
+        glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+    };
+
+    unsigned int CubemapLoader::convertHDRTextureToEnvironmentMap(GLint shaderProgram, string textureFilePath) {
         setupFrameBuffer();
         loadHDRTexture(textureFilePath);
         setupCubemap();
-        setupCaptureProjectionAndViews();
-        
+
         glUseProgram(shaderProgram);
-        //ToDo add proper uniforms.
-        //equirectangularToCubemapShader.setInt("equirectangularMap", 0);
-        //equirectangularToCubemapShader.setMat4("projection", captureProjection);
-        
+
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, texture);
-        
-        glViewport(0, 0, 512, 512); // don't forget to configure the viewport to the capture dimensions.
+
+        glUniform1i(glGetUniformLocation(shaderProgram, "hdrTexture"), 0);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projMat"), 1, GL_FALSE, &captureProjection[0][0]);
+
+        glViewport(0, 0, 512, 512);
         glBindFramebuffer(GL_FRAMEBUFFER, FBO);
         for (unsigned int i = 0; i < 6; ++i)
         {
             //ToDo add proper uniforms.
-            //equirectangularToCubemapShader.setMat4("view", captureViews[i]);
+            glm::mat4 captureView = captureViews[i];
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMat"), 1, GL_FALSE, &captureView[0][0]);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemap, 0);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -30,34 +61,35 @@ namespace Rendering {
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         return cubemap;
-	}
+    }
 
-	void CubemapLoader::setupFrameBuffer() {
-        
+    void CubemapLoader::setupFrameBuffer() {
+
         //Generate buffers.
-        glGenFramebuffers(1, &captureFBO);
-        glGenRenderbuffers(1, &captureRBO);
+        glGenFramebuffers(1, &FBO);
+        glGenRenderbuffers(1, &RBO);
 
         //Bind buffers.
-        glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
-        
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        glBindRenderbuffer(GL_RENDERBUFFER, RBO);
+
         //Setup buffers.
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
-	}
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, RBO);
+    }
 
     void CubemapLoader::loadHDRTexture(string filePath) {
-        
+
         //ToDo might not be needed.
+
         stbi_set_flip_vertically_on_load(true);
-        
+
         int width, height, nrComponents;
         float* data = stbi_loadf(filePath.c_str(), &width, &height, &nrComponents, 0);
-        
-        if (data){
-            glGenTextures(1, &hdrTexture);
-            glBindTexture(GL_TEXTURE_2D, hdrTexture);
+
+        if (data) {
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
 
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -67,8 +99,8 @@ namespace Rendering {
 
             stbi_image_free(data);
         }
-        
-        else{
+
+        else {
             std::cout << "Could not find file path." << std::endl;
             //Set texture to default black texture.
             texture = 0;
@@ -76,7 +108,7 @@ namespace Rendering {
     }
 
     void CubemapLoader::setupCubemap() {
-        
+
         glGenTextures(1, &cubemap);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
 
@@ -92,19 +124,90 @@ namespace Rendering {
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
-    void CubemapLoader::setupCaptureProjectionAndViews() {
-        captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
-        
-        //View for all 6 faces of a cubemap.
-        captureViews[] =
-        {
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(-1.0f,  0.0f,  0.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  1.0f,  0.0f), glm::vec3(0.0f,  0.0f,  1.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f,  0.0f), glm::vec3(0.0f,  0.0f, -1.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f,  1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
-            glm::lookAt(glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f))
+    void CubemapLoader::setupSkyboxVAO() {
+
+        float skyboxVertices[] = {
+            // positions          
+            -1.0f,  1.0f, -1.0f,
+            -1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f, -1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+             1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+
+            -1.0f, -1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f, -1.0f,  1.0f,
+            -1.0f, -1.0f,  1.0f,
+
+            -1.0f,  1.0f, -1.0f,
+             1.0f,  1.0f, -1.0f,
+             1.0f,  1.0f,  1.0f,
+             1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f,  1.0f,
+            -1.0f,  1.0f, -1.0f,
+
+            -1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+             1.0f, -1.0f, -1.0f,
+             1.0f, -1.0f, -1.0f,
+            -1.0f, -1.0f,  1.0f,
+             1.0f, -1.0f,  1.0f
         };
+        
+ 
+        unsigned int skyboxVBO;
+
+        //Generate.
+        glGenVertexArrays(1, &skyboxVAO);
+        glGenBuffers(1, &skyboxVBO);
+
+        //Bind.dd
+        glBindVertexArray(skyboxVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    }
+
+    void CubemapLoader::renderBackground(GLint programID, unsigned int textureID, glm::mat4 view, glm::mat4 proj) {
+        
+        if (!isSkyboxVAOSetup) {
+            setupSkyboxVAO();
+            isSkyboxVAOSetup = true;
+        }
+        
+        glDepthFunc(GL_LEQUAL);
+        glUseProgram(programID);
+
+        //Create view projection matrix without the translation part of the view.
+        glm::mat4 viewProj = proj * glm::mat4(glm::mat3(view));
+        glUniformMatrix4fv(glGetUniformLocation(programID, "viewProjMat"), 1, GL_FALSE, &viewProj[0][0]);
+        glUniform1i(glGetUniformLocation(programID, "skybox"), 0);
+
+        //Render backgroud.
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDepthFunc(GL_LESS);
     }
 
     void CubemapLoader::renderCube() {
@@ -161,7 +264,7 @@ namespace Rendering {
 
             glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
             glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-            
+
             glBindVertexArray(cubeVAO);
 
             //Setup for the layouts.
@@ -176,7 +279,7 @@ namespace Rendering {
 
         glBindVertexArray(cubeVAO);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        
+
         //Reset vertex array.
         glBindVertexArray(0);
     }

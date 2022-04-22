@@ -8,34 +8,20 @@ using namespace std;
 
 namespace Rendering {
 
-	static class CubemapLoader {
-	
+	class CubemapLoader {
+
 	public:
 		static unsigned int convertHDRTextureToEnvironmentMap(GLint shaderProgram, string textureFilePath);
-		
+		static void renderBackground(GLint programID, unsigned int textureID, glm::mat4 view, glm::mat4 proj);
+
 	private:
-		
-		//Framebuffer
-		static unsigned int FBO;
-		static unsigned int RBO;
-
-		//Cube vertax array object
-		static unsigned int cubeVAO;
-		static unsigned int cubeVBO;
-
-		//Texture related
-		static unsigned int texture;
-		static unsigned int cubemap;
-		
-		//Uniform values
-		static glm::mat4 captureProjection;
-		static glm::mat4 captureViews[];
 
 		//Functions
 		static void setupFrameBuffer();
 		static void loadHDRTexture(string filePath);
-		static unsigned int setupCubemap();
-		static void setupCaptureProjectionAndViews();
+		static void setupCubemap();
 		static void renderCube();
+		static void setupSkyboxVAO();
 	};
 }
+#endif

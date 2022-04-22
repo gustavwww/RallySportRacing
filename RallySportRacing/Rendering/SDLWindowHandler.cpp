@@ -12,6 +12,7 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 #include "Game/GameManager.h"
+#include "CubemapLoader.h"
 
 using namespace std;
 
@@ -23,9 +24,6 @@ namespace Rendering {
 	
 	//Audio
 	int volume = 50;
-
-	//Background
-	unsigned int backgroundVAO, backgroundVBO;
 
 	GLint Rendering::SDLWindowHandler::getDebugID()
 	{
@@ -198,139 +196,12 @@ namespace Rendering {
 		return textureID;
 	}
 
-	//FolderDir should look like this: "../Textures/Background/"
-	//Format should look like this: "png" or "jpg".
-	unsigned int SDLWindowHandler::loadCubeMap(std::string folderDir, std::string format) {
-
-		vector<std::string> faces
-		{
-			folderDir + "posx." + format,
-			folderDir + "negx." + format,
-			folderDir + "posy." + format,
-			folderDir + "negy." + format,
-			folderDir + "posz." + format,
-			folderDir + "negz." + format
-		};
-
-		//Generate and bind texture ID.
-		unsigned int textureID;
-		glGenTextures(1, &textureID);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-		int width, height, nrChannels;
-		GLint colorChannels;
-
-		if (format == "png") {
-			colorChannels = GL_RGBA;
-		}
-		else {
-			colorChannels = GL_RGB;
-		}
-
-		//Load in each image to their respective cube map face.
-		for (int i = 0; i < faces.size(); i++) {
-			unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
-			if (data) {
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, colorChannels, width, height, 0, colorChannels, GL_UNSIGNED_BYTE, data);
-				stbi_image_free(data);
-			}
-			else {
-				std::cout << "Cubemap tex failed to load at path: " << faces[i] << std::endl;
-				stbi_image_free(data);
-			}
-
-		}
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-		return textureID;
-	}
-
-	//ToDo setup vertex array object.
-	void SDLWindowHandler::setupBackground() {
-
-		float backgroundVertices[] = {
-			// positions          
-			-1.0f,  1.0f, -1.0f,
-			-1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-			 1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-
-			-1.0f, -1.0f,  1.0f,
-			-1.0f, -1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f, -1.0f,
-			-1.0f,  1.0f,  1.0f,
-			-1.0f, -1.0f,  1.0f,
-
-			 1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-
-			-1.0f, -1.0f,  1.0f,
-			-1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f, -1.0f,  1.0f,
-			-1.0f, -1.0f,  1.0f,
-
-			-1.0f,  1.0f, -1.0f,
-			 1.0f,  1.0f, -1.0f,
-			 1.0f,  1.0f,  1.0f,
-			 1.0f,  1.0f,  1.0f,
-			-1.0f,  1.0f,  1.0f,
-			-1.0f,  1.0f, -1.0f,
-
-			-1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f,  1.0f,
-			 1.0f, -1.0f, -1.0f,
-			 1.0f, -1.0f, -1.0f,
-			-1.0f, -1.0f,  1.0f,
-			 1.0f, -1.0f,  1.0f
-		};
-
-		//Generate.
-		glGenVertexArrays(1, &backgroundVAO);
-		glGenBuffers(1, &backgroundVBO);
-		
-		//Bind.
-		glBindVertexArray(backgroundVAO);
-		glBindBuffer(GL_ARRAY_BUFFER, backgroundVBO);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), &backgroundVertices, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	}
-
-	void SDLWindowHandler::renderBackground(GLint programID, unsigned int textureID, glm::mat4 view, glm::mat4 proj) {
-		glDepthFunc(GL_LEQUAL);
-		glUseProgram(programID);
-		
-		//Create view projection matrix without the translation part of the view.
-		glm::mat4 viewProj = proj * glm::mat4(glm::mat3(view));
-		glUniformMatrix4fv(glGetUniformLocation(programID, "viewProjMat"), 1, GL_FALSE, &viewProj[0][0]);
-		//glUniform1i(glGetUniformLocation(programID, "background"), 0);
-
-		//Render backgroud.
-		glBindVertexArray(backgroundVAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glDepthFunc(GL_LESS);
-	}
-
 	void SDLWindowHandler::beginRenderingLoop(void (*preRender)(), void (*onQuit)()) {
 
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
-		GLint backgroundProgramID = loadShader("../RallySportRacing/Shaders/Background.vert", "../RallySportRacing/Shaders/Background.frag");
+		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
+		GLint hdrToCubemapID = loadShader("../RallySportRacing/Shaders/Cubemap.vert", "../RallySportRacing/Shaders/HdrToCubemap.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
@@ -340,9 +211,8 @@ namespace Rendering {
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
-		//Load background.
-		unsigned int background = loadCubeMap("../Textures/Background/", "png");
-		setupBackground();
+		//Load skybox.
+		unsigned int skybox = CubemapLoader::convertHDRTextureToEnvironmentMap(hdrToCubemapID, "../Textures/Background/cape_hill_2k.hdr");
 		
 		//GUI bool
 		bool showDebugGUI = false;
@@ -413,7 +283,7 @@ namespace Rendering {
 			}
 
 			//ToDo draw background here.
-			renderBackground(backgroundProgramID, background, view, projection);
+			CubemapLoader::renderBackground(skyboxProgramID, skybox, view, projection);
 
 			Game::drawDebug();
 

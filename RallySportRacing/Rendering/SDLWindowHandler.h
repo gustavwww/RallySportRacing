@@ -2,7 +2,6 @@
 #define SDLWINDOWHANDLER
 
 #include "Model.h"
-//Remove this
 #include "ParticleSystem.h"
 #include <SDL.h>
 #include <GL/glew.h>
@@ -23,8 +22,6 @@ namespace Rendering {
 		
 		unsigned int loadTexture(const char* textureFilePath);
 		unsigned int loadCubeMap(std::string folderDir, std::string format);
-		void renderBackground(GLint programID, unsigned int textureID, glm::mat4 view, glm::mat4 proj);
-		void setupBackground();
 
 		void addModel(Model* model);
 		void removeModel(Model* model);
