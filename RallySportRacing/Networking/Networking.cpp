@@ -86,14 +86,20 @@ namespace Networking {
 		
 		if (command == "game") {
 
+			if (cmd.getArgsSize() % 38 != 0) {
+				// Skip corrupt UDP packets.
+				return;
+			}
+
 			// Store players already in game to eventuelly remove them.
 			vector<int> playersInGame;
 			for (auto el : players)
 				playersInGame.push_back(el.first);
 			
 			for (int i = 0; i < cmd.getArgsSize(); i++) {
-				if (cmd.getArgs()[i] == "player") {
+				if (cmd.getArgs()[i] == "player" && (i+37) <= cmd.getArgsSize()) {
 					i++;
+
 					int id = stoi(cmd.getArgs()[i]);
 					if (id == clientID) {
 						continue;
@@ -101,7 +107,6 @@ namespace Networking {
 
 					PlayerData data(cmd, i);
 
-					// TODO: Spawn model if player not already spawned.
 					auto el = players.find(id);
 					if (el == players.end()) {
 						// Player not initialized, creating player...
@@ -133,7 +138,6 @@ namespace Networking {
 				auto el = players.find(id);
 				if (el != players.end()) {
 					Player* p = el->second;
-					handler->removeModel(p->getModel());
 					players.erase(el);
 					cout << "A player has left the game: " << p->getName() << endl;
 					// TODO: Fix player deletion, currently kills the game..
@@ -141,6 +145,7 @@ namespace Networking {
 
 					// Remove sound source
 					sound->removeSoundSource(id);
+					delete p;
 				}
 			}
 
