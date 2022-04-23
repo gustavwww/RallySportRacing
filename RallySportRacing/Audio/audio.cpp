@@ -32,12 +32,12 @@ Audio* Audio::Instance() {
 ISoundEngine* Audio::SoundEngine = createIrrKlangDevice();
 
 // Init various sounds
-irrklang::ISoundSource* Audio::hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
-irrklang::ISoundSource* Audio::exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
-irrklang::ISoundSource* Audio::engineStartSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineStart2.mp3");
-irrklang::ISoundSource* Audio::engineOffSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineOff.mp3");
+//irrklang::ISoundSource* Audio::hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
+//irrklang::ISoundSource* Audio::exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
+//irrklang::ISoundSource* Audio::engineStartSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineStart2.mp3");
+//irrklang::ISoundSource* Audio::engineOffSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineOff.mp3");
 
-irrklang::ISound* Audio::engineSound = SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
+//irrklang::ISound* Audio::engineSound = SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
 
 Audio::Audio() {
 
@@ -66,7 +66,7 @@ void Audio::volumeSet(float v) {
 }
 
 void Audio::createSoundSource(int ID, tuple <float, float, float> position) {
-	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(position)));
+	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(ID, position)));
 	cout << "Creted sound source with ID: " + to_string(ID) << endl;
 }
 
@@ -82,6 +82,6 @@ void Audio::removeSoundSource(int ID) {
 	cout << "Removed sound source: " + to_string(ID) << endl;
 }
 
-string Audio::getSoundSourceSounds(int ID) {
-	return sources.at(ID)->getSounds();
+string Audio::getSoundString(int ID) {
+	return sources.at(ID)->getSoundString();
 }

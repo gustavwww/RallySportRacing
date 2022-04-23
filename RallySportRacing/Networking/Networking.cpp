@@ -172,7 +172,7 @@ namespace Networking {
 				+ to_string(qu.y) + ","
 				+ to_string(qu.z) + ","
 				+ to_string(qu.w) + ","
-				+ sound->getSoundSourceSounds(0) + ","
+				+ sound->getSoundString(0) + ","
 				+ to_string(frontLeftPos.x) + ","
 				+ to_string(frontLeftPos.y) + ","
 				+ to_string(frontLeftPos.z) + ","
