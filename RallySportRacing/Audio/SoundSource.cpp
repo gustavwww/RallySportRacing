@@ -18,6 +18,9 @@ tuple<float, float, float> positionXYZ;
 float speed;
 float playBackSpeed;
 
+int startSoundTimer = 0;
+
+// Constructor of SoundSource
 SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 {
 	positionXYZ = positionXYZ;
@@ -28,26 +31,14 @@ SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 
 	this->soundString = "000";
 	
-	// Init various sounds
+	// Init looping sounds
 	this->hornSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", true, true, true);
-	//this->exhaustSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/Backfire.mp3", true, true, true);
-	//this->engineStartSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineStart2.mp3", true, true, true);
-	//this->engineOffSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineOff.mp3", true, true, true);
-	
-	//this->hornSound = Audio::SoundEngine->addSoundSourceAlias(Audio::hornSound, ID + ": hornSound");
-	//this->exhaustSound = Audio::SoundEngine->addSoundSourceAlias(Audio::exhaustSound, ID + ": exhaustSound");
-	//this->engineStartSound = Audio::SoundEngine->addSoundSourceAlias(Audio::engineStartSound, ID + ": engineStartSound");
-	//this->engineOffSound = Audio::SoundEngine->addSoundSourceAlias(Audio::engineOffSound, ID + ": engineOffSound");
-
-
-
 	this->engineSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
 }
 
 // Function that updates source
 void SoundSource::update(tuple <float, float, float> positionXYZ, float speed, string soundString) {
 	//engineSound->setPosition();
-	//cout << "Got past here" << endl;
 
 	this->soundString = soundString;
 
@@ -57,6 +48,23 @@ void SoundSource::update(tuple <float, float, float> positionXYZ, float speed, s
 	engineStart(this->soundString[0] == '1');
 	engine(this->soundString[0] == '2', speed);
 	engineOff(this->soundString[0] == '3');
+}
+
+// Function that removes sound source and sound pointers
+void SoundSource::removeSoundSource() {
+	if(this->hornSound) {
+		this->hornSound->drop();
+		this->hornSound = 0;
+	}
+	if (this->hornSound) {
+		this->hornSound->drop();
+		this->hornSound = 0;
+	}
+}
+
+// Function that returns soundString
+string SoundSource::getSoundString() {
+	return this->soundString;
 }
 
 // Function that plays horn sound
@@ -69,7 +77,6 @@ void SoundSource::horn(bool x) {
 	}
 	else {
 		this->hornSound->setIsPaused(true);
-		//cout << "Got to stop" << endl;
 	}
 }
 
@@ -77,30 +84,18 @@ void SoundSource::horn(bool x) {
 void SoundSource::exhaust(bool x) {
 	if (x) {
 		Audio::SoundEngine->play2D("../RallySportRacing/Audio/Backfire.mp3");
-		//if (this->exhaustSound->getIsPaused()) {
-		//	this->exhaustSound->setIsPaused(false);
-		//}
 	}
-	/*else {
-		if (!this->exhaustSound->getIsPaused()) {
-			this->exhaustSound->setIsPaused(true);
-		}
-	}*/
 }
 
 // Function that plays engine start sound
 void SoundSource::engineStart(bool x) {
-	if (x) {
+	if (x && this->startSoundTimer == 0) {
 		Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineStart2.mp3");
-		/*if (this->engineSound->getIsPaused() && this->engineStartSound->getIsPaused()) {
-			this->engineStartSound->setIsPaused(false);
-		}*/
+		this->startSoundTimer = 120;
 	}
-	/*else {
-		if (!this->engineStartSound->getIsPaused()) {
-			this->engineStartSound->setIsPaused(true);
-		}
-	}*/
+	if (this->startSoundTimer > 0) {
+		this->startSoundTimer--;
+	}
 }
 
 // Function that plays engine sound
@@ -123,12 +118,5 @@ void SoundSource::engine(bool x, float speed) {
 void SoundSource::engineOff(bool x) {
 	if (x) {
 		Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineOff.mp3");
-		/*if (!this->engineOffSound->getIsPaused()) {
-			this->engineOffSound->setIsPaused(false);
-		}*/
 	}
-}
-
-string SoundSource::getSoundString() {
-	return this->soundString;
 }

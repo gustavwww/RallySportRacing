@@ -13,6 +13,7 @@ class SoundSource {
 public:
 	SoundSource(int ID, tuple <float, float, float> position);
 	void update(tuple <float, float, float> positionXYZ, float speed, string sounds);
+	void removeSoundSource();
 	string getSoundString();
 
 private:
@@ -23,11 +24,9 @@ private:
 	void engineOff(bool x);
 
 	string soundString;
+	int startSoundTimer;
 
 	irrklang::ISound* hornSound;
-	irrklang::ISound* exhaustSound;
-	irrklang::ISound* engineStartSound;
-	irrklang::ISound* engineOffSound;
 	irrklang::ISound* engineSound;
 };
 

@@ -21,6 +21,7 @@ map<int, SoundSource*> sources;
 
 Audio* Audio::instance = nullptr;
 
+// Function that creates one and only one instance of Audio
 Audio* Audio::Instance() {
 	if (instance == nullptr) {
 		instance = new Audio();
@@ -31,14 +32,7 @@ Audio* Audio::Instance() {
 // Init sound engine
 ISoundEngine* Audio::SoundEngine = createIrrKlangDevice();
 
-// Init various sounds
-//irrklang::ISoundSource* Audio::hornSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3");
-//irrklang::ISoundSource* Audio::exhaustSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/Backfire.mp3");
-//irrklang::ISoundSource* Audio::engineStartSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineStart2.mp3");
-//irrklang::ISoundSource* Audio::engineOffSound = SoundEngine->addSoundSourceFromFile("../RallySportRacing/Audio/engineOff.mp3");
-
-//irrklang::ISound* Audio::engineSound = SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
-
+// Constructor of audio
 Audio::Audio() {
 
 	// Init master volume
@@ -46,6 +40,7 @@ Audio::Audio() {
 	SoundEngine->setSoundVolume(volume);
 }
 
+// Function that increases master volume by 5%
 void Audio::volumeUp() {
 	if (volume < 1.0F) {
 		volume = volume + 0.05F;
@@ -53,6 +48,7 @@ void Audio::volumeUp() {
 	SoundEngine->setSoundVolume(volume);
 }
 
+// Function that decreases master volume by 5%
 void Audio::volumeDown() {
 	if (volume > 0.0F) {
 		volume = volume - 0.05F;
@@ -60,28 +56,29 @@ void Audio::volumeDown() {
 	SoundEngine->setSoundVolume(volume);
 }
 
+// Function that sets master volume to v
 void Audio::volumeSet(float v) {
 	volume = v;
 	SoundEngine->setSoundVolume(volume);
 }
 
+// Function that creates a sound source and ads ut to a map of sources
 void Audio::createSoundSource(int ID, tuple <float, float, float> position) {
 	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(ID, position)));
-	cout << "Creted sound source with ID: " + to_string(ID) << endl;
 }
 
+// Function that updates sound source in map with key ID
 void Audio::updateSoundSource(int ID, tuple<float, float, float> position, float speed, string sounds) {
 	sources.at(ID)->update(position, speed, sounds);
-	/*if (ID != 0) {
-		cout << "Updated sound source with ID: " + to_string(ID) << endl;
-	}*/
 }
 
+// Function that removes sound source from map and ends all sounds
 void Audio::removeSoundSource(int ID) {
+	sources.at(ID)->removeSoundSource();
 	sources.erase(ID);
-	cout << "Removed sound source: " + to_string(ID) << endl;
 }
 
+// Function that gets sound string of specific sound source
 string Audio::getSoundString(int ID) {
 	return sources.at(ID)->getSoundString();
 }
