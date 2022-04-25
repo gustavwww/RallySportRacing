@@ -12,7 +12,7 @@ uniform float roughness;
 ////////////////////////////////
 // Envoirment
 ////////////////////////////////
-
+uniform samplerCube irradianceMap;
 ////////////////////////////////
 //Shadow
 ////////////////////////////////
@@ -126,9 +126,13 @@ void main(){
 	Lo += (kDiff * albedo / PI + specular) * radiance * NdotL;
 
 	//ToDo end for each light loop here.
-
-	vec3 ambient = vec3(0.03) * albedo;
-	vec3 color = ambient + Lo;
+	
+	//Ambient light.
+	
+	//ToDo fix ambient light.
+	vec3 diffuseAmbient = texture(irradianceMap, normal).rgb * albedo * kDiff;
+	//vec3 diffuseAmbient = vec3(0.03) * albedo;
+	vec3 color = diffuseAmbient + Lo;
 
 	//HDR tonemapping.
 	color = color / (color + vec3(1.0));
