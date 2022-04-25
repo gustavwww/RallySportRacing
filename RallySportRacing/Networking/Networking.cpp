@@ -126,7 +126,7 @@ namespace Networking {
 
 						// Update sound source
 						
-						sound->updateSoundSource(id, make_tuple(0, 0, 0), 0, data.soundString);
+						sound->updateSoundSource(id, make_tuple(0, 0, 0), data.speed, data.soundString);
 					}
 
 				}
@@ -172,6 +172,7 @@ namespace Networking {
 				+ to_string(qu.y) + ","
 				+ to_string(qu.z) + ","
 				+ to_string(qu.w) + ","
+				+ to_string(vehicle->getSpeed()) + ","
 				+ sound->getSoundString(0) + ","
 				+ to_string(frontLeftPos.x) + ","
 				+ to_string(frontLeftPos.y) + ","

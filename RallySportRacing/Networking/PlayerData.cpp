@@ -21,6 +21,8 @@ namespace Networking {
 
 		orientation = glm::quat(quW, quX, quY, quZ);
 
+		speed = stof(cmd.getArgs()[index + 9]);
+
 		soundString = cmd.getArgs()[index + 9];
 
 		posX = stof(cmd.getArgs()[index + 10]);
