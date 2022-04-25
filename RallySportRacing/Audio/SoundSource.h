@@ -24,7 +24,6 @@ private:
 	void engineOff(bool x);
 
 	string soundString;
-	int startSoundTimer;
 
 	irrklang::ISound* hornSound;
 	irrklang::ISound* engineSound;

@@ -29,6 +29,8 @@ SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 	// Init engine sound
 	playBackSpeed = 1.0F;
 
+	startSoundTimer = 0;
+
 	this->soundString = "000";
 	
 	// Init looping sounds
@@ -56,9 +58,9 @@ void SoundSource::removeSoundSource() {
 		this->hornSound->drop();
 		this->hornSound = 0;
 	}
-	if (this->hornSound) {
-		this->hornSound->drop();
-		this->hornSound = 0;
+	if (this->engineSound) {
+		this->engineSound->drop();
+		this->engineSound = 0;
 	}
 }
 
@@ -89,12 +91,12 @@ void SoundSource::exhaust(bool x) {
 
 // Function that plays engine start sound
 void SoundSource::engineStart(bool x) {
-	if (x && this->startSoundTimer == 0) {
+	if (x && startSoundTimer == 0) {
 		Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineStart2.mp3");
-		this->startSoundTimer = 120;
+		startSoundTimer = 120;
 	}
-	if (this->startSoundTimer > 0) {
-		this->startSoundTimer--;
+	if (startSoundTimer > 0) {
+		startSoundTimer--;
 	}
 }
 
