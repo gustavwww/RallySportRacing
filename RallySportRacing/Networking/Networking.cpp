@@ -15,7 +15,7 @@
 #include <glm/gtx/quaternion.hpp>
 #include <Audio/audio.h>
 
-#define TICK_RATE 60;
+#define TICK_RATE 120;
 
 using namespace std;
 
@@ -116,7 +116,7 @@ namespace Networking {
 						cout << "A player has joined the game: " << p->getName() << endl;
 
 						// Create sound source
-						sound->createSoundSource(id, make_tuple(0, 0, 0));
+						sound->createSoundSource(id, make_tuple(data.pos.x, data.pos.y, data.pos.z));
 					}
 					else {
 						// Player already created, updating position...
@@ -126,7 +126,7 @@ namespace Networking {
 
 						// Update sound source
 						
-						sound->updateSoundSource(id, make_tuple(0, 0, 0), data.speed, data.soundString);
+						sound->updateSoundSource(id, make_tuple(data.pos.x, data.pos.y, data.pos.z), data.speed, data.soundString);
 					}
 
 				}

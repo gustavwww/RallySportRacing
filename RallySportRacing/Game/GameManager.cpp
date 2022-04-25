@@ -71,7 +71,7 @@ namespace Game {
 
 	Audio* sound;
 	int volumeButtonDelay = 0;
-	string sounds = "000";
+	string soundString = "000";
 
 	//Colors to select from when creating a model
 	glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
@@ -237,14 +237,14 @@ namespace Game {
 				if (keyboard_state_array[SDL_SCANCODE_E] && isOn == false) {
 					isOn = true;
 					// Play start sound
-					sounds[0] = '1';
+					soundString[0] = '1';
 					canPress = false;
 					time = 0;
 				}
 				else if (keyboard_state_array[SDL_SCANCODE_E] && isOn == true && vehicle->getSpeed() < abs(3)) {
 					isOn = false;
 					// Plays stop sound
-					sounds[0] = '3';
+					soundString[0] = '3';
 					canPress = false;
 					time = 0;
 				}
@@ -257,8 +257,8 @@ namespace Game {
 
 			if (isOn == true) {
 				// Engine sound on
-				if (sounds[0] == '0') {
-					sounds[0] = '2';
+				if (soundString[0] == '0') {
+					soundString[0] = '2';
 				}
 				// driving 
 				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
@@ -279,7 +279,7 @@ namespace Game {
 					smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3); // only z axis. Simulate wind effect on the smoke
 					if (vehicle->getSpeed() >= 100 && toggleFire == true) {
 						// spela upp ljud explosion
-						sounds[2] = '1';
+						soundString[2] = '1';
 						for (int i = 0; i < 200; i++) {
 							glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
 							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
@@ -403,7 +403,7 @@ namespace Game {
 
 		// horn sound
 		if (keyboard_state_array[SDL_SCANCODE_H]) {
-			sounds[1] = '1';
+			soundString[1] = '1';
 		}
 
 		// volume change
@@ -420,10 +420,10 @@ namespace Game {
 		}
 
 		// Update "self" sound source
-		sound->updateSoundSource(0, make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z), vehicle->getSpeed(), sounds);
+		sound->updateSoundSource(0, make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z), vehicle->getSpeed(), soundString);
 
 		// Reset sounds
-		sounds = "000";
+		soundString = "000";
 	}
 
 	void adjustCamPosition() {
