@@ -74,7 +74,7 @@ void Audio::updateSoundSource(int ID, tuple<float, float, float> position, float
 
 // Function that removes sound source from map and ends all sounds
 void Audio::removeSoundSource(int ID) {
-	sources.at(ID)->removeSoundSource();
+	delete sources.at(ID);
 	sources.erase(ID);
 }
 

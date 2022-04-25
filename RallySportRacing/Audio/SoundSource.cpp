@@ -38,6 +38,15 @@ SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 	this->engineSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
 }
 
+SoundSource::~SoundSource()	{
+	if (this->hornSound) {
+		delete this->hornSound;
+	}
+	if (this->engineSound) {
+		delete this->engineSound;
+	}
+}
+
 // Function that updates source
 void SoundSource::update(tuple <float, float, float> positionXYZ, float speed, string soundString) {
 	//engineSound->setPosition();
@@ -50,18 +59,6 @@ void SoundSource::update(tuple <float, float, float> positionXYZ, float speed, s
 	engineStart(this->soundString[0] == '1');
 	engine(this->soundString[0] == '2', speed);
 	engineOff(this->soundString[0] == '3');
-}
-
-// Function that removes sound source and sound pointers
-void SoundSource::removeSoundSource() {
-	if(this->hornSound) {
-		this->hornSound->drop();
-		this->hornSound = 0;
-	}
-	if (this->engineSound) {
-		this->engineSound->drop();
-		this->engineSound = 0;
-	}
 }
 
 // Function that returns soundString

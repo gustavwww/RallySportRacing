@@ -12,6 +12,7 @@ using namespace irrklang;
 class SoundSource {
 public:
 	SoundSource(int ID, tuple <float, float, float> position);
+	~SoundSource();
 	void update(tuple <float, float, float> positionXYZ, float speed, string sounds);
 	void removeSoundSource();
 	string getSoundString();
