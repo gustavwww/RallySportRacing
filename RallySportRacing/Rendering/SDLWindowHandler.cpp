@@ -25,6 +25,11 @@ namespace Rendering {
 	//Audio
 	int volume = 50;
 
+	glm::vec3 SDLWindowHandler::getLightPosition() {
+		return glm::vec3(lightPos);
+	}
+
+
 	GLint Rendering::SDLWindowHandler::getDebugID()
 	{
 		return this->debugID;
@@ -202,6 +207,7 @@ namespace Rendering {
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
 		GLint hdrToCubemapID = loadShader("../RallySportRacing/Shaders/Cubemap.vert", "../RallySportRacing/Shaders/HdrToCubemap.frag");
+		GLint envMapToIrradianceMapID = loadShader("../RallySportRacing/Shaders/Cubemap.vert", "../RallySportRacing/Shaders/CubemapToIrradiance.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
@@ -213,6 +219,7 @@ namespace Rendering {
 
 		//Load skybox.
 		unsigned int skybox = CubemapLoader::convertHDRTextureToEnvironmentMap(hdrToCubemapID, "../Textures/Background/cape_hill_2k.hdr");
+		unsigned int irradianceMap = CubemapLoader::createIrradianceMap(envMapToIrradianceMapID, skybox);
 		
 		//GUI bool
 		bool showDebugGUI = false;
@@ -273,6 +280,11 @@ namespace Rendering {
 			//Set uniforms for light source.
 			glUniform3fv(glGetUniformLocation(programID, "viewSpaceLightPos"), 1, &viewSpaceLightPos[0]);
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
+			
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+
+			glUniform1i(glGetUniformLocation(programID, "irradianceMap"), 0);
 
 			for (Model* m : models) {
 				m->render(projection, view, programID);

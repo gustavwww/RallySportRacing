@@ -43,6 +43,7 @@ namespace Game {
 	GameObject* wall;
 	GameObject* wall2;
 	GameObject* test1;
+	GameObject* light;
 	vector<GameObject*> gameObjects;
 
 	Vehicle* vehicle;
@@ -119,12 +120,19 @@ namespace Game {
 		test1->setInitialPosition(btVector3(-700, -90, 0));
 
 		// test wall
-		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf", false);
+		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false);
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel, physics->dynamicsWorld);
 		gameObjects.push_back(wall);
 		wall->setInitialPosition(btVector3(-70, 4, 0));
-		wall->setInitialRotation(btQuaternion(0,0,1,1));
+		//wall->setInitialRotation(btQuaternion(0,0,1,1));
+
+		// test light
+		Rendering::Model* lightModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
+		windowHandler->addModel(lightModel);
+		light = new GameObject(lightModel, physics->dynamicsWorld);
+		gameObjects.push_back(light);
+		light->setInitialPosition(btVector3(-70, 4, 0));
 
 		// player vehicle, use setInitialpos to change position when starting the game
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
@@ -226,6 +234,8 @@ namespace Game {
 		SDL_PumpEvents();
 		buttons = SDL_GetMouseState(&x, &y);
 
+		light->setPosition(handler->getLightPosition());
+
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
 
@@ -326,7 +336,7 @@ namespace Game {
 			perspective = 1;
 			camOrientation = glm::vec3(0, 1, 0);
 		}
-		if (keyboard_state_array[SDL_SCANCODE_C] || (buttons & SDL_BUTTON_RMASK) == SDL_BUTTON_RMASK) {
+		if (keyboard_state_array[SDL_SCANCODE_C] || (buttons & SDL_BUTTON_RMASK) == SDL_BUTTON_RMASK && perspective != 3) {
 			perspective = 2;
 			camOrientation = glm::vec3(0, 1, 0);
 		}

@@ -15,10 +15,12 @@ namespace Rendering {
 
     //Texture related
     static unsigned int texture;
-    static unsigned int cubemap;
+    static unsigned int environmentMap;
+    static unsigned int irradianceMap;
 
     //Bool
     static bool isSkyboxVAOSetup;
+    static bool isFrameBufferSetup;
 
     static glm::mat4 captureProjection = glm::perspective(glm::radians(90.0f), 1.0f, 0.1f, 10.0f);
     //View for all 6 faces of a cubemap.
@@ -33,9 +35,13 @@ namespace Rendering {
     };
 
     unsigned int CubemapLoader::convertHDRTextureToEnvironmentMap(GLint shaderProgram, string textureFilePath) {
-        setupFrameBuffer();
+        if (!isFrameBufferSetup) {
+            setupFrameBuffer();
+            isFrameBufferSetup = true;
+        }
+        
         loadHDRTexture(textureFilePath);
-        setupCubemap();
+        environmentMap = setupCubemap(512);
 
         glUseProgram(shaderProgram);
 
@@ -52,14 +58,14 @@ namespace Rendering {
             //ToDo add proper uniforms.
             glm::mat4 captureView = captureViews[i];
             glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMat"), 1, GL_FALSE, &captureView[0][0]);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, cubemap, 0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, environmentMap, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             renderCube();
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        return cubemap;
+        return environmentMap;
     }
 
     void CubemapLoader::setupFrameBuffer() {
@@ -106,21 +112,57 @@ namespace Rendering {
         }
     }
 
-    void CubemapLoader::setupCubemap() {
+    unsigned int CubemapLoader::createIrradianceMap(GLint shaderProgram, unsigned int envCubemap) {
+        if (!isFrameBufferSetup) {
+            setupFrameBuffer();
+            isFrameBufferSetup = true;
+        }
+        irradianceMap = setupCubemap(32);
+
+        glUseProgram(shaderProgram);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+
+        glUniform1i(glGetUniformLocation(shaderProgram, "envMap"), 0);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projMat"), 1, GL_FALSE, &captureProjection[0][0]);
+
+        glViewport(0, 0, 32, 32);
+        glBindFramebuffer(GL_FRAMEBUFFER, FBO);
+        for (unsigned int i = 0; i < 6; i++)
+        {
+            glm::mat4 captureView = captureViews[i];
+            glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "viewMat"), 1, GL_FALSE, &captureView[0][0]);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, irradianceMap, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            renderCube();
+        }
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        
+
+        return irradianceMap;
+    }
+
+    unsigned int CubemapLoader::setupCubemap(int resolution) {
+
+        unsigned int cubemap;
 
         glGenTextures(1, &cubemap);
         glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
 
         //Loop through all 6 faces of the cubemap from positive X to negative Z.
-        for (unsigned int i = 0; i < 6; ++i)
+        for (unsigned int i = 0; i < 6; i++)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 512, 512, 0, GL_RGB, GL_FLOAT, nullptr);
+            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, resolution, resolution, 0, GL_RGB, GL_FLOAT, nullptr);
         }
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        return cubemap;
     }
 
     void CubemapLoader::setupSkyboxVAO() {
@@ -177,7 +219,7 @@ namespace Rendering {
         glGenVertexArrays(1, &skyboxVAO);
         glGenBuffers(1, &skyboxVBO);
 
-        //Bind.dd
+        //Bind.
         glBindVertexArray(skyboxVAO);
         glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
