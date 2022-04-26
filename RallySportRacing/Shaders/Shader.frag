@@ -12,7 +12,7 @@ uniform float roughness;
 ////////////////////////////////
 // Envoirment
 ////////////////////////////////
-uniform samplerCube irradianceMap;
+layout(binding = 7) uniform sampler2D irradianceMap;
 ////////////////////////////////
 //Shadow
 ////////////////////////////////
@@ -75,6 +75,11 @@ vec3 fresnelSchlick(float HdotV, vec3 baseReflectivity){
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - HdotV, 5.0);
 }
 
+vec3 fresnelSchlickRoughness(float HdotV, vec3 baseReflectivity, float roughness){
+	
+	return baseReflectivity + (max(vec3(1.0 - roughness), baseReflectivity) - baseReflectivity) * pow(1.0 - HdotV, 5.0);
+}
+
 void main(){
 
 	/////////////////////////////////
@@ -128,11 +133,20 @@ void main(){
 	//ToDo end for each light loop here.
 	
 	//Ambient light.
+	//vec3 diffuseAmbient = 1.5f * texture(irradianceMap, normal).rgb * albedo * kDiff;
+	vec3 diffuseAmbient = vec3(0.03) * albedo;
 	
-	//ToDo fix ambient light.
-	vec3 diffuseAmbient = texture(irradianceMap, normal).rgb * albedo * kDiff;
-	//vec3 diffuseAmbient = vec3(0.03) * albedo;
-	vec3 color = diffuseAmbient + Lo;
+	//ToDo fix specular ambient light.
+	const float MAX_REFLECTION_LOD = 4.0;
+	//vec3 prefilteredColor = textureLod(prefilteredMap, reflect(-viewDir, normal), roughness * MAX_REFLECTION_LOD).rgb;
+	//vec2 brdf = texture(brdfLUT, vec2(NdotV, roughness)).rg;
+	//vec3 specularAmbient = prefilteredColor * (F * brdf.r +brdf.g);
+	vec3 specularAmbient = vec3(0.0);
+
+	vec3 ambient = (diffuseAmbient + specularAmbient);
+
+	
+	vec3 color = ambient + Lo;
 
 	//HDR tonemapping.
 	color = color / (color + vec3(1.0));

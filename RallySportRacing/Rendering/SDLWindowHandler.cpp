@@ -12,7 +12,7 @@
 #include "imgui_impl_sdl.h"
 #include "imgui_impl_opengl3.h"
 #include "Game/GameManager.h"
-#include "CubemapLoader.h"
+#include "Utils/HdrFileGenerator.h"
 
 using namespace std;
 
@@ -21,6 +21,7 @@ namespace Rendering {
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
+	float envMultiplier = 1.5f;
 	
 	//Audio
 	int volume = 50;
@@ -28,7 +29,6 @@ namespace Rendering {
 	glm::vec3 SDLWindowHandler::getLightPosition() {
 		return glm::vec3(lightPos);
 	}
-
 
 	GLint Rendering::SDLWindowHandler::getDebugID()
 	{
@@ -217,10 +217,20 @@ namespace Rendering {
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
-		//Load skybox.
-		unsigned int skybox = CubemapLoader::convertHDRTextureToEnvironmentMap(hdrToCubemapID, "../Textures/Background/cape_hill_2k.hdr");
-		unsigned int irradianceMap = CubemapLoader::createIrradianceMap(envMapToIrradianceMapID, skybox);
-		
+		//Load environment textures.
+		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/001.hdr");
+		unsigned int irradianceMap = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/001_irradiance.hdr");
+
+		//Bind textures.
+		glActiveTexture(GL_TEXTURE6);
+		glBindTexture(GL_TEXTURE_2D, skybox);
+		glActiveTexture(GL_TEXTURE7);
+		glBindTexture(GL_TEXTURE_2D, irradianceMap);
+
+		//Environment uniforms.
+		glUseProgram(skyboxProgramID);
+		glUniform1fv(glGetUniformLocation(skyboxProgramID, "envMultiplier"), 1, &envMultiplier);
+
 		//GUI bool
 		bool showDebugGUI = false;
 
@@ -243,7 +253,7 @@ namespace Rendering {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplSDL2_NewFrame(window);
 			ImGui::NewFrame();
-			
+
 			//Set slider to change in scene.
 			ImGui::DragFloat3("light pos", &lightPos.x);
 			ImGui::DragFloat3("light color", &lightColor.x);
@@ -253,7 +263,7 @@ namespace Rendering {
 
 				showDebugGUI = !showDebugGUI;
 			}
-			
+
 			//Volume control menu
 			if (ImGui::ArrowButton("volDownButton", 0)) { if (volume >= 5) { volume = volume - 5; cout << "Left button!\n"; } }
 			ImGui::SameLine(50);
@@ -274,17 +284,18 @@ namespace Rendering {
 			// Clear the colorbuffer
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+			//Draw background
+			glUseProgram(skyboxProgramID);
+			glUniform3fv(glGetUniformLocation(skyboxProgramID, "cameraPos"), 1, &camPosition[0]);
+			glUniformMatrix4fv(glGetUniformLocation(skyboxProgramID, "invPV"), 1, GL_FALSE, &inverse(projection * view)[0][0]);
+			Utils::HdrFileGenerator::drawScreenQuad();
+
 			// Choose shader program to use
 			glUseProgram(programID);
 
 			//Set uniforms for light source.
 			glUniform3fv(glGetUniformLocation(programID, "viewSpaceLightPos"), 1, &viewSpaceLightPos[0]);
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
-			
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
-
-			glUniform1i(glGetUniformLocation(programID, "irradianceMap"), 0);
 
 			for (Model* m : models) {
 				m->render(projection, view, programID);
@@ -293,9 +304,6 @@ namespace Rendering {
 			for (ParticleSystem* p : particleSystems) {
 				p->render(particleProgramID, projection, view, width, height);
 			}
-
-			//ToDo draw background here.
-			CubemapLoader::renderBackground(skyboxProgramID, skybox, view, projection);
 
 			Game::drawDebug();
 

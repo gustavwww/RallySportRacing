@@ -1,23 +1,34 @@
 #version 420
 
+layout(binding = 6) uniform sampler2D skybox;
+
 //Inputs
-in vec3 TexCoords;
+in vec2 texCoord;
 
 //Outputs
 out vec4 fragmentColor;
 
 //Uniforms
-uniform samplerCube skybox;
+uniform vec3 cameraPos;
+uniform float envMultiplier;
+uniform mat4 invPV;
+
+//Constants
+const float PI = 3.14159265359;
 
 void main(){
-	vec3 envColor = texture(skybox, TexCoords).rgb;
 
-	//HDR tone mapping.
-	envColor = min(envColor / (envColor + vec3(1.0)), 10000);
+	vec4 pixelPos = invPV * vec4(texCoord, 1.0, 1.0);
+	pixelPos = (1.0 / pixelPos.w) * pixelPos;
 
-	//Gamma correction.
-    envColor = pow(envColor, vec3(1.0/2.2));
-	
+	vec3 dir = normalize(pixelPos.xyz - cameraPos);
 
-	fragmentColor = vec4(envColor, 1.0);
+	float theta = acos(max(-1.0f, min(1.0f, dir.y)));
+	float phi = atan(dir.z, dir.x);
+
+	if(phi < 0.0f)
+		phi = phi + 2.0f * PI;
+	// Use these to lookup the color in the environment map
+	vec2 lookup = vec2(phi / (2.0 * PI), theta / PI);
+	fragmentColor = envMultiplier * texture(skybox, lookup);
 }
