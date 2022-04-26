@@ -14,11 +14,13 @@ const float PI = 3.14159265359;
 void main(){
 	vec3 normal = normalize(pos);
 
+	
 	//Irradiance color.
 	vec3 irradiance = vec3(0.0);
 
+	/*
 	//Create sampling tangent space.
-	vec3 right = cross(vec3(0.0, 0.0, -1.0), normal);
+	vec3 right = cross(vec3(0.0, 1.0, 0.0), normal);
 	vec3 up = cross(normal, right);
 
 	float sampleStep = 0.025;
@@ -43,10 +45,10 @@ void main(){
 			irradiance += texture(envMap, worldSample).rgb * cosTheta * sinTheta;
 			nrSamples++;
 		}
-	}
+	}*/
 
 	//Multiplacation by PI compensate weight issue.
-	irradiance = irradiance * PI * float((1.0 / nrSamples));
+	//irradiance = irradiance * PI * float((1.0 / nrSamples));
 
-	fragmentcolor = vec4(irradiance, 1.0);
+	fragmentcolor = vec4(normal, 1.0);
 }
