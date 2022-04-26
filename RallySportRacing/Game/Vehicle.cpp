@@ -190,11 +190,21 @@ namespace Game {
 
 		vehicle->setBrake(500000, 2);
 		vehicle->setBrake(500000, 3);
+		
 	}
 
 	float Game::Vehicle::getSpeed()
 	{
 		return vehicle->getCurrentSpeedKmHour();
+	}
+
+	// Function that returns velocity vector in speed per frame
+	tuple<float, float, float> Game::Vehicle::getVelocity() {
+		btVector3 velocity = vehicle->getRigidBody()->getLinearVelocity();
+		float speedX = velocity.getX();
+		float speedY = velocity.getY();
+		float speedZ = velocity.getZ();
+		return make_tuple(speedX, speedY, speedZ);
 	}
 
 	void Vehicle::updateTransform()

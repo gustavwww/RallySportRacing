@@ -420,8 +420,9 @@ namespace Game {
 		}
 
 		// Update "self" sound source
-		sound->updateSoundSource(0, make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z), vehicle->getSpeed(), soundString);
-
+		sound->updateSoundSource(0, make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z), vehicle->getVelocity(), vehicle->getSpeed(), soundString);
+		sound->setListenerParameters(glmToTuple(camPosition), glmToTuple(camDirection), vehicle->getVelocity(), vehicle->getSpeed());
+		
 		// Reset sounds
 		soundString = "000";
 	}
@@ -449,6 +450,9 @@ namespace Game {
 	glm::quat Game::bulletToGlm(const btQuaternion& q)
 	{
 		return glm::quat(q.getW(), q.getX(), q.getY(), q.getZ());
+	}
+	tuple<float, float, float> Game::glmToTuple(const glm::vec3& vec) {
+		return make_tuple(vec.x, vec.y, vec.z);
 	}
 
 	void Game::drawDebug() {

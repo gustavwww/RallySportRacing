@@ -70,11 +70,9 @@ void Audio::createSoundSource(int ID, tuple <float, float, float> position) {
 	cout << "Creted sound source with ID: " + to_string(ID) << endl;
 }
 
-void Audio::updateSoundSource(int ID, tuple<float, float, float> position, float speed, string sounds) {
-	sources.at(ID)->update(position, speed, sounds);
-	/*if (ID != 0) {
-		cout << "Updated sound source with ID: " + to_string(ID) << endl;
-	}*/
+// Function that updates sound source in map with key ID
+void Audio::updateSoundSource(int ID, tuple<float, float, float> position, tuple<float, float, float> velPerFrame, float speed, string sounds) {
+	sources.at(ID)->update(position, velPerFrame, speed, sounds);
 }
 
 void Audio::removeSoundSource(int ID) {
@@ -84,4 +82,32 @@ void Audio::removeSoundSource(int ID) {
 
 string Audio::getSoundString(int ID) {
 	return sources.at(ID)->getSoundString();
+}
+
+// Function that updates the listeners position, orientation and velocity
+void Audio::setListenerParameters(tuple <float, float, float> positionXYZ, tuple <float, float, float> direction, tuple <float, float, float> velPerFrame, float speedKmPerh) {
+
+	irrklang::vec3df position(get<0>(positionXYZ), get<1>(positionXYZ), get<2>(positionXYZ));	// position of the listener
+	irrklang::vec3df lookDirection(get<0>(direction), get<1>(direction), get<2>(direction)); // the direction the listener looks into
+	irrklang::vec3df velPerSecond = getVelMetersPerSec(velPerFrame, speedKmPerh);   // only relevant for doppler effects
+	irrklang::vec3df upVector(0, 1, 0);        // where 'up' is in your 3D scene
+
+	SoundEngine->setListenerPosition(position, lookDirection, velPerSecond, upVector);
+}
+
+// Function that takes a tuple of the speed per frame in X,Y,Z directions and total speed in km/h and returns a tuple of the speed in m/s
+irrklang::vec3df Audio::getVelMetersPerSec(tuple <float, float, float> velPerFrame, float speedKmPerh) {
+	float x;
+	// Get speed in m/s
+	float speedMetersPerSec = speedKmPerh / 3.6;
+	
+	// Calculate x, the multiplier that turns the speed per frame to speed in m/s
+	// speedMeterPerSec = sqrt( (velPerFrame.X * x)^2 + (velPerFrame.Y * x)^2 + (velPerFrame.Z * x)^2 ) -> x
+
+	x = speedMetersPerSec * sqrt( pow(get<0>(velPerFrame), 2) + pow(get<1>(velPerFrame), 2) + pow(get<2>(velPerFrame), 2) ) /
+		(pow(get<0>(velPerFrame), 2) + pow(get<1>(velPerFrame), 2) + pow(get<2>(velPerFrame), 2));
+
+	// Return vector of velocity in m/s
+	irrklang::vec3df velMetersPerSec( get<0>(velPerFrame) * x, get<1>(velPerFrame) * x, get<2>(velPerFrame) * x );
+	return velMetersPerSec;
 }

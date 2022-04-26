@@ -12,17 +12,19 @@ using namespace irrklang;
 class SoundSource {
 public:
 	SoundSource(int ID, tuple <float, float, float> position);
-	void update(tuple <float, float, float> positionXYZ, float speed, string sounds);
+	~SoundSource();
+	void update(tuple <float, float, float> positionXYZ, tuple <float, float, float> velPerFrame, float speed, string sounds);
 	string getSoundString();
 
 private:
-	void horn(bool x);
-	void exhaust(bool x);
-	void engineStart(bool x);
-	void engine(bool x, float speed);
-	void engineOff(bool x);
+	void horn(bool x, irrklang::vec3df position, irrklang::vec3df velMetersPerSec);
+	void exhaust(bool x, irrklang::vec3df position);
+	void engineStart(bool x, irrklang::vec3df position);
+	void engine(bool x, float speed, irrklang::vec3df position);
+	void engineOff(bool x, irrklang::vec3df position);
 
 	string soundString;
+	int startSoundTimer;
 
 	irrklang::ISound* hornSound;
 	irrklang::ISound* exhaustSound;

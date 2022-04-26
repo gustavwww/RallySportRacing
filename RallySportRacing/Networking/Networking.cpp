@@ -126,7 +126,7 @@ namespace Networking {
 
 						// Update sound source
 						
-						sound->updateSoundSource(id, make_tuple(data.pos.x, data.pos.y, data.pos.z), data.speed, data.soundString);
+						sound->updateSoundSource(id, make_tuple(data.pos.x, data.pos.y, data.pos.z), make_tuple(0, 0, 0), data.speed, data.soundString);
 					}
 
 				}

@@ -13,54 +13,60 @@ using namespace irrklang;
 
 #pragma comment(lib, "../../External/irrKlang/irrKlang.lib")
 
-tuple<float, float, float> positionXYZ;
-
 float speed;
 float playBackSpeed;
 
 SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 {
-	positionXYZ = positionXYZ;
+	irrklang::vec3df position(get<0>(positionXYZ), get<1>(positionXYZ), get<2>(positionXYZ));
 	speed = 0.0F;
 
 	// Init engine sound
 	playBackSpeed = 1.0F;
 
 	this->soundString = "000";
+	startSoundTimer = 0;
 	
-	// Init various sounds
-	this->hornSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", true, true, true);
-	//this->exhaustSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/Backfire.mp3", true, true, true);
-	//this->engineStartSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineStart2.mp3", true, true, true);
-	//this->engineOffSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineOff.mp3", true, true, true);
-	
-	//this->hornSound = Audio::SoundEngine->addSoundSourceAlias(Audio::hornSound, ID + ": hornSound");
-	//this->exhaustSound = Audio::SoundEngine->addSoundSourceAlias(Audio::exhaustSound, ID + ": exhaustSound");
-	//this->engineStartSound = Audio::SoundEngine->addSoundSourceAlias(Audio::engineStartSound, ID + ": engineStartSound");
-	//this->engineOffSound = Audio::SoundEngine->addSoundSourceAlias(Audio::engineOffSound, ID + ": engineOffSound");
+	// Init looping sounds
+	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
+	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/BetterCarAudio.mp3",position,  true, true, true);
+}
 
-
-
-	this->engineSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
+// Destructor of SoundSource
+SoundSource::~SoundSource()	{
+	if (this->hornSound) {
+		this->hornSound->stop();
+		this->hornSound->drop();
+		this->hornSound = 0;
+	}
+	if (this->engineSound) {
+		this->engineSound->stop();
+		this->engineSound->drop();
+		this->engineSound = 0;
+	}
 }
 
 // Function that updates source
-void SoundSource::update(tuple <float, float, float> positionXYZ, float speed, string soundString) {
-	//engineSound->setPosition();
-	//cout << "Got past here" << endl;
+void SoundSource::update(tuple <float, float, float> positionXYZ, tuple <float, float, float> velPerFrame, float speed, string soundString) {
+	irrklang::vec3df position(get<0>(positionXYZ), get<1>(positionXYZ), get<2>(positionXYZ));
+
+	// Get velocity vector in m/s
+	irrklang::vec3df velMetersPerSecond = Audio::getVelMetersPerSec(velPerFrame, speed);
 
 	this->soundString = soundString;
 
-	horn(this->soundString[1] == '1');
-	exhaust(this->soundString[2] == '1');
+	horn(this->soundString[1] == '1', position, velMetersPerSecond);
+	exhaust(this->soundString[2] == '1', position);
 
-	engineStart(this->soundString[0] == '1');
-	engine(this->soundString[0] == '2', speed);
-	engineOff(this->soundString[0] == '3');
+	engineStart(this->soundString[0] == '1', position);
+	engine(this->soundString[0] == '2', speed, position);
+	engineOff(this->soundString[0] == '3', position);
 }
 
 // Function that plays horn sound
-void SoundSource::horn(bool x) {
+void SoundSource::horn(bool x, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
+	this->hornSound->setPosition(position);
+	this->hornSound->setVelocity(velMetersPerSec);
 
 	if (x) {
 		if (this->hornSound->getIsPaused()) {
@@ -74,37 +80,26 @@ void SoundSource::horn(bool x) {
 }
 
 // Function that plays exhaust sound
-void SoundSource::exhaust(bool x) {
+void SoundSource::exhaust(bool x, irrklang::vec3df position) {
 	if (x) {
-		Audio::SoundEngine->play2D("../RallySportRacing/Audio/Backfire.mp3");
-		//if (this->exhaustSound->getIsPaused()) {
-		//	this->exhaustSound->setIsPaused(false);
-		//}
+		Audio::SoundEngine->play3D("../RallySportRacing/Audio/Backfire.mp3", position);
 	}
-	/*else {
-		if (!this->exhaustSound->getIsPaused()) {
-			this->exhaustSound->setIsPaused(true);
-		}
-	}*/
 }
 
 // Function that plays engine start sound
-void SoundSource::engineStart(bool x) {
-	if (x) {
-		Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineStart2.mp3");
-		/*if (this->engineSound->getIsPaused() && this->engineStartSound->getIsPaused()) {
-			this->engineStartSound->setIsPaused(false);
-		}*/
+void SoundSource::engineStart(bool x, irrklang::vec3df position) {
+	if (x && startSoundTimer == 0) {
+		Audio::SoundEngine->play3D("../RallySportRacing/Audio/engineStart2.mp3", position);
+		startSoundTimer = 120;
 	}
-	/*else {
-		if (!this->engineStartSound->getIsPaused()) {
-			this->engineStartSound->setIsPaused(true);
-		}
-	}*/
+	if (startSoundTimer > 0) {
+		startSoundTimer--;
+	}
 }
 
 // Function that plays engine sound
-void SoundSource::engine(bool x, float speed) {
+void SoundSource::engine(bool x, float speed, irrklang::vec3df position) {
+	this->engineSound->setPosition(position);
 	if (x) {
 		if (this->engineSound->getIsPaused()) {
 			this->engineSound->setIsPaused(false);
@@ -120,12 +115,9 @@ void SoundSource::engine(bool x, float speed) {
 }
 
 // Function that plays engine off sound
-void SoundSource::engineOff(bool x) {
+void SoundSource::engineOff(bool x, irrklang::vec3df position) {
 	if (x) {
-		Audio::SoundEngine->play2D("../RallySportRacing/Audio/engineOff.mp3");
-		/*if (!this->engineOffSound->getIsPaused()) {
-			this->engineOffSound->setIsPaused(false);
-		}*/
+		Audio::SoundEngine->play3D("../RallySportRacing/Audio/engineOff.mp3", position);
 	}
 }
 
