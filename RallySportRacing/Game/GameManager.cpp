@@ -86,13 +86,28 @@ namespace Game {
 	glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 
 
+	// for checkpoints
 	btCollisionObject* checkpoint;
+	// temporary inorder to draw checkpoints
+	btTransform trans;
+	btCollisionShape* checkPointShape;
 
 	DebugDraw* debugDrawer;
 
 	Rendering::SDLWindowHandler* Game::getHandler()
 	{
 		return handler;
+	}
+	void initCheckPoints() {
+		// Currently only creates one
+		checkpoint = new btCollisionObject();
+		checkPointShape = new btBoxShape(btVector3(4, 4, 4));
+		checkpoint->setCollisionShape(checkPointShape);
+		trans.setIdentity();
+		trans.setOrigin(btVector3(0, 0, 0));
+		checkpoint->setWorldTransform(trans);
+		checkpoint->setCollisionFlags(checkpoint->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE); // it can detect collision but it does not do anything besides that
+		physics->dynamicsWorld->addCollisionObject(checkpoint);
 	}
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
@@ -157,6 +172,7 @@ namespace Game {
 
 		debugDrawer = new DebugDraw();
 
+		initCheckPoints();
 
 		// Multiplayer setup
 		Networking::setupNetwork(vehicle, windowHandler);
@@ -181,18 +197,7 @@ namespace Game {
 		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
 		gameObjects.push_back(debugEnvironment);
 		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));*/
-
-		// Todo: put this in a seperate method for simplicity
-		checkpoint = new btCollisionObject();
-		btCollisionShape* shape = new btBoxShape(btVector3(4, 1, 4));
-		checkpoint->setCollisionShape(shape);
-		btTransform trans;
-		trans.setIdentity();
-		trans.setOrigin(btVector3(-10, 0, 20));
-		checkpoint->setWorldTransform(trans);
-		//checkpoint->setCollisionFlags(checkpoint->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE);
-
-		physics->dynamicsWorld->addCollisionObject(checkpoint);
+	
 	}
 
 	bool toScreen = true;
@@ -277,6 +282,7 @@ namespace Game {
 					const btVector3& normalOnB = pt.m_normalWorldOnB;
 
 					cout << "vehicle: " << vehicle->vehicle->getRigidBody()->getWorldArrayIndex() << endl;
+					cout << "chekcpoint: " << checkpoint->getWorldArrayIndex() << endl;
 					cout << "A: " << obA->getWorldArrayIndex() << endl;
 					cout << "B: " << obB->getWorldArrayIndex() << endl;
 				}
@@ -284,8 +290,11 @@ namespace Game {
 		}
 
 		// debug drawing, takes a lot of performance
-		//physics->dynamicsWorld->setDebugDrawer(debugDrawer);
+		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
+		physics->dynamicsWorld->debugDrawObject(trans, checkPointShape, btVector3(0, 0, 1));
 		//physics->dynamicsWorld->debugDrawWorld(); 
+
+
 
 		// updates position and orientation of all gameObjects
 		for (int i = 0; i < gameObjects.size(); i++) {
@@ -351,7 +360,7 @@ namespace Game {
 
 				// engine sound
 				sound->engine(vehicle->getSpeed());
-
+				
 				// driving 
 				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->drive(1);
@@ -496,7 +505,7 @@ namespace Game {
 		// Camera handling for the different perspectives
 		// Perspective 1 => start perspective following the car
 		if (perspective == 1) {
-			camOffset = glm::vec3(11 * vehicle->getOrientation().x, 3, 11 * vehicle->getOrientation().z); //offset 20. Height 5
+			camOffset = glm::vec3(11 * vehicle->getOrientation().x, 11 * vehicle->getOrientation().y + 3, 11 * vehicle->getOrientation().z); //offset 20. Height 3
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
 			camDirection = camPosition + (vehicle->getPosition() - camPosition) * 0.5f;
 			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.1f;
@@ -504,7 +513,7 @@ namespace Game {
 
 		// Perspective 2 => for reversing
 		else if (perspective == 2) {
-			camOffset = glm::vec3(15 * vehicle->getOrientation().x * -1, 3, 15 * vehicle->getOrientation().z * -1); //offset 20. Height 5
+			camOffset = glm::vec3(15 * vehicle->getOrientation().x * -1, -15 * vehicle->getOrientation().y + 3, 15 * vehicle->getOrientation().z * -1); //offset 20. Height 3
 
 			camDirection = vehicle->getPosition();
 			camPosition = camOffset + vehicle->getPosition();

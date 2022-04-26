@@ -7,6 +7,7 @@
 
 namespace Game {
 
+	void initCheckPoints();
 	void setupGame(Rendering::SDLWindowHandler* windowHandler);
 	void update();
 	void adjustCamPosition();
