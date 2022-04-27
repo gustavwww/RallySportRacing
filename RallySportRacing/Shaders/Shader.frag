@@ -102,7 +102,11 @@ void loadPBRValues(){
 		if(useBaseColorTexture == 0){
 			albedo = albedoValue;
 		}else{
+			vec4 albedoA = texture(baseColorTexture, texCoord);
+			if(albedoA.a < 0.1)
+				discard;
 			albedo = texture(baseColorTexture, texCoord).rgb;
+
 		}
 		
 		//Metallic
@@ -133,7 +137,7 @@ void main(){
 	vec3 viewDir = normalize(vec3(0,0,0) - vertexPosition_viewspace);
 
 	//If a dia-electric use baseReflectivity 0.04 and if metal use the albedo color as baseReflectivity.
-	vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
+	vec3 baseReflectivity = mix(vec3(0.04), albedo.rgb, metallic);
 
 	//Luminance output.
 	vec3 Lo = vec3(0.0f);
@@ -148,7 +152,7 @@ void main(){
 
 	float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
 	float attenuation = 1.0/(d * d);
-	vec3 radiance = lightColor * 500000 * attenuation;
+	vec3 radiance = lightColor * 5000 * attenuation;
 
 	//Dot products.
 	float NdotV = max(dot(normal, viewDir), 0.0000001);
@@ -171,11 +175,11 @@ void main(){
 	//Remove diffuse component if metal.
 	kDiff *= 1.0 - metallic;
 
-	Lo += (kDiff * albedo / PI + specular) * radiance * NdotL;
+	Lo += (kDiff * albedo.rgb / PI + specular) * radiance * NdotL;
 
 	//ToDo end for each light loop here.
 
-	vec3 ambient = vec3(0.03) * albedo;
+	vec3 ambient = vec3(0.03) * albedo.rgb;
 	vec3 color = ambient + Lo;
 
 	//HDR tonemapping.
