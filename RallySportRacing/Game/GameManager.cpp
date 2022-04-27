@@ -87,10 +87,18 @@ namespace Game {
 
 
 	// for checkpoints
-	btCollisionObject* checkpoint;
-	// temporary inorder to draw checkpoints
-	btTransform trans;
-	btCollisionShape* checkPointShape;
+	// collisionobjects one for every checkpoint
+	btCollisionObject* checkpoint1; // needs one of these for every checkpoint
+	btCollisionObject* checkpoint2;
+	vector<btCollisionObject*> checkpoints; // list of all checkpoints
+
+	// transforms one for every checkpoint
+	btTransform transform1; // needs one of these for every checkpoint
+	btTransform transform2;
+	vector<btTransform> transforms; // list of all transforms for checkpoints
+
+	btCollisionObject* latestReachedCheckpoint;
+	btCollisionShape* checkPointShape; // same for all checkpoints
 
 	DebugDraw* debugDrawer;
 
@@ -99,15 +107,34 @@ namespace Game {
 		return handler;
 	}
 	void initCheckPoints() {
-		// Currently only creates one
-		checkpoint = new btCollisionObject();
-		checkPointShape = new btBoxShape(btVector3(4, 4, 4));
-		checkpoint->setCollisionShape(checkPointShape);
-		trans.setIdentity();
-		trans.setOrigin(btVector3(0, 0, 0));
-		checkpoint->setWorldTransform(trans);
-		checkpoint->setCollisionFlags(checkpoint->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE); // it can detect collision but it does not do anything besides that
-		physics->dynamicsWorld->addCollisionObject(checkpoint);
+		
+		checkPointShape = new btBoxShape(btVector3(4, 4, 4));// same for all checkpoints
+
+		transform1.setIdentity(); // initilizes the different transforms
+		transform2.setIdentity(); // initilizes the different transforms
+	 
+		transform1.setOrigin(btVector3(5, 0, 5)); // hardcoded values for the position for the checkpoints
+		transform2.setOrigin(btVector3(10, 0, 10));
+
+		// adds all checkpoints objects to list
+		checkpoints.push_back(checkpoint1);
+		checkpoints.push_back(checkpoint2);
+
+		// adds all checkpoints transforms to list
+		transforms.push_back(transform1);
+		transforms.push_back(transform2);
+
+
+		for (int i = 0; i < checkpoints.size(); i++) {
+			checkpoints[i] = new btCollisionObject();
+			checkpoints[i]->setCollisionShape(checkPointShape);
+
+			checkpoints[i]->setWorldTransform(transforms[i]);
+			checkpoints[i]->setCollisionFlags(checkpoints[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE); // it can detect collision but it does not do anything besides that
+
+			physics->dynamicsWorld->addCollisionObject(checkpoints[i]);
+		}
+
 	}
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
@@ -168,7 +195,7 @@ namespace Game {
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
-		//vehicle->setInitialPosition(btVector3(-40, -100, 0));
+		vehicle->setInitialPosition(btVector3(0, 0, 0));
 
 		debugDrawer = new DebugDraw();
 
@@ -277,21 +304,30 @@ namespace Game {
 				if (pt.getDistance() < 0.f)
 				{
 
-					const btVector3& ptA = pt.getPositionWorldOnA();
-					const btVector3& ptB = pt.getPositionWorldOnB();
-					const btVector3& normalOnB = pt.m_normalWorldOnB;
+					//const btVector3& ptA = pt.getPositionWorldOnA();
+					//const btVector3& ptB = pt.getPositionWorldOnB();
+					//const btVector3& normalOnB = pt.m_normalWorldOnB;
 
-					cout << "vehicle: " << vehicle->vehicle->getRigidBody()->getWorldArrayIndex() << endl;
-					cout << "chekcpoint: " << checkpoint->getWorldArrayIndex() << endl;
-					cout << "A: " << obA->getWorldArrayIndex() << endl;
-					cout << "B: " << obB->getWorldArrayIndex() << endl;
+					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
+						if (obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[i]->getWorldArrayIndex()) {
+							//cout << "Kollision med: " << checkpoints[i]->getWorldArrayIndex() << endl;
+							latestReachedCheckpoint = checkpoints[i];
+						}
+					}
+
+					//cout << "vehicle: " << vehicle->vehicle->getRigidBody()->getWorldArrayIndex() << endl;
+					//cout << "checkpoint: " << checkpoints[0]->getWorldArrayIndex() << endl;
+					//cout << "A: " << obA->getWorldArrayIndex() << endl;
+					//cout << "B: " << obB->getWorldArrayIndex() << endl;
 				}
 			}
 		}
 
 		// debug drawing, takes a lot of performance
 		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
-		physics->dynamicsWorld->debugDrawObject(trans, checkPointShape, btVector3(0, 0, 1));
+		for (int i = 0; i < checkpoints.size(); i++) { // draws every checkpoints
+			physics->dynamicsWorld->debugDrawObject(transforms[i], checkPointShape, btVector3(0, 0, 0));
+		}
 		//physics->dynamicsWorld->debugDrawWorld(); 
 
 
@@ -447,14 +483,14 @@ namespace Game {
 		}
 
 		// Incase the car has turned around and cant get up
-		if (keyboard_state_array[SDL_SCANCODE_R] && resetCarToggle && (1 >= vehicle->getSpeed() && vehicle->getSpeed() >= -1)) {
+		if (keyboard_state_array[SDL_SCANCODE_R] && resetCarToggle) {
 			resetCarToggle = false;
 			resetCarDelay = 0;
-			vehicle->setInitialPosition(vehicle->getTransform().getOrigin() + btVector3(0, 3, 0));
+			vehicle->setInitialPosition(latestReachedCheckpoint->getWorldTransform().getOrigin() + btVector3(0, 3, 0));
 
 			//btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), vehicle->getTransform().getRotation().getZ(), vehicle->getTransform().getRotation().getW());
 
-			vehicle->setInitialRotation(btQuaternion(0,1,0,0));
+			vehicle->setInitialRotation(latestReachedCheckpoint->getWorldTransform().getRotation());
 
 		}
 		resetCarDelay += gameTimer->getDeltaTime();
