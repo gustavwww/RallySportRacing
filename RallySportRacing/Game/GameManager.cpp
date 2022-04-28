@@ -29,6 +29,7 @@
 #include <Utils/Random.h>
 
 #include "Audio/audio.h"
+#define PI 3.1415926538f
 
 using namespace std;
 using namespace Utils;
@@ -107,15 +108,16 @@ namespace Game {
 		return handler;
 	}
 	void initCheckPoints() {
-		
-		checkPointShape = new btBoxShape(btVector3(4, 4, 4));// same for all checkpoints
+
+		checkPointShape = new btBoxShape(btVector3(6, 4, 6));// same for all checkpoints
 
 		transform1.setIdentity(); // initilizes the different transforms
 		transform2.setIdentity(); // initilizes the different transforms
 	 
-		transform1.setOrigin(btVector3(5, 0, 5)); // hardcoded values for the position for the checkpoints
-		transform2.setOrigin(btVector3(10, 0, 10));
-
+		transform1.setOrigin(btVector3(0, 0, 0)); // hardcoded values for the position for the specific checkpoint
+		//transform1.setRotation(btQuaternion(btVector3(0, 1, 0), 2)); // hardcoded values for the position for the specific checkpoint
+		transform2.setOrigin(btVector3(-16, 0, 1094)); // hardcoded values for the position for the specific checkpoint
+		 
 		// adds all checkpoints objects to list
 		checkpoints.push_back(checkpoint1);
 		checkpoints.push_back(checkpoint2);
@@ -135,6 +137,7 @@ namespace Game {
 			physics->dynamicsWorld->addCollisionObject(checkpoints[i]);
 		}
 
+		latestReachedCheckpoint = checkpoints[0]; // sets the latestcheckpointreached to the first checkpoint
 	}
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
@@ -195,7 +198,7 @@ namespace Game {
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
-		vehicle->setInitialPosition(btVector3(0, 0, 0));
+		vehicle->setInitialPosition(btVector3(0, 5, 0));
 
 		debugDrawer = new DebugDraw();
 
@@ -287,6 +290,7 @@ namespace Game {
 	bool everyOtherLoop = true;
 
 	void update() {
+
 		// temporary for testing
 		// Collisionhandling between a pair of objects
 		// Bullet physics does not give a predefined check collision with method
@@ -486,12 +490,10 @@ namespace Game {
 		if (keyboard_state_array[SDL_SCANCODE_R] && resetCarToggle) {
 			resetCarToggle = false;
 			resetCarDelay = 0;
+
+			vehicle->vehicle->getRigidBody()->setLinearVelocity(btVector3(0, 0, 0));
 			vehicle->setInitialPosition(latestReachedCheckpoint->getWorldTransform().getOrigin() + btVector3(0, 3, 0));
-
-			//btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), vehicle->getTransform().getRotation().getZ(), vehicle->getTransform().getRotation().getW());
-
 			vehicle->setInitialRotation(latestReachedCheckpoint->getWorldTransform().getRotation());
-
 		}
 		resetCarDelay += gameTimer->getDeltaTime();
 		if (resetCarDelay >= 4) {
@@ -500,11 +502,13 @@ namespace Game {
 
 		if (keyboard_state_array[SDL_SCANCODE_T]) { // for testing purpose
 
-			vehicle->setInitialPosition(vehicle->getTransform().getOrigin() + btVector3(0, 2, 0));
+			cout << vehicle->getTransform().getOrigin().x() << endl;
+			cout << vehicle->getTransform().getOrigin().y() << endl;
+			cout << vehicle->getTransform().getOrigin().z() << endl;
 
-			btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), 1, vehicle->getTransform().getRotation().getW()); 
-
-			vehicle->setInitialRotation(rotate);
+			//vehicle->setInitialPosition(vehicle->getTransform().getOrigin() + btVector3(0, 2, 0));
+			//btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), 1, vehicle->getTransform().getRotation().getW()); 
+			//vehicle->setInitialRotation(rotate);
 		}
 
 		// Complete reset the vehicle to a certain position. Could be used for checkpoints
