@@ -405,12 +405,6 @@ namespace Game {
 				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->drive(1);
 					pressedW = true;
-
-					/* For Dirt track. Waiting for the model before fully implementing
-					glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
-					glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
-					dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
-					dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);*/
 				}
 				else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->drive(-1);
@@ -502,9 +496,15 @@ namespace Game {
 
 		if (keyboard_state_array[SDL_SCANCODE_T]) { // for testing purpose
 
-			cout << vehicle->getTransform().getOrigin().x() << endl;
-			cout << vehicle->getTransform().getOrigin().y() << endl;
-			cout << vehicle->getTransform().getOrigin().z() << endl;
+			//cout << vehicle->getTransform().getOrigin().x() << endl;
+			//cout << vehicle->getTransform().getOrigin().y() << endl;
+			//cout << vehicle->getTransform().getOrigin().z() << endl;
+
+			// For Dirt track. Waiting for the model before fully implementing
+			glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+			glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+			dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+			dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 
 			//vehicle->setInitialPosition(vehicle->getTransform().getOrigin() + btVector3(0, 2, 0));
 			//btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), 1, vehicle->getTransform().getRotation().getW()); 
