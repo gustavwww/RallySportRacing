@@ -30,6 +30,7 @@ SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 	// Init looping sounds
 	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
 	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/BetterCarAudio.mp3",position,  true, true, true);
+	this->engineSound->setVolume(2);
 }
 
 // Destructor of SoundSource
