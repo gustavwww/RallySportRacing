@@ -29,6 +29,7 @@
 #include <Utils/Random.h>
 
 #include "Audio/audio.h"
+#define PI 3.1415926538f
 
 using namespace std;
 using namespace Utils;
@@ -51,6 +52,8 @@ namespace Game {
 	unsigned int smokeTexture;
 	unsigned int explosionTexture;
 	unsigned int blueexplosionTexture;
+	unsigned int tireTrackTexture;
+	unsigned int dirtTexture;
 
 	//ParticleSystems
 	Rendering::ParticleSystem smokeParticlesObject;
@@ -61,6 +64,12 @@ namespace Game {
 
 	Rendering::ParticleSystem blueexplosionParticlesObject;
 	Rendering::ParticleSystem* blueexplosionParticlesPointer;
+
+	Rendering::ParticleSystem tireTrackParticlesObject;
+	Rendering::ParticleSystem* tireTrackParticlesPointer;
+
+	Rendering::ParticleSystem dirtParticlesObject;
+	Rendering::ParticleSystem* dirtParticlesPointer;
 
 	//Debug GameObject
 	GameObject* debugEnvironment;
@@ -79,11 +88,57 @@ namespace Game {
 	glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 
 
+	// for checkpoints
+	// collisionobjects one for every checkpoint
+	btCollisionObject* checkpoint1; // needs one of these for every checkpoint
+	btCollisionObject* checkpoint2;
+	vector<btCollisionObject*> checkpoints; // list of all checkpoints
+
+	// transforms one for every checkpoint
+	btTransform transform1; // needs one of these for every checkpoint
+	btTransform transform2;
+	vector<btTransform> transforms; // list of all transforms for checkpoints
+
+	btCollisionObject* latestReachedCheckpoint;
+	btCollisionShape* checkPointShape; // same for all checkpoints
+
 	DebugDraw* debugDrawer;
 
 	Rendering::SDLWindowHandler* Game::getHandler()
 	{
 		return handler;
+	}
+	void initCheckPoints() {
+
+		checkPointShape = new btBoxShape(btVector3(6, 4, 6));// same for all checkpoints
+
+		transform1.setIdentity(); // initilizes the different transforms
+		transform2.setIdentity(); // initilizes the different transforms
+	 
+		transform1.setOrigin(btVector3(0, 0, 0)); // hardcoded values for the position for the specific checkpoint
+		//transform1.setRotation(btQuaternion(btVector3(0, 1, 0), 2)); // hardcoded values for the position for the specific checkpoint
+		transform2.setOrigin(btVector3(-16, 0, 1094)); // hardcoded values for the position for the specific checkpoint
+		 
+		// adds all checkpoints objects to list
+		checkpoints.push_back(checkpoint1);
+		checkpoints.push_back(checkpoint2);
+
+		// adds all checkpoints transforms to list
+		transforms.push_back(transform1);
+		transforms.push_back(transform2);
+
+
+		for (int i = 0; i < checkpoints.size(); i++) {
+			checkpoints[i] = new btCollisionObject();
+			checkpoints[i]->setCollisionShape(checkPointShape);
+
+			checkpoints[i]->setWorldTransform(transforms[i]);
+			checkpoints[i]->setCollisionFlags(checkpoints[i]->getCollisionFlags() | btCollisionObject::CF_NO_CONTACT_RESPONSE); // it can detect collision but it does not do anything besides that
+
+			physics->dynamicsWorld->addCollisionObject(checkpoints[i]);
+		}
+
+		latestReachedCheckpoint = checkpoints[0]; // sets the latestcheckpointreached to the first checkpoint
 	}
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
@@ -94,11 +149,17 @@ namespace Game {
 		// Initialize audio
 		sound = Audio::Instance();
 
-		//Load and add smokeParticles to particle render list.
-		smokeTexture = handler->loadTexture("../Textures/smokeTexture.png");
-		smokeParticlesObject = Rendering::ParticleSystem(1000000, smokeTexture);
-		smokeParticlesPointer = &smokeParticlesObject;
-		handler->addParticleSystem(smokeParticlesPointer);
+		//Load and add dirtParticles to particle render list.
+		dirtTexture = handler->loadTexture("../Textures/dirtTexture.png");
+		dirtParticlesObject = Rendering::ParticleSystem(1000000, dirtTexture);
+		tireTrackParticlesPointer = &dirtParticlesObject;
+		handler->addParticleSystem(tireTrackParticlesPointer);
+
+		//Load and add testExplosion to particle render list.
+		explosionTexture = handler->loadTexture("../Textures/explosion.png");
+		explosionParticlesObject = Rendering::ParticleSystem(1000000, explosionTexture);
+		explosionParticlesPointer = &explosionParticlesObject;
+		handler->addParticleSystem(explosionParticlesPointer);
 
 		//Load and add testExplosionBlue to particle render list.
 		blueexplosionTexture = handler->loadTexture("../Textures/blueExplosion.png");
@@ -106,11 +167,17 @@ namespace Game {
 		blueexplosionParticlesPointer = &blueexplosionParticlesObject;
 		handler->addParticleSystem(blueexplosionParticlesPointer);
 
-		//Load and add testExplosion to particle render list.
-		explosionTexture = handler->loadTexture("../Textures/explosion.png");
-		explosionParticlesObject = Rendering::ParticleSystem(1000000, explosionTexture);
-		explosionParticlesPointer = &explosionParticlesObject;
-		handler->addParticleSystem(explosionParticlesPointer);
+		//Load and add tireTrack to particle render list.
+		tireTrackTexture = handler->loadTexture("../Textures/testTrack.png");
+		tireTrackParticlesObject = Rendering::ParticleSystem(1000000, tireTrackTexture);
+		tireTrackParticlesPointer = &tireTrackParticlesObject;
+		handler->addParticleSystem(tireTrackParticlesPointer);
+
+		//Load and add smokeParticles to particle render list.
+		smokeTexture = handler->loadTexture("../Textures/smokeTexture.png");
+		smokeParticlesObject = Rendering::ParticleSystem(1000000, smokeTexture);
+		smokeParticlesPointer = &smokeParticlesObject;
+		handler->addParticleSystem(smokeParticlesPointer);
 
 		// test environment finished track
 		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape2.gltf", true);
@@ -132,13 +199,14 @@ namespace Game {
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
-		//vehicle->setInitialPosition(btVector3(-40, -100, 0));
+		vehicle->setInitialPosition(btVector3(0, 5, 0));
 
 		// Create player sound source
 		sound->createSoundSource(0, make_tuple(vehicle->getPosition().x, vehicle->getPosition().y, vehicle->getPosition().z));
 
 		debugDrawer = new DebugDraw();
 
+		initCheckPoints();
 
 		// Multiplayer setup
 		Networking::setupNetwork(vehicle, windowHandler);
@@ -163,6 +231,7 @@ namespace Game {
 		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
 		gameObjects.push_back(debugEnvironment);
 		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));*/
+	
 	}
 
 	bool toScreen = true;
@@ -199,16 +268,77 @@ namespace Game {
 	// vertical angle : 0, look at the horizon
 	float verticalAngle = 0.f;
 
-	bool toggleFire = false;
+	bool pressedW = false;
+	// for engine off and on
 	bool isOn = false;
 	bool canPress = true;
 	float time;
+	bool engineOnOffToggle = true;
+	float engineDelay;
+
+	// delay for turning the car back up
+	bool resetCarToggle = true;
+	float resetCarDelay;
+
+	// delay for completely resetting the vehicle, could be used for check points 
+	bool completeResetCarToggle = true;
+	float completeResetCarDelay;
+
+	// delay for backfire
+	bool backFireToggle = true;
+	float backFireDelay;
+
+	// timer for gas when enginestarts
+	double gasTimer = 3;
+
+	bool everyOtherLoop = true;
 
 	void update() {
 
+		// temporary for testing
+		// Collisionhandling between a pair of objects
+		// Bullet physics does not give a predefined check collision with method
+		int numManifolds = physics->dynamicsWorld->getDispatcher()->getNumManifolds();
+		for (int i = 0; i < numManifolds; i++)
+		{
+			btPersistentManifold* contactManifold = physics->dynamicsWorld->getDispatcher()->getManifoldByIndexInternal(i);
+			const btCollisionObject* obA = contactManifold->getBody0();
+			const btCollisionObject* obB = contactManifold->getBody1();
+
+			int numContacts = contactManifold->getNumContacts();
+			for (int j = 0; j < numContacts; j++)
+			{
+				btManifoldPoint& pt = contactManifold->getContactPoint(j);
+				if (pt.getDistance() < 0.f)
+				{
+
+					//const btVector3& ptA = pt.getPositionWorldOnA();
+					//const btVector3& ptB = pt.getPositionWorldOnB();
+					//const btVector3& normalOnB = pt.m_normalWorldOnB;
+
+					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
+						if (obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[i]->getWorldArrayIndex()) {
+							//cout << "Kollision med: " << checkpoints[i]->getWorldArrayIndex() << endl;
+							latestReachedCheckpoint = checkpoints[i];
+						}
+					}
+
+					//cout << "vehicle: " << vehicle->vehicle->getRigidBody()->getWorldArrayIndex() << endl;
+					//cout << "checkpoint: " << checkpoints[0]->getWorldArrayIndex() << endl;
+					//cout << "A: " << obA->getWorldArrayIndex() << endl;
+					//cout << "B: " << obB->getWorldArrayIndex() << endl;
+				}
+			}
+		}
+
 		// debug drawing, takes a lot of performance
-		//physics->dynamicsWorld->setDebugDrawer(debugDrawer);
+		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
+		for (int i = 0; i < checkpoints.size(); i++) { // draws every checkpoints
+			physics->dynamicsWorld->debugDrawObject(transforms[i], checkPointShape, btVector3(0, 0, 0));
+		}
 		//physics->dynamicsWorld->debugDrawWorld(); 
+
+
 
 		// updates position and orientation of all gameObjects
 		for (int i = 0; i < gameObjects.size(); i++) {
@@ -218,7 +348,6 @@ namespace Game {
 
 		// Calculate deltaTime
 		if (firstTime) {
-
 			camOrientation = glm::vec3(0, 1, 0);
 			firstTime = false;
 			gameTimer->startGameTime();
@@ -233,61 +362,94 @@ namespace Game {
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
 
-			if (canPress) {
+			if (engineOnOffToggle) {
 				if (keyboard_state_array[SDL_SCANCODE_E] && isOn == false) {
 					isOn = true;
 					// Play start sound
 					soundString[0] = '1';
-					canPress = false;
-					time = 0;
+					engineOnOffToggle = false;
+					engineDelay = 0;
+					gasTimer = 0;
+	
+					for (int i = 0; i < 100; i++) {
+						glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
+						smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.2);
+					}
 				}
 				else if (keyboard_state_array[SDL_SCANCODE_E] && isOn == true && vehicle->getSpeed() < abs(3)) {
 					isOn = false;
 					// Plays stop sound
 					soundString[0] = '3';
-					canPress = false;
-					time = 0;
+					engineOnOffToggle = false;
+					engineDelay = 0;
 				}
-
 			}
-			time += gameTimer->getDeltaTime();
-			if (time >= 1) {
-				canPress = true;
+
+			gasTimer += gameTimer->getDeltaTime();
+			if (gasTimer <= 1.5) {
+				glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
+				smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.2);
+			}
+
+			engineDelay += gameTimer->getDeltaTime();
+			if (engineDelay >= 1) {
+				engineOnOffToggle = true;
 			}
 
 			if (isOn == true) {
+				
 				// Engine sound on
 				if (soundString[0] == '0') {
 					soundString[0] = '2';
 				}
+				
+				float randomNumber = random.Float() * 10;
+				everyOtherLoop = !everyOtherLoop;
+				if ((int)randomNumber % 7 == 0 && everyOtherLoop) { // random small amount of gas coming out when the engine is on
+					glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
+					smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 2, 0.2);
+				}
+				
 				// driving 
 				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->drive(1);
-					glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
-					smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3);
-					toggleFire = true;
+					pressedW = true;
 				}
 				else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->drive(-1);
 				}
 				if (keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->handBrake();
+					if (vehicle->getSpeed() >= 30) {
+						glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+						glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+
+						tireTrackParticlesObject.emitParticle(rearWheel1Pos - glm::vec3(0, 0.3, 0), glm::vec3(0, -0.05, 0), 10, 0.2);
+						tireTrackParticlesObject.emitParticle(rearWheel2Pos - glm::vec3(0, 0.3, 0), glm::vec3(0, -0.05, 0), 10, 0.2);
+					}
 				}
 				if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->notGasing();
-					glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
-					smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3); // only z axis. Simulate wind effect on the smoke
-					if (vehicle->getSpeed() >= 100 && toggleFire == true) {
+				
+					if (vehicle->getSpeed() >= 100 && pressedW == true && backFireToggle == true) {
 						// spela upp ljud explosion
+						
 						soundString[2] = '1';
-						for (int i = 0; i < 200; i++) {
-							glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, 0.23f, 2 * vehicle->getOrientation().z);
-							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.3 * random.Float() * vehicle->getOrientation().x, 0.3 * random.Float(), 0.3 * random.Float() * vehicle->getOrientation().z), 0.05f);
-							blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0.01 * random.Float() * vehicle->getOrientation().x, 0.01 * random.Float(), 0.01 * random.Float() * vehicle->getOrientation().z), 0.05f);
+						for (int i = 0; i < 400; i++) {
+							glm::vec3 smokeOffset = glm::vec3(1 * vehicle->getOrientation().x, 1*vehicle->getOrientation().y + 0.23, 1 * vehicle->getOrientation().z);
+							blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset + glm::vec3(0, 0.05, 0), glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.05f, 0.05);
+							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.05f, 0.1);
 						}
-						toggleFire = false;
+						pressedW = false;
+						backFireToggle = false;
+						backFireDelay = 0;
 					}
 				}
+				backFireDelay += gameTimer->getDeltaTime();
+				if (backFireDelay >= 3) {
+					backFireToggle = true;
+				}
+
 				// steering
 				if (keyboard_state_array[SDL_SCANCODE_D]) {
 					vehicle->steerLeft(gameTimer->getDeltaTime());
@@ -307,12 +469,55 @@ namespace Game {
 			
 		}
 
+		// Incase the car has turned around and cant get up
+		if (keyboard_state_array[SDL_SCANCODE_R] && resetCarToggle) {
+			resetCarToggle = false;
+			resetCarDelay = 0;
+
+			vehicle->vehicle->getRigidBody()->setLinearVelocity(btVector3(0, 0, 0));
+			vehicle->setInitialPosition(latestReachedCheckpoint->getWorldTransform().getOrigin() + btVector3(0, 3, 0));
+			vehicle->setInitialRotation(latestReachedCheckpoint->getWorldTransform().getRotation());
+		}
+		resetCarDelay += gameTimer->getDeltaTime();
+		if (resetCarDelay >= 4) {
+			resetCarToggle = true;
+		}
+
+		if (keyboard_state_array[SDL_SCANCODE_T]) { // for testing purpose
+
+			//cout << vehicle->getTransform().getOrigin().x() << endl;
+			//cout << vehicle->getTransform().getOrigin().y() << endl;
+			//cout << vehicle->getTransform().getOrigin().z() << endl;
+
+			// For Dirt track. Waiting for the model before fully implementing
+			glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+			glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+			dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+			dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+
+			//vehicle->setInitialPosition(vehicle->getTransform().getOrigin() + btVector3(0, 2, 0));
+			//btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), 1, vehicle->getTransform().getRotation().getW()); 
+			//vehicle->setInitialRotation(rotate);
+		}
+
+		// Complete reset the vehicle to a certain position. Could be used for checkpoints
+		if (keyboard_state_array[SDL_SCANCODE_0] && completeResetCarToggle) {
+			completeResetCarToggle = false;
+			completeResetCarDelay = 0;
+			vehicle->setInitialPosition(btVector3(0, 1, 0)); // certain position
+			vehicle->setInitialRotation(btQuaternion(0, 0, 0, 1));
+		}
+		completeResetCarDelay += gameTimer->getDeltaTime();
+		if (completeResetCarDelay >= 4) {
+			completeResetCarToggle = true;
+		}
+
 		// Different perspectives
 		if (keyboard_state_array[SDL_SCANCODE_1] || (buttons & SDL_BUTTON_LMASK) == SDL_BUTTON_LMASK) {
 			perspective = 1;
 			camOrientation = glm::vec3(0, 1, 0);
 		}
-		if (keyboard_state_array[SDL_SCANCODE_C] || (buttons & SDL_BUTTON_RMASK) == SDL_BUTTON_RMASK) {
+		if ((keyboard_state_array[SDL_SCANCODE_C] || (buttons & SDL_BUTTON_RMASK) == SDL_BUTTON_RMASK) && perspective != 3) {
 			perspective = 2;
 			camOrientation = glm::vec3(0, 1, 0);
 		}
@@ -329,7 +534,7 @@ namespace Game {
 		// Camera handling for the different perspectives
 		// Perspective 1 => start perspective following the car
 		if (perspective == 1) {
-			camOffset = glm::vec3(11 * vehicle->getOrientation().x, 3, 11 * vehicle->getOrientation().z); //offset 20. Height 5
+			camOffset = glm::vec3(11 * vehicle->getOrientation().x, 11 * vehicle->getOrientation().y + 3, 11 * vehicle->getOrientation().z); //offset 20. Height 3
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
 			camDirection = camPosition + (vehicle->getPosition() - camPosition) * 0.5f;
 			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.1f;
@@ -337,7 +542,7 @@ namespace Game {
 
 		// Perspective 2 => for reversing
 		else if (perspective == 2) {
-			camOffset = glm::vec3(15 * vehicle->getOrientation().x * -1, 3, 15 * vehicle->getOrientation().z * -1); //offset 20. Height 5
+			camOffset = glm::vec3(15 * vehicle->getOrientation().x * -1, -15 * vehicle->getOrientation().y + 3, 15 * vehicle->getOrientation().z * -1); //offset 20. Height 3
 
 			camDirection = vehicle->getPosition();
 			camPosition = camOffset + vehicle->getPosition();
