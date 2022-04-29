@@ -11,7 +11,13 @@ namespace Rendering {
 
 	}
 
-	Text2D::render() {
+	void Text2D::render() {
+
+
+
+	}
+
+	static void Text2D::loadCharacters() {
 
 
 

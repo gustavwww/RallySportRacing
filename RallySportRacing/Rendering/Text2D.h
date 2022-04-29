@@ -24,7 +24,6 @@ namespace Rendering {
     private:
         static map<char, Character> characters;
 
-
     };
 
 

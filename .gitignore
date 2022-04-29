@@ -1,7 +1,7 @@
 # Ignore windows build files
 build/
-/bin
-!/*/bin
+bin/
+!*/bin
 .vs
 
 # Linux ignores
