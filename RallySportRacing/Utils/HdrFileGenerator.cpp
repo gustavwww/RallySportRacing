@@ -20,7 +20,11 @@ namespace Utils {
 
 	/// <param name="filePath">File path to which hdr image the irradiance hdr should be based on.</param>
 	void HdrFileGenerator::createIrradianceHDR(GLuint programID, string filePath) {
-		unsigned int envTexture = loadHDRTexture(filePath);
+		static unsigned int envTexture = 0;
+		if ( envTexture == 0 )
+		{
+			envTexture = loadHDRTexture( filePath );
+		}
 		setUpFrameBuffer(32);
 		setUpTextureObject();
 
@@ -30,22 +34,22 @@ namespace Utils {
 		glBindTexture(GL_TEXTURE_2D, envTexture);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, hdrIrraFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, irraTexture, 0);
+
+		GLint lwidth, lheight;
+		glGetTextureLevelParameteriv(irraTexture, 0, GL_TEXTURE_WIDTH, &lwidth);
+		glGetTextureLevelParameteriv(irraTexture, 0, GL_TEXTURE_HEIGHT, &lheight);
+		glViewport( 0, 0, 200, 100 );
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		drawScreenQuad();
-
-		GLint lwidth, lheight;
 		std::vector<float> data;
-		glGetTextureLevelParameteriv(irraTexture, 0, GL_TEXTURE_WIDTH, &lwidth);
-		glGetTextureLevelParameteriv(irraTexture, 0, GL_TEXTURE_HEIGHT, &lheight);
-		data.resize(size_t(lwidth) * lheight * 3);
-		glGetTextureSubImage(irraTexture, 0, 0, 0, 0, lwidth, lheight, 1, GL_RGB32F, GL_FLOAT, data.size() * sizeof(float), data.data());
+		data.resize(size_t(lwidth) * lheight * 4);
+		glGetTextureSubImage(irraTexture, 0, 0, 0, 0, lwidth, lheight, 1, GL_RGBA, GL_FLOAT, data.size() * sizeof(float), data.data());
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		//Take data from texture and store in HDR file.
-		stbi_write_hdr("../Textures/Background/irradiance.hdr", lwidth, lheight, 3, &data[0]);
+		stbi_write_hdr("../Textures/Background/irradiance.hdr", lwidth, lheight, 4, &data[0]);
 
 	}
 
@@ -98,18 +102,41 @@ namespace Utils {
 	//ToDo make sure this works.
 	void HdrFileGenerator::setUpFrameBuffer(int resolution) {
 
+		if ( hdrIrraFBO != 0 )
+		{
+			return;
+		}
 		//Generate buffers.
 		glGenFramebuffers(1, &hdrIrraFBO);
-		glGenRenderbuffers(1, &hdrIrraRBO);
+		//glGenRenderbuffers(1, &hdrIrraRBO);
 
 		//Bind buffers.
 		glBindFramebuffer(GL_FRAMEBUFFER, hdrIrraFBO);
-		glBindRenderbuffer(GL_RENDERBUFFER, hdrIrraRBO);
+		//glBindRenderbuffer(GL_RENDERBUFFER, hdrIrraRBO);
 
 		//Setup buffers.
-		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdrIrraRBO);
+		//glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, resolution, resolution);
+		//glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdrIrraRBO);
 	
+		glGenTextures(1, &irraTexture);
+		glBindTexture(GL_TEXTURE_2D, irraTexture);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 200, 100, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, irraTexture, 0);
+		GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers( 1, attachments );
+
+		GLenum status = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+		if ( status != GL_FRAMEBUFFER_COMPLETE )
+		{
+			throw "Framebuffer not complete";
+		}
 	}
 
 	//ToDo finish writing this function and change width and height.
@@ -131,19 +158,11 @@ namespace Utils {
 	}
 
 	void HdrFileGenerator::setUpTextureObject() {
-		glGenTextures(1, &irraTexture);
-		glBindTexture(GL_TEXTURE_2D, irraTexture);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 200, 100, 0, GL_RGB, GL_FLOAT, nullptr);
 	}
 
 	void HdrFileGenerator::drawScreenQuad() {
 		glDisable(GL_DEPTH_TEST);
+		glDisable( GL_CULL_FACE );
 		if (renderVAO == 0) {
 			//Generate
 			glGenVertexArrays(1, &renderVAO);
@@ -160,9 +179,10 @@ namespace Utils {
 
 		}
 		//Render
-		glViewport(0,0, 200, 100);
 		glBindVertexArray(renderVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
+
+		glEnable( GL_CULL_FACE );
 		glEnable(GL_DEPTH_TEST);
 
 	}

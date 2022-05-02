@@ -13,5 +13,5 @@ uniform mat4 projMat;
 void main(){
 	pos = posIn;
 	//ToDo check if this row is necessaryneseceary.
-	//gl_Position = projMat * viewMat * vec4(pos, 0, 1.0);
+	gl_Position = vec4(pos, 0, 1.0);
 }
