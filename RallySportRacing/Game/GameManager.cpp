@@ -90,13 +90,29 @@ namespace Game {
 
 	// for checkpoints
 	// collisionobjects one for every checkpoint
+	btCollisionObject* checkpoint0; // this is the spawn point
 	btCollisionObject* checkpoint1; // needs one of these for every checkpoint
 	btCollisionObject* checkpoint2;
+	btCollisionObject* checkpoint3;
+	btCollisionObject* checkpoint4;
+	btCollisionObject* checkpoint5;
+	btCollisionObject* checkpoint6;
+	btCollisionObject* checkpoint7;
+	btCollisionObject* checkpoint8;
+	btCollisionObject* checkpoint9; // could be end point or we just have the start point as the endpoint
 	vector<btCollisionObject*> checkpoints; // list of all checkpoints
 
 	// transforms one for every checkpoint
-	btTransform transform1; // needs one of these for every checkpoint
+	btTransform transform0; // this is the spawn point
+	btTransform transform1; // needs one of these for every checkpoint. Start point for the race
 	btTransform transform2;
+	btTransform transform3;
+	btTransform transform4;
+	btTransform transform5;
+	btTransform transform6;
+	btTransform transform7;
+	btTransform transform8;
+	btTransform transform9;
 	vector<btTransform> transforms; // list of all transforms for checkpoints
 
 	btCollisionObject* latestReachedCheckpoint;
@@ -112,20 +128,58 @@ namespace Game {
 
 		checkPointShape = new btBoxShape(btVector3(6, 4, 6));// same for all checkpoints
 
+		transform0.setIdentity(); // initilizes the different transforms
 		transform1.setIdentity(); // initilizes the different transforms
 		transform2.setIdentity(); // initilizes the different transforms
+		transform3.setIdentity(); // initilizes the different transforms
+		transform4.setIdentity(); // initilizes the different transforms
+		transform5.setIdentity(); // initilizes the different transforms
+		transform6.setIdentity(); // initilizes the different transforms
+		transform7.setIdentity(); // initilizes the different transforms
+		transform8.setIdentity(); // initilizes the different transforms
+		transform9.setIdentity(); // initilizes the different transforms
 	 
-		transform1.setOrigin(btVector3(0, 0, 0)); // hardcoded values for the position for the specific checkpoint
-		//transform1.setRotation(btQuaternion(btVector3(0, 1, 0), 2)); // hardcoded values for the position for the specific checkpoint
+		transform0.setOrigin(btVector3(0, 0, 0)); // hardcoded values for the position for the specific checkpoint
+		transform1.setOrigin(btVector3(9.2, -1.3, 42)); // hardcoded values for the position for the specific checkpoint
 		transform2.setOrigin(btVector3(-16, 0, 1094)); // hardcoded values for the position for the specific checkpoint
+		transform3.setOrigin(btVector3(-386, 12, -180)); // hardcoded values for the position for the specific checkpoint
+		transform3.setRotation(btQuaternion(btVector3(0, 1, 0), PI));
+		transform4.setOrigin(btVector3(-1112, 38, -398)); // hardcoded values for the position for the specific checkpoint
+		transform4.setRotation(btQuaternion(btVector3(0, 1, 0), 3*PI/2));
+		transform5.setOrigin(btVector3(-1467, 44, -73)); // hardcoded values for the position for the specific checkpoint
+		transform5.setRotation(btQuaternion(btVector3(0, 1, 0), 2.75*PI/2));
+		transform6.setOrigin(btVector3(-931, 29, -1000)); // hardcoded values for the position for the specific checkpoint
+		transform6.setRotation(btQuaternion(btVector3(0, 1, 0), PI/2));
+		transform7.setOrigin(btVector3(-703, 27, -776)); // hardcoded values for the position for the specific checkpoint
+		transform7.setRotation(btQuaternion(btVector3(0, 1, 0), PI / 4));
+		transform8.setOrigin(btVector3(-248, 8, -768)); // hardcoded values for the position for the specific checkpoint
+		transform8.setRotation(btQuaternion(btVector3(0, 1, 0), 3*PI/5));
+		transform9.setOrigin(btVector3(-32, -3, -88)); // hardcoded values for the position for the specific checkpoint
+		//transform9.setRotation(btQuaternion(btVector3(0, 1, 0), 3 * PI / 5));
 		 
 		// adds all checkpoints objects to list
+		checkpoints.push_back(checkpoint0);
 		checkpoints.push_back(checkpoint1);
 		checkpoints.push_back(checkpoint2);
+		checkpoints.push_back(checkpoint3);
+		checkpoints.push_back(checkpoint4);
+		checkpoints.push_back(checkpoint5);
+		checkpoints.push_back(checkpoint6);
+		checkpoints.push_back(checkpoint7);
+		checkpoints.push_back(checkpoint8);
+		checkpoints.push_back(checkpoint9);
 
 		// adds all checkpoints transforms to list
+		transforms.push_back(transform0);
 		transforms.push_back(transform1);
 		transforms.push_back(transform2);
+		transforms.push_back(transform3);
+		transforms.push_back(transform4);
+		transforms.push_back(transform5);
+		transforms.push_back(transform6);
+		transforms.push_back(transform7);
+		transforms.push_back(transform8);
+		transforms.push_back(transform9);
 
 
 		for (int i = 0; i < checkpoints.size(); i++) {
@@ -138,7 +192,7 @@ namespace Game {
 			physics->dynamicsWorld->addCollisionObject(checkpoints[i]);
 		}
 
-		latestReachedCheckpoint = checkpoints[0]; // sets the latestcheckpointreached to the first checkpoint
+		latestReachedCheckpoint = checkpoints[1]; // sets the latestcheckpointreached to the first checkpoint, 0 is spawn point, 1 is start checkpoint 
 	}
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
@@ -485,15 +539,15 @@ namespace Game {
 
 		if (keyboard_state_array[SDL_SCANCODE_T]) { // for testing purpose
 
-			//cout << vehicle->getTransform().getOrigin().x() << endl;
-			//cout << vehicle->getTransform().getOrigin().y() << endl;
-			//cout << vehicle->getTransform().getOrigin().z() << endl;
+			cout << vehicle->getTransform().getOrigin().x() << endl;
+			cout << vehicle->getTransform().getOrigin().y() << endl;
+			cout << vehicle->getTransform().getOrigin().z() << endl;
 
 			// For Dirt track. Waiting for the model before fully implementing
-			glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
-			glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
-			dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
-			dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+			//glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+			//glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+			//dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+			//dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 
 			//vehicle->setInitialPosition(vehicle->getTransform().getOrigin() + btVector3(0, 2, 0));
 			//btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), 1, vehicle->getTransform().getRotation().getW()); 
