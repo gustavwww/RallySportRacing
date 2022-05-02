@@ -1,16 +1,17 @@
 #version 420
 
 //Inputs
-in vec3 pos;
+layout (location = 0) in vec2 posIn;
 
 //Output
-out vec2 texCoord;
+out vec2 pos;
 
 //Uniforms
 uniform mat4 viewMat;
 uniform mat4 projMat;
 
 void main(){
-	texCoord = pos.xy;
-	gl_Position = projMat * viewMat * vec4(pos, 1.0);
+	pos = posIn;
+	//ToDo check if this row is necessaryneseceary.
+	//gl_Position = projMat * viewMat * vec4(pos, 0, 1.0);
 }
