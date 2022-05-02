@@ -40,13 +40,14 @@ namespace Utils {
 	public:
 		static void createIrradianceHDR(GLuint programID, string filePath);
 		static void createReflectionHDRs(string filePath);
+
 		static unsigned int loadHDRTexture(const std::string& filename);
 		static unsigned int loadHdrMipmapTexture(const std::vector<std::string>& filenames);
 		static void drawScreenQuad();
-		static void createFile();
 
 	private:
 		static void setUpFrameBuffer(int resolution);
+		static void setUpFrameBuffers();
 		static void setUpTextureObject();
 		
 	};

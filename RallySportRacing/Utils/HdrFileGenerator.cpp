@@ -8,13 +8,15 @@ namespace Utils {
 	//Framebuffers
 	unsigned int hdrIrraFBO;
 	unsigned int hdrIrraRBO;
+	unsigned int mipmapFBO;
+	unsigned int mipmapRBO;
 
 	//VertexArrayObjects
 	unsigned int renderVAO;
 	unsigned int renderVBO;
 
 	//Texture
-	unsigned int texture;
+	unsigned int irraTexture;
 
 	/// <param name="filePath">File path to which hdr image the irradiance hdr should be based on.</param>
 	void HdrFileGenerator::createIrradianceHDR(GLuint programID, string filePath) {
@@ -23,34 +25,35 @@ namespace Utils {
 		setUpTextureObject();
 
 		glUseProgram(programID);
-		//ToDo Setup shader uniforms.
 
 		glActiveTexture(GL_TEXTURE16);
 		glBindTexture(GL_TEXTURE_2D, envTexture);
 
 		glBindFramebuffer(GL_FRAMEBUFFER, hdrIrraFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, irraTexture, 0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		drawScreenQuad();
 
 		GLint lwidth, lheight;
 		std::vector<float> data;
-		glGetTextureLevelParameteriv(colorTextureTargets[colorBuffer], 0, GL_TEXTURE_WIDTH, &lwidth);
-		glGetTextureLevelParameteriv(colorTextureTargets[colorBuffer], 0, GL_TEXTURE_HEIGHT, &lheight);
-		data.resize(size_t(lwidth) * lheight * 3); // RGB data
-		glGetTextureSubImage(colorTextureTarget, mipmapLevel, 0, 0, 0, lwidth, lheight, 1, GL_RGB, GL_FLOAT, data.size() * sizeof(float), data.data());
+		glGetTextureLevelParameteriv(irraTexture, 0, GL_TEXTURE_WIDTH, &lwidth);
+		glGetTextureLevelParameteriv(irraTexture, 0, GL_TEXTURE_HEIGHT, &lheight);
+		data.resize(size_t(lwidth) * lheight * 3);
+		glGetTextureSubImage(irraTexture, 0, 0, 0, 0, lwidth, lheight, 1, GL_RGB32F, GL_FLOAT, data.size() * sizeof(float), data.data());
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		
+
 		//Take data from texture and store in HDR file.
+		stbi_write_hdr("../Textures/Background/irradiance.hdr", lwidth, lheight, 3, &data[0]);
+
 	}
 
+	//ToDo write this function.
 	void HdrFileGenerator::createReflectionHDRs(string filePath) {
-		stbi_write_hdr("../Textures/Background/irradiance.hdr", );
+
 	}
 
-	//ToDo test
 	unsigned int HdrFileGenerator::loadHDRTexture(const std::string& filename) {
 
 		unsigned int textureID;
@@ -91,12 +94,8 @@ namespace Utils {
 
 		return textureID;
 	}
-	
-	void HdrFileGenerator::createFile() {
 
-	}
-
-	//ToDo finish
+	//ToDo make sure this works.
 	void HdrFileGenerator::setUpFrameBuffer(int resolution) {
 
 		//Generate buffers.
@@ -113,14 +112,34 @@ namespace Utils {
 	
 	}
 
+	//ToDo finish writing this function and change width and height.
+	void HdrFileGenerator::setUpFrameBuffers() {
+
+		//Generate buffers.
+		glGenFramebuffers(7, &mipmapFBO);
+		glGenRenderbuffers(7, &mipmapRBO);
+
+		//Bind buffers.
+		glBindFramebuffer(GL_FRAMEBUFFER, mipmapFBO);
+		glBindRenderbuffer(GL_RENDERBUFFER, mipmapRBO);
+
+		//Setup buffers.
+		//ToDo set correct resolution.
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 0, 0);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, hdrIrraRBO);
+
+	}
+
 	void HdrFileGenerator::setUpTextureObject() {
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glGenTextures(1, &irraTexture);
+		glBindTexture(GL_TEXTURE_2D, irraTexture);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F, 200, 100, 0, GL_RGB, GL_FLOAT, nullptr);
 	}
 
 	void HdrFileGenerator::drawScreenQuad() {
@@ -141,6 +160,7 @@ namespace Utils {
 
 		}
 		//Render
+		glViewport(0,0, 200, 100);
 		glBindVertexArray(renderVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glEnable(GL_DEPTH_TEST);
