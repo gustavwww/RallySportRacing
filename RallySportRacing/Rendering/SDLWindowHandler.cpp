@@ -208,6 +208,7 @@ namespace Rendering {
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
 		GLint hdrToCubemapID = loadShader("../RallySportRacing/Shaders/Cubemap.vert", "../RallySportRacing/Shaders/HdrToCubemap.frag");
 		GLint envMapToIrradianceMapID = loadShader("../RallySportRacing/Shaders/Cubemap.vert", "../RallySportRacing/Shaders/CubemapToIrradiance.frag");
+		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
@@ -220,6 +221,7 @@ namespace Rendering {
 		//Load environment textures.
 		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/001.hdr");
 		unsigned int irradianceMap = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/001_irradiance.hdr");
+		Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, "../Textures/Background/cape_hill_2k.hdr");
 
 		//Bind textures.
 		glActiveTexture(GL_TEXTURE6);
