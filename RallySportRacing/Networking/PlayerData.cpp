@@ -1,4 +1,5 @@
 #include "PlayerData.h"
+#include <BulletSoftBody/btSoftBody.h>
 
 using namespace std;
 
@@ -21,7 +22,7 @@ namespace Networking {
 
 		orientation = glm::quat(quW, quX, quY, quZ);
 
-		speed = stof(cmd.getArgs()[index + 9]);
+		velocity = Audio::stringToVelocity((cmd.getArgs()[index + 9]));
 
 		soundString = cmd.getArgs()[index + 10];
 
