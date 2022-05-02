@@ -34,7 +34,11 @@ uniform vec3 lightColor;
 in vec3 vertexPosition_viewspace;
 in vec3 normal_viewspace;
 in vec2 texCoord;
-//in vec3 color;
+
+////////////////////////////////
+//Uniforms input
+////////////////////////////////
+uniform mat4 viewInverse;
 
 
 ////////////////////////////////
@@ -133,8 +137,22 @@ void main(){
 	//ToDo end for each light loop here.
 	
 	//Ambient light.
-	//vec3 diffuseAmbient = 1.5f * texture(irradianceMap, normal).rgb * albedo * kDiff;
-	vec3 diffuseAmbient = vec3(0.03) * albedo;
+
+	//Testing lookUp.
+	vec4 normalWorldSpace = viewInverse * vec4(normal, 0.0f);
+
+	float theta = acos(max(-1.0f, min(1.0f, normalWorldSpace.y)));
+	float phi = atan(normalWorldSpace.z, normalWorldSpace.x);
+	if(phi < 0.0f)
+	{
+		phi = phi + 2.0f * PI;
+	}
+
+	vec2 lookup = vec2(phi / (2.0 * PI), theta / PI);
+
+	vec3 diffuseAmbient = 1.5f * texture(irradianceMap, lookup).rgb * albedo * kDiff;
+	
+	//vec3 diffuseAmbient = vec3(0.03) * albedo;
 	
 	//ToDo fix specular ambient light.
 	const float MAX_REFLECTION_LOD = 4.0;
