@@ -6,7 +6,7 @@
 #include "Services/TCPClient.h"
 #include <thread>
 
-const int WIDTH = 1920, HEIGHT = 1080;
+const int WIDTH = 1280, HEIGHT = 720;
 
 using namespace Rendering;
 
@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 	SDLWindowHandler windowHandler(WIDTH, HEIGHT);
 	windowHandler.initSDLWindow("OpenGL");
 
-	Game::setupGame(&windowHandler);
+	//Game::setupGame(&windowHandler);
 
 	windowHandler.beginRenderingLoop(Game::update, Game::applicationExit);
 

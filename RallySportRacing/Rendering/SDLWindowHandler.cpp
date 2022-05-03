@@ -210,6 +210,7 @@ namespace Rendering {
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
 		
+		GLint copyTextureShader = loadShader("../RallySportRacing/Shaders/CopyTexture.vert", "../RallySportRacing/Shaders/CopyTexture.frag");
 
 		//debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
@@ -280,23 +281,29 @@ namespace Rendering {
 			view = glm::lookAt(camPosition, camDirection, camOrientation);
 			glm::vec4 viewSpaceLightPos = view * lightPos;
 			if (preRender) {
-				(*preRender)();
+				//(*preRender)();
 			}
 
 			// Clear the colorbuffer
+			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+			glClearColor( 0, 0, 0, 0 );
+			glUseProgram(0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_r) {
+				glDeleteProgram( mapCreationID );
+				mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
 				Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, "../Textures/Background/001.hdr");
 			}
 
 
-			skybox = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/irradiance.hdr");
+			//skybox = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/irradiance.hdr");
 			//Draw background
 			glUseProgram(skyboxProgramID);
 			glUniform3fv(glGetUniformLocation(skyboxProgramID, "cameraPos"), 1, &camPosition[0]);
 			glUniformMatrix4fv(glGetUniformLocation(skyboxProgramID, "invPV"), 1, GL_FALSE, &inverse(projection * view)[0][0]);
-			Utils::HdrFileGenerator::drawScreenQuad();
+			//Utils::HdrFileGenerator::drawScreenQuad();
 
 			// Choose shader program to use
 			glUseProgram(programID);
@@ -306,11 +313,11 @@ namespace Rendering {
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
 	
 			
+			/*
 			for (Model* m : models) {
 				m->render(projection, view, programID);
 			}
 
-			/*
 			for (ParticleSystem* p : particleSystems) {
 				p->render(particleProgramID, projection, view, width, height);
 			}
@@ -320,6 +327,12 @@ namespace Rendering {
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
+
+			glUseProgram( copyTextureShader );
+			glActiveTexture( GL_TEXTURE0 );
+			glBindTexture( GL_TEXTURE_2D, Utils::HdrFileGenerator::irraTexture );
+			Utils::HdrFileGenerator::drawScreenQuad();
+
 			ImGui::Render();
 			if (showDebugGUI) {
 				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

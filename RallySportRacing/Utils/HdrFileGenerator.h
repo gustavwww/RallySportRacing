@@ -45,6 +45,9 @@ namespace Utils {
 		static unsigned int loadHdrMipmapTexture(const std::vector<std::string>& filenames);
 		static void drawScreenQuad();
 
+		//Texture
+		static unsigned int irraTexture;
+
 	private:
 		static void setUpFrameBuffer();
 		static void setUpFrameBuffers();
