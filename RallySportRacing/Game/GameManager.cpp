@@ -113,7 +113,7 @@ namespace Game {
 		handler->addParticleSystem(explosionParticlesPointer);
 
 		// test environment finished track
-		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape2.gltf", true);
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true);
 		windowHandler->addModel(test);
 		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
@@ -145,7 +145,7 @@ namespace Game {
 
 
 		// Multiplayer setup
-		Networking::setupNetwork(vehicle, windowHandler);
+		//Networking::setupNetwork(vehicle, windowHandler);
 
 		// environment 1 test
 		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
