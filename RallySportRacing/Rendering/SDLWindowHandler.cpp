@@ -20,7 +20,7 @@ namespace Rendering {
 
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
-	glm::vec4 lightPos = glm::vec4(1.0f, 10.0f, 1.0f, 1.0f);
+	glm::vec4 lightPos = glm::vec4(1.0f, 500.0f, 1.0f, 1.0f);
 	float envMultiplier = 1.5f;
 	
 	//Audio
@@ -219,9 +219,9 @@ namespace Rendering {
 		glm::mat4 view;
 
 		//Load environment textures.
-		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/001.hdr");
+		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/cape_hill_2k.hdr");
 		unsigned int irradianceMap = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/001_irradiance.hdr");
-		Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, "../Textures/Background/cape_hill_2k.hdr");
+		//Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, "../Textures/Background/cape_hill_2k.hdr");
 
 		//Bind textures.
 		glActiveTexture(GL_TEXTURE6);
