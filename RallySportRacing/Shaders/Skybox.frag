@@ -30,5 +30,10 @@ void main(){
 		phi = phi + 2.0f * PI;
 	// Use these to lookup the color in the environment map
 	vec2 lookup = vec2(phi / (2.0 * PI), theta / PI);
-	fragmentColor = envMultiplier * texture(skybox, lookup);
+	vec3 envColor = envMultiplier * texture(skybox, lookup).rgb;
+
+	envColor = envColor / (envColor + vec3(1.0));
+    envColor = pow(envColor, vec3(1.0/2.2)); 
+
+	fragmentColor = vec4(envColor, 1.0);
 }
