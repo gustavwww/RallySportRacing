@@ -12,9 +12,9 @@ out vec4 fragmentColor;
 const float PI = 3.14159265359;
 
 void main(){
-	
-	vec3 normal = normalize(vec3(pos, 0));
 
+	vec3 normal = normalize(vec3(pos, 0));
+	
 	//Irradiance color.
 	vec3 irradiance = vec3(0.0);
 	
@@ -41,8 +41,6 @@ void main(){
 			//Tangent space to world space conversion.
 			vec3 worldSample = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
-			worldSample = worldSample.x * right + worldSample.y * up + worldSample * normal;
-
 			float thetaWorld = acos(worldSample.z);
 			float phiWorld = atan(worldSample.y, worldSample.x);
 
@@ -54,8 +52,13 @@ void main(){
 	}
 
 	//Multiplacation by PI compensate weight issue.
-	irradiance = irradiance * PI * float((1.0 / nrSamples));
+	vec3 color = irradiance * PI * float((1.0 / nrSamples));
 
-	//fragmentColor = vec4(irradiance, 1.0);
-	fragmentColor = vec4(1,0,0,0);
+	//Tonemapping
+	//color = color / (color + vec3(1.0));
+    
+	//Gamma correction
+	color = pow(color, vec3(1.0/2.2)); 
+
+	fragmentColor = vec4(color, 1.0);
 }
