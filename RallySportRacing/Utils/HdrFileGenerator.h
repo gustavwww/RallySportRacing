@@ -46,10 +46,8 @@ namespace Utils {
 		static void drawScreenQuad();
 
 	private:
-		static void setUpFrameBuffer(int resolution);
+		static void setUpFrameBuffer();
 		static void setUpFrameBuffers();
-		static void setUpTextureObject();
-		
 	};
 
 }
