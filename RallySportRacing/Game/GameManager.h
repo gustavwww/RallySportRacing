@@ -6,7 +6,8 @@
 #include "Rendering/SDLWindowHandler.h"
 
 namespace Game {
-
+	void activateSnow();
+	void activateRain();
 	void initCheckPoints();
 	void setupGame(Rendering::SDLWindowHandler* windowHandler);
 	void update();
