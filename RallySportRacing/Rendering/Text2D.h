@@ -2,6 +2,8 @@
 #define TEXT2D
 
 #include <glm/glm.hpp>
+#include <string>
+#include <map>
 
 using namespace std;
 
@@ -16,14 +18,20 @@ namespace Rendering {
 
     class Text2D {
     public:
-	    Text2D();
-	    void render();
+	    Text2D(string text, glm::vec3 color);
+	    void render(GLint programID);
 
         static void loadCharacters();
 
     private:
-        static map<char, Character> characters;
+        string text;
+        glm::vec3 color;
 
+        static map<char, Character> characters;
+        bool isTextSetup = false;
+        void setupText();
+
+        unsigned int VAO, VBO;
     };
 
 

@@ -22,7 +22,6 @@ add_executable (RallySportRacing
     "Rendering/ParticleSystem.cpp" "Utils/Random.h" "Utils/Random.cpp" "Utils/GameTimer.h" "Utils/GameTimer.cpp" "Audio/audio.cpp" "Audio/audio.h" "Audio/SoundSource.cpp" "Audio/SoundSource.h" "Rendering/CubemapLoader.h" "Rendering/CubemapLoader.cpp" "Networking/PlayerData.h" "Networking/PlayerData.cpp")
 
 
-
 find_package(OpenGL REQUIRED)
 
 set(Bullet_ROOT "${CMAKE_SOURCE_DIR}/External/bullet/")

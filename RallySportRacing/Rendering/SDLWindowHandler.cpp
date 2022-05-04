@@ -202,6 +202,8 @@ namespace Rendering {
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
 		GLint hdrToCubemapID = loadShader("../RallySportRacing/Shaders/Cubemap.vert", "../RallySportRacing/Shaders/HdrToCubemap.frag");
+		GLint text2DProgramID = loadShader("../RallySportRacing/Shaders/2DText.vert", "../RallySportRacing/Shaders/2DText.frag");
+
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
@@ -217,9 +219,12 @@ namespace Rendering {
 		//GUI bool
 		bool showDebugGUI = false;
 
+		// Load character glyphs from font.
+		Text2D::loadCharacters();
+
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		
+
 		SDL_Event windowEvent; 
 		while (true) {
 			// This needs to be the first thing checked for imgui to work well
@@ -282,6 +287,10 @@ namespace Rendering {
 				p->render(particleProgramID, projection, view, width, height);
 			}
 
+			for (Text2D* t : texts) {
+				t->render(text2DProgramID);
+			}
+
 			//ToDo draw background here.
 			CubemapLoader::renderBackground(skyboxProgramID, skybox, view, projection);
 
@@ -311,6 +320,14 @@ namespace Rendering {
 	}
 	void SDLWindowHandler::removeParticlesSystem(ParticleSystem* particleSystem) {
 		particleSystems.erase(particleSystem);
+	}
+
+	void SDLWindowHandler::addText(Text2D* text) {
+		texts.insert(text);
+	}
+
+	void SDLWindowHandler::removeText(Text2D* text) {
+		texts.erase(text);
 	}
 
 	SDL_Window* SDLWindowHandler::getSDLWindow() {
