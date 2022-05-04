@@ -12,7 +12,7 @@ uniform float roughness;
 ////////////////////////////////
 // Envoirment
 ////////////////////////////////
-
+layout(binding = 7) uniform sampler2D irradianceMap;
 ////////////////////////////////
 //Shadow
 ////////////////////////////////
@@ -34,7 +34,11 @@ uniform vec3 lightColor;
 in vec3 vertexPosition_viewspace;
 in vec3 normal_viewspace;
 in vec2 texCoord;
-//in vec3 color;
+
+////////////////////////////////
+//Uniforms input
+////////////////////////////////
+uniform mat4 viewInverse;
 
 
 ////////////////////////////////
@@ -73,6 +77,11 @@ float geometryFunction(float NdotV, float NdotL, float roughness){
 vec3 fresnelSchlick(float HdotV, vec3 baseReflectivity){
 	
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - HdotV, 5.0);
+}
+
+vec3 fresnelSchlickRoughness(float HdotV, vec3 baseReflectivity, float roughness){
+	
+	return baseReflectivity + (max(vec3(1.0 - roughness), baseReflectivity) - baseReflectivity) * pow(1.0 - HdotV, 5.0);
 }
 
 void main(){
@@ -126,8 +135,35 @@ void main(){
 	Lo += (kDiff * albedo / PI + specular) * radiance * NdotL;
 
 	//ToDo end for each light loop here.
+	
+	//Ambient light.
 
-	vec3 ambient = vec3(0.03) * albedo;
+	//Testing lookUp.
+	vec4 normalWorldSpace = viewInverse * vec4(normal, 0.0f);
+
+	float theta = acos(max(-1.0f, min(1.0f, normalWorldSpace.y)));
+	float phi = atan(normalWorldSpace.z, normalWorldSpace.x);
+	if(phi < 0.0f)
+	{
+		phi = phi + 2.0f * PI;
+	}
+
+	vec2 lookup = vec2(phi / (2.0 * PI), theta / PI);
+
+	vec3 diffuseAmbient = 1.5f * texture(irradianceMap, lookup).rgb * albedo * kDiff;
+	
+	//vec3 diffuseAmbient = vec3(0.03) * albedo;
+	
+	//ToDo fix specular ambient light.
+	const float MAX_REFLECTION_LOD = 4.0;
+	//vec3 prefilteredColor = textureLod(prefilteredMap, reflect(-viewDir, normal), roughness * MAX_REFLECTION_LOD).rgb;
+	//vec2 brdf = texture(brdfLUT, vec2(NdotV, roughness)).rg;
+	//vec3 specularAmbient = prefilteredColor * (F * brdf.r +brdf.g);
+	vec3 specularAmbient = vec3(0.0);
+
+	vec3 ambient = (diffuseAmbient + specularAmbient);
+
+	
 	vec3 color = ambient + Lo;
 
 	//HDR tonemapping.

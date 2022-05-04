@@ -20,7 +20,7 @@ private:
 	void horn(bool x, irrklang::vec3df position, irrklang::vec3df velMetersPerSec);
 	void exhaust(bool x, irrklang::vec3df position);
 	void engineStart(bool x, irrklang::vec3df position);
-	void engine(bool x, float speed, irrklang::vec3df position);
+	void engine(bool x, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec);
 	void engineOff(bool x, irrklang::vec3df position);
 
 	string soundString;
