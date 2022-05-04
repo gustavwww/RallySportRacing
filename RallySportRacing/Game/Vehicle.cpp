@@ -16,7 +16,6 @@ namespace Game {
 		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
 		getHandler()->addModel(wheel4Model);
 
-		//test wheels but have no model, using wallmodel temporary
 		wheel1 = new GameObject(wheel1Model, dynamicsWorld);
 		wheel2 = new GameObject(wheel2Model, dynamicsWorld);
 		wheel3 = new GameObject(wheel3Model, dynamicsWorld);
@@ -34,7 +33,7 @@ namespace Game {
 
 		btScalar chassisMass(1000.0);
 		btVector3 chassisInertia(0.0f, 0.0f, 0.0f);
-		btVector3 shape = btVector3(0.9, 0.5, 2.2); // could use automatically generated cshape from model but requires a little bit of fine tunements
+		btVector3 shape = btVector3(0.9, 0.6, 2.2); // could use automatically generated cshape from model but requires a little bit of fine tunements
 		collisionShape = new btBoxShape(shape); 
 
 		btQuaternion initalRotation = btQuaternion(0, 0, 0, 1);
@@ -46,7 +45,7 @@ namespace Game {
 		compoundShape = new btCompoundShape();
 		btTransform position;
 		position.setIdentity();
-		position.setOrigin(btVector3(0, 0.8, 0.4));  // offset
+		position.setOrigin(btVector3(0, 0.75, 0.4));  // offset
 		compoundShape->addChildShape(position, collisionShape);
 		shape = shape + btVector3(0, 1, -0.13); // adjust shape with offset 
 
@@ -62,7 +61,7 @@ namespace Game {
 		tuning.m_suspensionDamping = 2.3f;
 		tuning.m_suspensionCompression = 4.4f;
 		tuning.m_maxSuspensionForce = 11600.0;
-		tuning.m_maxSuspensionTravelCm = 25.0;
+		tuning.m_maxSuspensionTravelCm = 20.0;
 		tuning.m_frictionSlip = 100.5; // not used
 
 
@@ -87,14 +86,14 @@ namespace Game {
 		btVector3 wheelConnectionPoint(shape.x(), connectionHeight, shape.z() - wheelWidth); // these will be needed to be adjusted depending on the model
 
 		// front wheels offset
-		btVector3 frontWheelsOffset = btVector3(-0.06, -0.20, -0.06);
+		btVector3 frontWheelsOffset = btVector3(-0.06, -0.29, -0.06);
 		//Adds the front wheels
 		vehicle->addWheel(wheelConnectionPoint + frontWheelsOffset, wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
 		vehicle->addWheel((wheelConnectionPoint + frontWheelsOffset) * btVector3(-1, 1, 1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, true);
 
 		// Rear wheels offset
-		btVector3 rearWheelsOffset = btVector3(-0.06, -0.27, -0.83);
+		btVector3 rearWheelsOffset = btVector3(-0.06, -0.36, -0.83);
 		//Adds the rear wheels
 		vehicle->addWheel((wheelConnectionPoint + rearWheelsOffset) * btVector3(1, 1, -1), wheelDirection, wheelAxle, suspensionRestLength, wheelRadius, tuning, false);
 

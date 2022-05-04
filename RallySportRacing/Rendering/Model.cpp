@@ -51,6 +51,7 @@ namespace Rendering {
 		glm::mat4 modelViewMatrix = view * model;
 		glm::mat4 mvp = projection * modelViewMatrix;
 		glm::mat4 normalMatrix = inverse(transpose(modelViewMatrix));
+		glm::mat4 viewInverse = inverse(view);
 
 		//Send matrix to shader
 		GLuint matrixID = glGetUniformLocation(programID, "MVP");
@@ -61,6 +62,9 @@ namespace Rendering {
 		
 		GLuint normalMatrixID = glGetUniformLocation(programID, "normalMatrix");
 		glUniformMatrix4fv(normalMatrixID, 1, GL_FALSE, &normalMatrix[0][0]);
+
+		GLuint viewInverseMatrixID = glGetUniformLocation(programID, "viewInverse");
+		glUniformMatrix4fv(viewInverseMatrixID, 1, GL_FALSE, &viewInverse[0][0]);
 
 		for each (Mesh m in meshes) {
 			m.renderMesh(programID);

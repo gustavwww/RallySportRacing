@@ -18,7 +18,7 @@ float playBackSpeed;
 
 SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 {
-	irrklang::vec3df position(get<0>(positionXYZ), get<1>(positionXYZ), get<2>(positionXYZ));
+	irrklang::vec3df position(get<0>(positionXYZ)/Audio::distanceScalar, get<1>(positionXYZ)/ Audio::distanceScalar, get<2>(positionXYZ)/ Audio::distanceScalar);
 	speed = 0.0F;
 
 	// Init engine sound
@@ -30,6 +30,7 @@ SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 	// Init looping sounds
 	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
 	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/BetterCarAudio.mp3",position,  true, true, true);
+	this->engineSound->setVolume(2);
 }
 
 // Destructor of SoundSource
@@ -48,7 +49,7 @@ SoundSource::~SoundSource()	{
 
 // Function that updates source
 void SoundSource::update(tuple <float, float, float> positionXYZ, tuple <float, float, float> velPerFrame, float speed, string soundString) {
-	irrklang::vec3df position(get<0>(positionXYZ), get<1>(positionXYZ), get<2>(positionXYZ));
+	irrklang::vec3df position(get<0>(positionXYZ)/Audio::distanceScalar, get<1>(positionXYZ)/Audio::distanceScalar, get<2>(positionXYZ)/Audio::distanceScalar);
 
 	// Get velocity vector in m/s
 	irrklang::vec3df velMetersPerSecond = Audio::getVelMetersPerSec(velPerFrame, speed);
@@ -59,7 +60,7 @@ void SoundSource::update(tuple <float, float, float> positionXYZ, tuple <float, 
 	exhaust(this->soundString[2] == '1', position);
 
 	engineStart(this->soundString[0] == '1', position);
-	engine(this->soundString[0] == '2', speed, position);
+	engine(this->soundString[0] == '2', speed, position, velMetersPerSecond);
 	engineOff(this->soundString[0] == '3', position);
 }
 
@@ -98,8 +99,11 @@ void SoundSource::engineStart(bool x, irrklang::vec3df position) {
 }
 
 // Function that plays engine sound
-void SoundSource::engine(bool x, float speed, irrklang::vec3df position) {
+void SoundSource::engine(bool x, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
 	this->engineSound->setPosition(position);
+	this->engineSound->setVelocity(velMetersPerSec);
+	//this->engineSound->setMinDistance(10);
+
 	if (x) {
 		if (this->engineSound->getIsPaused()) {
 			this->engineSound->setIsPaused(false);

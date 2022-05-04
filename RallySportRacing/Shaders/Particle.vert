@@ -4,11 +4,13 @@ layout(location = 0) in vec4 particle;
 uniform mat4 projMat;
 uniform float screen_x;
 uniform float screen_y;
+uniform float scale;
 
 out float life;
 
 void main()
 {
+	//scaleTest = test; 
 	life = particle.w;
 	//Use 1 instead of lifetime when calculating fragment.
 	vec4 particle_viewspace = vec4(particle.xyz, 1.0);
@@ -19,5 +21,5 @@ void main()
 	gl_Position = projMat * particle_viewspace;
 
 	//Scale size based on lifetime.
-	gl_PointSize = scaleFactor * mix(0.0, 0.2, pow(life, 1.0 / 4.0));
+	gl_PointSize = scaleFactor * mix(0.0, scale, pow(life, 1.0 / 4.0)); // 
 }

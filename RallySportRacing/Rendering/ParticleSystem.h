@@ -24,7 +24,9 @@ namespace Rendering {
 		unsigned int maxSize;
 		unsigned int texture;
 
-		unsigned int VAO, VBO;
+		float scale;
+
+		unsigned int VAO, VBO, VAO1, VBO1;
 
 		ParticleSystem(unsigned int maxSize, unsigned int texture);
 		ParticleSystem() {
@@ -32,7 +34,7 @@ namespace Rendering {
 		};
 		~ParticleSystem();
 
-		void emitParticle(glm::vec3 pos, glm::vec3 velocity, float lifeLength);
+		void emitParticle(glm::vec3 pos, glm::vec3 velocity, float lifeLength, float scaling);
 		void updateParticles();
 		void render(GLint programID, glm::mat4 projectionMatrix, glm::mat4 viewMatrix, float screenWidth, float screenHeight);
 

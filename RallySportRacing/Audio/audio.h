@@ -27,6 +27,8 @@ public:
 
 	static ISoundEngine* SoundEngine;
 
+	static int distanceScalar;
+
 private:
 	static Audio* instance;
 };

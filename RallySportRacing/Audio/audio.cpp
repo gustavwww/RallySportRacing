@@ -17,6 +17,8 @@ float volume;
 
 ISoundEngine* SoundEngine;
 
+int Audio::distanceScalar = 10;
+
 map<int, SoundSource*> sources;
 
 Audio* Audio::instance = nullptr;
@@ -77,7 +79,7 @@ string Audio::getSoundString(int ID) {
 // Function that updates the listeners position, orientation and velocity
 void Audio::setListenerParameters(tuple <float, float, float> positionXYZ, tuple <float, float, float> direction, tuple <float, float, float> velPerFrame, float speedKmPerh) {
 
-	irrklang::vec3df position(get<0>(positionXYZ), get<1>(positionXYZ), get<2>(positionXYZ));	// position of the listener
+	irrklang::vec3df position(get<0>(positionXYZ)/distanceScalar, get<1>(positionXYZ)/distanceScalar, get<2>(positionXYZ)/distanceScalar);	// position of the listener
 	irrklang::vec3df lookDirection(get<0>(direction), get<1>(direction), get<2>(direction)); // the direction the listener looks into
 	irrklang::vec3df velPerSecond = getVelMetersPerSec(velPerFrame, speedKmPerh);   // only relevant for doppler effects
 	irrklang::vec3df upVector(0, 1, 0);        // where 'up' is in your 3D scene
