@@ -19,7 +19,7 @@ namespace Game{
 		void Vehicle::notGasing();
 		void Vehicle::handBrake();
 		float Vehicle::getSpeed();
-		tuple<float, float, float>  Game::Vehicle::getVelocity();
+		glm::vec3  Game::Vehicle::getVelocity();
 
 		void* m_groundObject; // the object the vehicle is in contact with
 	

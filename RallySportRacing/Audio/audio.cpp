@@ -1,12 +1,4 @@
 #include "audio.h"
-#include <iostream>
-#include <string>
-#include <windows.h>
-#include "../../External/irrKlang/include/irrKlang.h"
-
-#include <tuple>
-#include <map>
-#include "SoundSource.h"
 
 using namespace std;
 using namespace irrklang;
@@ -59,12 +51,12 @@ void Audio::volumeSet(float v) {
 	SoundEngine->setSoundVolume(volume);
 }
 
-void Audio::createSoundSource(int ID, tuple <float, float, float> position) {
+void Audio::createSoundSource(int ID, glm::vec3 position) {
 	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(ID, position)));
 }
 
 // Function that updates sound source in map with key ID
-void Audio::updateSoundSource(int ID, tuple<float, float, float> position, tuple<float, float, float> velPerFrame, float speed, string sounds) {
+void Audio::updateSoundSource(int ID, glm::vec3 position, glm::vec3 velPerFrame, float speed, string sounds) {
 	sources.at(ID)->update(position, velPerFrame, speed, sounds);
 }
 
@@ -77,10 +69,10 @@ string Audio::getSoundString(int ID) {
 }
 
 // Function that updates the listeners position, orientation and velocity
-void Audio::setListenerParameters(tuple <float, float, float> positionXYZ, tuple <float, float, float> direction, tuple <float, float, float> velPerFrame, float speedKmPerh) {
+void Audio::setListenerParameters(glm::vec3 positionXYZ, glm::vec3 direction, glm::vec3 velPerFrame, float speedKmPerh) {
 
-	irrklang::vec3df position(get<0>(positionXYZ)/distanceScalar, get<1>(positionXYZ)/distanceScalar, get<2>(positionXYZ)/distanceScalar);	// position of the listener
-	irrklang::vec3df lookDirection(get<0>(direction), get<1>(direction), get<2>(direction)); // the direction the listener looks into
+	irrklang::vec3df position(positionXYZ.x/distanceScalar, positionXYZ.y/distanceScalar, positionXYZ.z/distanceScalar);	// position of the listener
+	irrklang::vec3df lookDirection(direction.x, direction.y, direction.z); // the direction the listener looks into
 	irrklang::vec3df velPerSecond = getVelMetersPerSec(velPerFrame, speedKmPerh);   // only relevant for doppler effects
 	irrklang::vec3df upVector(0, 1, 0);        // where 'up' is in your 3D scene
 
@@ -88,7 +80,7 @@ void Audio::setListenerParameters(tuple <float, float, float> positionXYZ, tuple
 }
 
 // Function that takes a tuple of the speed per frame in X,Y,Z directions and total speed in km/h and returns a tuple of the speed in m/s
-irrklang::vec3df Audio::getVelMetersPerSec(tuple <float, float, float> velPerFrame, float speedKmPerh) {
+irrklang::vec3df Audio::getVelMetersPerSec(glm::vec3 velPerFrame, float speedKmPerh) {
 	float x;
 	// Get speed in m/s
 	float speedMetersPerSec = speedKmPerh / 3.6;
@@ -96,10 +88,12 @@ irrklang::vec3df Audio::getVelMetersPerSec(tuple <float, float, float> velPerFra
 	// Calculate x, the multiplier that turns the speed per frame to speed in m/s
 	// speedMeterPerSec = sqrt( (velPerFrame.X * x)^2 + (velPerFrame.Y * x)^2 + (velPerFrame.Z * x)^2 ) -> x
 
-	x = speedMetersPerSec * sqrt( pow(get<0>(velPerFrame), 2) + pow(get<1>(velPerFrame), 2) + pow(get<2>(velPerFrame), 2) ) /
-		(pow(get<0>(velPerFrame), 2) + pow(get<1>(velPerFrame), 2) + pow(get<2>(velPerFrame), 2));
+	x = speedMetersPerSec * sqrt( pow(velPerFrame.x, 2) + pow(velPerFrame.y, 2) + pow(velPerFrame.z, 2) ) /
+		(pow(velPerFrame.x, 2) + pow(velPerFrame.y, 2) + pow(velPerFrame.z, 2));
 
 	// Return vector of velocity in m/s
-	irrklang::vec3df velMetersPerSec( get<0>(velPerFrame) * x, get<1>(velPerFrame) * x, get<2>(velPerFrame) * x );
+	irrklang::vec3df velMetersPerSec( velPerFrame.x * x, velPerFrame.y * x,velPerFrame.z * x );
 	return velMetersPerSec;
 }
+
+

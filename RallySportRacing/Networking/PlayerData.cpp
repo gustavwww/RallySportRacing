@@ -1,4 +1,5 @@
 #include "PlayerData.h"
+#include <BulletSoftBody/btSoftBody.h>
 
 using namespace std;
 
@@ -23,52 +24,58 @@ namespace Networking {
 
 		speed = stof(cmd.getArgs()[index + 9]);
 
-		soundString = cmd.getArgs()[index + 10];
+		float velX = stof(cmd.getArgs()[index + 10]);
+		float velY = stof(cmd.getArgs()[index + 11]);
+		float velZ = stof(cmd.getArgs()[index + 12]);
 
-		posX = stof(cmd.getArgs()[index + 11]);
-		posY = stof(cmd.getArgs()[index + 12]);
-		posZ = stof(cmd.getArgs()[index + 13]);
+		velocity = glm::vec3(velX, velY, velZ);
+
+		soundString = cmd.getArgs()[index + 13];
+
+		posX = stof(cmd.getArgs()[index + 14]);
+		posY = stof(cmd.getArgs()[index + 15]);
+		posZ = stof(cmd.getArgs()[index + 16]);
 		
-		quX = stof(cmd.getArgs()[index + 14]);
-		quY = stof(cmd.getArgs()[index + 15]);
-		quZ = stof(cmd.getArgs()[index + 16]);
-		quW = stof(cmd.getArgs()[index + 17]);
+		quX = stof(cmd.getArgs()[index + 17]);
+		quY = stof(cmd.getArgs()[index + 18]);
+		quZ = stof(cmd.getArgs()[index + 19]);
+		quW = stof(cmd.getArgs()[index + 20]);
 
 		frontLeftPos = glm::vec3(posX, posY, posZ);
 		frontLeftOr = glm::quat(quW, quX, quY, quZ);
 
-		posX = stof(cmd.getArgs()[index + 18]);
-		posY = stof(cmd.getArgs()[index + 19]);
-		posZ = stof(cmd.getArgs()[index + 20]);
+		posX = stof(cmd.getArgs()[index + 21]);
+		posY = stof(cmd.getArgs()[index + 22]);
+		posZ = stof(cmd.getArgs()[index + 23]);
 
-		quX = stof(cmd.getArgs()[index + 21]);
-		quY = stof(cmd.getArgs()[index + 22]);
-		quZ = stof(cmd.getArgs()[index + 23]);
-		quW = stof(cmd.getArgs()[index + 24]);
+		quX = stof(cmd.getArgs()[index + 24]);
+		quY = stof(cmd.getArgs()[index + 25]);
+		quZ = stof(cmd.getArgs()[index + 26]);
+		quW = stof(cmd.getArgs()[index + 27]);
 
 		frontRightPos = glm::vec3(posX, posY, posZ);
 		frontRightOr = glm::quat(quW, quX, quY, quZ);
 
-		posX = stof(cmd.getArgs()[index + 25]);
-		posY = stof(cmd.getArgs()[index + 26]);
-		posZ = stof(cmd.getArgs()[index + 27]);
+		posX = stof(cmd.getArgs()[index + 28]);
+		posY = stof(cmd.getArgs()[index + 29]);
+		posZ = stof(cmd.getArgs()[index + 30]);
 
-		quX = stof(cmd.getArgs()[index + 28]);
-		quY = stof(cmd.getArgs()[index + 29]);
-		quZ = stof(cmd.getArgs()[index + 30]);
-		quW = stof(cmd.getArgs()[index + 31]);
+		quX = stof(cmd.getArgs()[index + 31]);
+		quY = stof(cmd.getArgs()[index + 32]);
+		quZ = stof(cmd.getArgs()[index + 33]);
+		quW = stof(cmd.getArgs()[index + 34]);
 
 		backLeftPos = glm::vec3(posX, posY, posZ);
 		backLeftOr = glm::quat(quW, quX, quY, quZ);
 
-		posX = stof(cmd.getArgs()[index + 32]);
-		posY = stof(cmd.getArgs()[index + 33]);
-		posZ = stof(cmd.getArgs()[index + 34]);
+		posX = stof(cmd.getArgs()[index + 35]);
+		posY = stof(cmd.getArgs()[index + 36]);
+		posZ = stof(cmd.getArgs()[index + 37]);
 
-		quX = stof(cmd.getArgs()[index + 35]);
-		quY = stof(cmd.getArgs()[index + 36]);
-		quZ = stof(cmd.getArgs()[index + 37]);
-		quW = stof(cmd.getArgs()[index + 38]);
+		quX = stof(cmd.getArgs()[index + 38]);
+		quY = stof(cmd.getArgs()[index + 39]);
+		quZ = stof(cmd.getArgs()[index + 40]);
+		quW = stof(cmd.getArgs()[index + 41]);
 
 		backRightPos = glm::vec3(posX, posY, posZ);
 		backRightOr = glm::quat(quW, quX, quY, quZ);
