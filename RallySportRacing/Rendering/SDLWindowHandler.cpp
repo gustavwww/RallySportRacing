@@ -218,7 +218,8 @@ namespace Rendering {
 
 		//Create irrdiance file.
 		string backgroundFilePath = "../Textures/Background/kloppenheim_06_2k.hdr";
-		Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFilePath);
+		//Uncomment line under to create new irradiance file.
+		//Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFilePath);
 
 		//Load environment textures.
 		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture(backgroundFilePath);
