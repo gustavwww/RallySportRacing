@@ -5,7 +5,6 @@
 #include <glm/gtx/quaternion.hpp>
 #include "Services/Protocol/Command.h"
 #include <tuple>
-#include <Audio/audio.h>
 
 using namespace std;
 
@@ -17,7 +16,8 @@ namespace Networking {
 		string name;
 		glm::vec3 pos;
 		glm::quat orientation;
-		tuple<float, float, float, float> velocity;
+		float speed;
+		tuple<float, float, float> velocity;
 		string soundString;
 
 		glm::vec3 frontLeftPos;
