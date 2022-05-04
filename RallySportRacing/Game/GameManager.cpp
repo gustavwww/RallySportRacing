@@ -54,6 +54,8 @@ namespace Game {
 	unsigned int blueexplosionTexture;
 	unsigned int tireTrackTexture;
 	unsigned int dirtTexture;
+	unsigned int rainTexture;
+	unsigned int snowTexture;
 
 	//ParticleSystems
 	Rendering::ParticleSystem smokeParticlesObject;
@@ -70,6 +72,12 @@ namespace Game {
 
 	Rendering::ParticleSystem dirtParticlesObject;
 	Rendering::ParticleSystem* dirtParticlesPointer;
+
+	Rendering::ParticleSystem rainParticlesObject;
+	Rendering::ParticleSystem* rainParticlesPointer;
+
+	Rendering::ParticleSystem snowParticlesObject;
+	Rendering::ParticleSystem* snowParticlesPointer;
 
 	//Debug GameObject
 	GameObject* debugEnvironment;
@@ -233,6 +241,18 @@ namespace Game {
 		smokeParticlesPointer = &smokeParticlesObject;
 		handler->addParticleSystem(smokeParticlesPointer);
 
+		//Load and add rainTexture to particle render list.
+		rainTexture = handler->loadTexture("../Textures/rainTexture.png");
+		rainParticlesObject = Rendering::ParticleSystem(1000000, rainTexture);
+		rainParticlesPointer = &rainParticlesObject;
+		handler->addParticleSystem(rainParticlesPointer);
+
+		//Load and add snowTexture to particle render list.
+		snowTexture = handler->loadTexture("../Textures/snowTexture.png");
+		snowParticlesObject = Rendering::ParticleSystem(1000000, snowTexture);
+		snowParticlesPointer = &snowParticlesObject;
+		handler->addParticleSystem(snowParticlesPointer);
+
 		// test environment finished track
 		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape2.gltf", true);
 		windowHandler->addModel(test);
@@ -263,7 +283,7 @@ namespace Game {
 		initCheckPoints();
 
 		// Multiplayer setup
-		Networking::setupNetwork(vehicle, windowHandler);
+		//Networking::setupNetwork(vehicle, windowHandler);
 
 		// environment 1 test
 		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
@@ -346,9 +366,38 @@ namespace Game {
 
 	bool everyOtherLoop = true;
 
-	void update() {
+	bool toggleRain = false;
+	bool toggleSnow = false;
 
-		// temporary for testing
+	void activateRain() {
+		glm::vec3 rainOffset1 = glm::vec3(25 * random.Float(), 25 * random.Float(), 25 * random.Float());
+		rainParticlesObject.emitParticle(vehicle->getPosition() + rainOffset1, glm::vec3(0, -9, 0), 2, 2);
+
+		glm::vec3 rainOffset2 = glm::vec3(-25 * random.Float(), 25 * random.Float(), -25 * random.Float());
+		rainParticlesObject.emitParticle(vehicle->getPosition() + rainOffset2, glm::vec3(0, -9, 0), 2, 2);
+
+		glm::vec3 rainOffset3 = glm::vec3(-25 * random.Float(), 25 * random.Float(), 25 * random.Float());
+		rainParticlesObject.emitParticle(vehicle->getPosition() + rainOffset3, glm::vec3(0, -9, 0), 2, 2);
+
+		glm::vec3 rainOffset4 = glm::vec3(25 * random.Float(), 25 * random.Float(), -25 * random.Float());
+		rainParticlesObject.emitParticle(vehicle->getPosition() + rainOffset4, glm::vec3(0, -9, 0), 2, 2);
+	}
+
+	void activateSnow() {
+		glm::vec3 rainOffset1 = glm::vec3(25 * random.Float(), 25 * random.Float(), 25 * random.Float());
+		snowParticlesObject.emitParticle(vehicle->getPosition() + rainOffset1, glm::vec3(0, -2, 0), 4, 3);
+
+		glm::vec3 rainOffset2 = glm::vec3(-25 * random.Float(), 25 * random.Float(), -25 * random.Float());
+		snowParticlesObject.emitParticle(vehicle->getPosition() + rainOffset2, glm::vec3(0, -2, 0), 4, 3);
+
+		glm::vec3 rainOffset3 = glm::vec3(-25 * random.Float(), 25 * random.Float(), 25 * random.Float());
+		snowParticlesObject.emitParticle(vehicle->getPosition() + rainOffset3, glm::vec3(0, -2, 0), 4, 3);
+
+		glm::vec3 rainOffset4 = glm::vec3(25 * random.Float(), 25 * random.Float(), -25 * random.Float());
+		snowParticlesObject.emitParticle(vehicle->getPosition() + rainOffset4, glm::vec3(0, -2, 0), 4, 3);
+	}
+
+	void update() {
 		// Collisionhandling between a pair of objects
 		// Bullet physics does not give a predefined check collision with method
 		int numManifolds = physics->dynamicsWorld->getDispatcher()->getNumManifolds();
@@ -407,10 +456,29 @@ namespace Game {
 		}
 		gameTimer->updateGameTime();
 
-		// TODO:
-		// gonna fix the code so it is more simple and clear?
 		SDL_PumpEvents();
 		buttons = SDL_GetMouseState(&x, &y);
+
+		// weather 
+		if (keyboard_state_array[SDL_SCANCODE_F1]) {
+			toggleRain = false;
+			toggleSnow = false;
+		}
+		if (keyboard_state_array[SDL_SCANCODE_F2]) {
+			toggleRain = true;
+			toggleSnow = false;
+		}
+		if (keyboard_state_array[SDL_SCANCODE_F3]) {
+			toggleSnow = true;
+			toggleRain = false;
+		}
+		if (toggleRain) {
+			activateRain();
+		}
+		if (toggleSnow) {
+			activateSnow();
+		}
+
 
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
@@ -538,15 +606,15 @@ namespace Game {
 
 		if (keyboard_state_array[SDL_SCANCODE_T]) { // for testing purpose
 
-			cout << vehicle->getTransform().getOrigin().x() << endl;
-			cout << vehicle->getTransform().getOrigin().y() << endl;
-			cout << vehicle->getTransform().getOrigin().z() << endl;
+			//cout << vehicle->getTransform().getOrigin().x() << endl;
+			//cout << vehicle->getTransform().getOrigin().y() << endl;
+			//cout << vehicle->getTransform().getOrigin().z() << endl;
 
 			// For Dirt track. Waiting for the model before fully implementing
-			//glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
-			//glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
-			//dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
-			//dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+			glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+			glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+			dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+			dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 
 			//vehicle->setInitialPosition(vehicle->getTransform().getOrigin() + btVector3(0, 2, 0));
 			//btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), 1, vehicle->getTransform().getRotation().getW()); 
