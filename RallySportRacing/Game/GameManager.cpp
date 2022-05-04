@@ -283,7 +283,7 @@ namespace Game {
 		initCheckPoints();
 
 		// Multiplayer setup
-		//Networking::setupNetwork(vehicle, windowHandler);
+		Networking::setupNetwork(vehicle, windowHandler);
 
 		// environment 1 test
 		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
