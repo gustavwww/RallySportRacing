@@ -113,7 +113,7 @@ namespace Game {
 		handler->addParticleSystem(explosionParticlesPointer);
 
 		// test environment finished track
-		Rendering::Model* test = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true);
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape2.gltf", true);
 		windowHandler->addModel(test);
 		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
@@ -126,13 +126,6 @@ namespace Game {
 		gameObjects.push_back(wall);
 		wall->setInitialPosition(btVector3(-70, 4, 0));
 		//wall->setInitialRotation(btQuaternion(0,0,1,1));
-
-		// test light
-		Rendering::Model* lightModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
-		windowHandler->addModel(lightModel);
-		light = new GameObject(lightModel, physics->dynamicsWorld);
-		gameObjects.push_back(light);
-		light->setInitialPosition(btVector3(-70, 4, 0));
 
 		// player vehicle, use setInitialpos to change position when starting the game
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);

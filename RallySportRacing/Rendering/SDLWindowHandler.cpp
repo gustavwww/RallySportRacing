@@ -203,15 +203,12 @@ namespace Rendering {
 
 	void SDLWindowHandler::beginRenderingLoop(void (*preRender)(), void (*onQuit)()) {
 
-		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
-		Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, "../Textures/Background/001.hdr");
-
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
-		
+		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
 
-		//debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
+		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 5000.0f);
@@ -219,9 +216,13 @@ namespace Rendering {
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
+		//Create irrdiance file.
+		string backgroundFilePath = "../Textures/Background/kloppenheim_06_2k.hdr";
+		Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFilePath);
+
 		//Load environment textures.
-		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/irradiance.hdr");
-		unsigned int irradianceMap = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/001_irradiance.hdr");
+		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture(backgroundFilePath);
+		unsigned int irradianceMap = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/irradiance.hdr");
 
 		//Bind textures.
 		glActiveTexture(GL_TEXTURE6);
@@ -286,12 +287,6 @@ namespace Rendering {
 			// Clear the colorbuffer
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_r) {
-				Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, "../Textures/Background/001.hdr");
-			}
-
-
-			skybox = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/irradiance.hdr");
 			//Draw background
 			glUseProgram(skyboxProgramID);
 			glUniform3fv(glGetUniformLocation(skyboxProgramID, "cameraPos"), 1, &camPosition[0]);
@@ -310,11 +305,9 @@ namespace Rendering {
 				m->render(projection, view, programID);
 			}
 
-			/*
 			for (ParticleSystem* p : particleSystems) {
 				p->render(particleProgramID, projection, view, width, height);
 			}
-			*/
 
 			//Game::drawDebug();
 
