@@ -1,12 +1,4 @@
 #include "audio.h"
-#include <iostream>
-#include <string>
-#include <windows.h>
-#include "../../External/irrKlang/include/irrKlang.h"
-
-#include <tuple>
-#include <map>
-#include "SoundSource.h"
 
 using namespace std;
 using namespace irrklang;
@@ -103,3 +95,27 @@ irrklang::vec3df Audio::getVelMetersPerSec(tuple <float, float, float> velPerFra
 	irrklang::vec3df velMetersPerSec( get<0>(velPerFrame) * x, get<1>(velPerFrame) * x, get<2>(velPerFrame) * x );
 	return velMetersPerSec;
 }
+/*
+// Return speed and velocity in string form
+string Audio::velocityToString(float speedKmPerh, tuple<float, float, float> velPerFrame)
+{
+	return to_string(speedKmPerh) + "|" + to_string(get<0>(velPerFrame)) + "|" + to_string(get<1>(velPerFrame)) + "|" + to_string(get<2>(velPerFrame)) + "|";
+}
+
+// Return speed and velocity in tuple form
+tuple<float, float, float, float> Audio::stringToVelocity(string velocity)
+{
+	int arrayIterator = 0;
+	string tempFloatArray[4];
+
+	for (int i = 0; i < velocity.length(); i++) {
+		if (velocity[i] != '|') {
+			tempFloatArray[arrayIterator].append(&velocity[i]);
+		}
+		else {
+			arrayIterator++;
+		}
+	}
+	return make_tuple(stof(tempFloatArray[0]), stof(tempFloatArray[1]), stof(tempFloatArray[2]), stof(tempFloatArray[3]));
+}
+*/

@@ -5,6 +5,9 @@
 #include <string>
 #include <windows.h>
 #include "../../External/irrKlang/include/irrKlang.h"
+#include <glm/glm.hpp>
+#include <map>
+#include "SoundSource.h"
 
 using namespace std;
 using namespace irrklang;
@@ -24,6 +27,9 @@ public:
 	string getSoundString(int ID);
 	void setListenerParameters(tuple <float, float, float> positionXYZ, tuple <float, float, float> direction, tuple <float, float, float> velPerFrame, float speed);
 	static irrklang::vec3df getVelMetersPerSec(tuple <float, float, float> velPerFrame, float speedKmPerh);
+	static string velocityToString(float speedKmPerh, tuple<float, float, float> velPerFrame);
+	static tuple<float, float, float, float> stringToVelocity(string velocity);
+
 
 	static ISoundEngine* SoundEngine;
 

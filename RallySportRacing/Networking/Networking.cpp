@@ -86,7 +86,7 @@ namespace Networking {
 		
 		if (command == "game") {
 
-			if (cmd.getArgsSize() % 40 != 0) {
+			if (cmd.getArgsSize() % 43 != 0) {
 				// Skip corrupt UDP packets.
 				return;
 			}
@@ -97,7 +97,7 @@ namespace Networking {
 				playersInGame.push_back(el.first);
 			
 			for (int i = 0; i < cmd.getArgsSize(); i++) {
-				if (cmd.getArgs()[i] == "player" && (i+39) <= cmd.getArgsSize()) {
+				if (cmd.getArgs()[i] == "player" && (i+42) <= cmd.getArgsSize()) {
 					i++;
 
 					int id = stoi(cmd.getArgs()[i]);
@@ -126,7 +126,7 @@ namespace Networking {
 
 						// Update sound source
 						
-						sound->updateSoundSource(id, make_tuple(data.pos.x, data.pos.y, data.pos.z), make_tuple(0, 0, 0), data.speed, data.soundString);
+						sound->updateSoundSource(id, make_tuple(data.pos.x, data.pos.y, data.pos.z), data.velocity, data.speed, data.soundString);
 					}
 
 				}
@@ -157,6 +157,7 @@ namespace Networking {
 		while (inGame) {
 			glm::vec3 pos = vehicle->getPosition();
 			glm::quat qu = vehicle->getQuaternion();
+			tuple<float, float, float> velocity = vehicle->getVelocity();
 			glm::vec3 frontLeftPos = vehicle->wheel1->getPosition();
 			glm::quat frontLeftOr = vehicle->wheel1->getQuaternion();
 			glm::vec3 frontRightPos = vehicle->wheel2->getPosition();
@@ -173,6 +174,9 @@ namespace Networking {
 				+ to_string(qu.z) + ","
 				+ to_string(qu.w) + ","
 				+ to_string(vehicle->getSpeed()) + ","
+				+ to_string(get<0>(velocity)) + ","
+				+ to_string(get<1>(velocity)) + ","
+				+ to_string(get<2>(velocity)) + ","
 				+ sound->getSoundString(0) + ","
 				+ to_string(frontLeftPos.x) + ","
 				+ to_string(frontLeftPos.y) + ","

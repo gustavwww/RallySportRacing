@@ -1,12 +1,5 @@
 #include "SoundSource.h"
-#include "audio.h"
 
-#include <iostream>
-#include <string>
-#include <windows.h>
-#include "../../External/irrKlang/include/irrKlang.h"
-
-#include<tuple>
 
 using namespace std;
 using namespace irrklang;

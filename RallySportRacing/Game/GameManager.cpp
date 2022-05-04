@@ -305,7 +305,6 @@ namespace Game {
 		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
 		gameObjects.push_back(debugEnvironment);
 		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));*/
-	
 	}
 
 	bool toScreen = true;
