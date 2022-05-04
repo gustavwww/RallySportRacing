@@ -216,19 +216,35 @@ namespace Rendering {
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
-		//Create irrdiance file.
-		string backgroundFilePath = "../Textures/Background/kloppenheim_06_2k.hdr";
-		Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFilePath);
+		
+		string backgroundFileName = "../Textures/Background/001";
+		vector<string>reflectionLevels{
+			backgroundFileName + "_dl_0.hdr",
+			backgroundFileName + "_dl_1.hdr",
+			backgroundFileName + "_dl_2.hdr",
+			backgroundFileName + "_dl_3.hdr",
+			backgroundFileName + "_dl_4.hdr",
+			backgroundFileName + "_dl_5.hdr",
+			backgroundFileName + "_dl_6.hdr",
+			backgroundFileName + "_dl_7.hdr"
+		};
+		
+		//Create irrdiance and reflection files.
+		//Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFileName + ".hdr");
+		Utils::HdrFileGenerator::createReflectionHDRs(mapCreationID, backgroundFileName + ".hdr", 0);
 
 		//Load environment textures.
-		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture(backgroundFilePath);
+		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture(backgroundFileName + ".hdr");
 		unsigned int irradianceMap = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/irradiance.hdr");
+		unsigned int reflectionMap = Utils::HdrFileGenerator::loadHdrMipmapTexture(reflectionLevels);
 
 		//Bind textures.
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, skybox);
 		glActiveTexture(GL_TEXTURE7);
 		glBindTexture(GL_TEXTURE_2D, irradianceMap);
+		glActiveTexture(GL_TEXTURE8);
+		glBindTexture(GL_TEXTURE_2D, reflectionMap);
 
 		//Environment uniforms.
 		glUseProgram(skyboxProgramID);
