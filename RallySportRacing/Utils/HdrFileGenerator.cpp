@@ -13,6 +13,9 @@ namespace Utils {
 	unsigned int renderVAO;
 	unsigned int renderVBO;
 
+	//Width and height
+	unsigned int irrTexWidth = 822, irrTexHeight = 411;
+
 	//Texture
 	unsigned int irraTexture;
 
@@ -35,7 +38,7 @@ namespace Utils {
 		GLint lwidth, lheight;
 		glGetTextureLevelParameteriv(irraTexture, 0, GL_TEXTURE_WIDTH, &lwidth);
 		glGetTextureLevelParameteriv(irraTexture, 0, GL_TEXTURE_HEIGHT, &lheight);
-		glViewport(0, 0, 822, 411);
+		glViewport(0, 0, irrTexWidth, irrTexHeight);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		drawScreenQuad();
@@ -46,6 +49,7 @@ namespace Utils {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 		//Take data from texture and store in HDR file.
+		stbi_flip_vertically_on_write(1);
 		stbi_write_hdr("../Textures/Background/irradiance.hdr", lwidth, lheight, 4, &data[0]);
 
 	}
@@ -61,7 +65,7 @@ namespace Utils {
 		glGenTextures(1, &textureID);
 		glBindTexture(GL_TEXTURE_2D, textureID);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -79,7 +83,7 @@ namespace Utils {
 		glBindTexture(GL_TEXTURE_2D, textureID);
 		//ToDo maybe chabge this.
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
@@ -117,7 +121,7 @@ namespace Utils {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 822, 411, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, irrTexWidth, irrTexHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, irraTexture, 0);
 		GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };

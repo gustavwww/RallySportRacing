@@ -13,14 +13,22 @@ const float PI = 3.14159265359;
 
 void main(){
 
-	vec3 normal = normalize(vec3(pos, 0));
+	//2D space to 3D space
+	vec2 tp = (pos + 1) / 2;
+	tp.y = 1 - tp.y;
+	float ncosT = cos(tp.y * PI);
+	float nsinT = sin(tp.y * PI);
+	float ncosP = cos(tp.x * 2 * PI);
+	float nsinP = sin(tp.x * 2 * PI);
+
+	vec3 normal = normalize(vec3(nsinT * ncosP, ncosT, nsinT * nsinP));
 	
 	//Irradiance color.
 	vec3 irradiance = vec3(0.0);
 	
 	//Create sampling tangent space.
-	vec3 right = cross(vec3(0.0, 1.0, 0.0), normal);
-	vec3 up = cross(normal, right);
+	vec3 tg = cross(vec3(0.0, 1.0, 0.0), normal);
+	vec3 bitg = cross(normal, tg);
 
 	float sampleStep = 0.025;
 	float nrSamples = 0.0;
@@ -35,30 +43,25 @@ void main(){
 
 			float cosTheta = cos(theta);
 			float sinTheta = sin(theta);
+
 			//Convertion from spherical to cartesian.
-			vec3 tangentSample = vec3(sinTheta * cosPhi, sinTheta * sinPhi, cosTheta);
+			vec3 tangentSample = vec3(sinTheta * cosPhi, cosTheta, sinTheta * sinPhi);
 			
-			//Tangent space to world space conversion.
-			vec3 worldSample = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
+			//Tangent space to world space direction vector.
+			vec3 worldSample = tangentSample.x * tg + tangentSample.y * normal + tangentSample.z * bitg;
 
-			float thetaWorld = acos(worldSample.z);
-			float phiWorld = atan(worldSample.y, worldSample.x);
+			float thetaWorld = acos(worldSample.y);
+			float phiWorld = atan(worldSample.z, worldSample.x);
 
-			vec2 lookup = vec2(thetaWorld, phiWorld);
+			vec2 lookup = vec2(phiWorld / (2 * PI), thetaWorld / PI);
 
-			irradiance += texture(envTexture, lookup).rgb * cosTheta * sinTheta;
+			irradiance += texture(envTexture, lookup).rgb * cosTheta;
 			nrSamples++;
 		}
 	}
 
 	//Multiplacation by PI compensate weight issue.
 	vec3 color = irradiance * PI * float((1.0 / nrSamples));
-
-	//Tonemapping
-	//color = color / (color + vec3(1.0));
-    
-	//Gamma correction
-	color = pow(color, vec3(1.0/2.2)); 
 
 	fragmentColor = vec4(color, 1.0);
 }
