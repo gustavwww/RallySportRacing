@@ -1,12 +1,4 @@
 #include "audio.h"
-#include <iostream>
-#include <string>
-#include <windows.h>
-#include "../../External/irrKlang/include/irrKlang.h"
-
-#include <tuple>
-#include <map>
-#include "SoundSource.h"
 
 using namespace std;
 using namespace irrklang;
@@ -103,7 +95,7 @@ irrklang::vec3df Audio::getVelMetersPerSec(tuple <float, float, float> velPerFra
 	irrklang::vec3df velMetersPerSec( get<0>(velPerFrame) * x, get<1>(velPerFrame) * x, get<2>(velPerFrame) * x );
 	return velMetersPerSec;
 }
-
+/*
 // Return speed and velocity in string form
 string Audio::velocityToString(float speedKmPerh, tuple<float, float, float> velPerFrame)
 {
@@ -126,3 +118,4 @@ tuple<float, float, float, float> Audio::stringToVelocity(string velocity)
 	}
 	return make_tuple(stof(tempFloatArray[0]), stof(tempFloatArray[1]), stof(tempFloatArray[2]), stof(tempFloatArray[3]));
 }
+*/

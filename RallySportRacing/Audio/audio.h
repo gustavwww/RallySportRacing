@@ -5,6 +5,9 @@
 #include <string>
 #include <windows.h>
 #include "../../External/irrKlang/include/irrKlang.h"
+#include <glm/glm.hpp>
+#include <map>
+#include "SoundSource.h"
 
 using namespace std;
 using namespace irrklang;

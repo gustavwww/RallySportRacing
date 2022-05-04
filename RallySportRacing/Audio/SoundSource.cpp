@@ -1,12 +1,5 @@
 #include "SoundSource.h"
-#include "audio.h"
 
-#include <iostream>
-#include <string>
-#include <windows.h>
-#include "../../External/irrKlang/include/irrKlang.h"
-
-#include<tuple>
 
 using namespace std;
 using namespace irrklang;
@@ -30,7 +23,6 @@ SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
 	// Init looping sounds
 	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
 	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/BetterCarAudio.mp3",position,  true, true, true);
-	//this->engineSound = Audio::SoundEngine->play2D("../RallySportRacing/Audio/BetterCarAudio.mp3", true, true, true);
 	this->engineSound->setVolume(2);
 }
 
