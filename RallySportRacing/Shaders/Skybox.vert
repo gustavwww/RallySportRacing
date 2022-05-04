@@ -1,22 +1,13 @@
 #version 420
 
 //Inputs
-layout(location = 0) in vec3 pos;
+layout(location = 0) in vec2 pos;
 
 //Outputs
-out vec3 TexCoords;
-
-//Uniforms
-uniform mat4 viewProjMat;
+out vec2 texCoord;
 
 void main(){
-	//Convert to vec3 TexCoords.
-	TexCoords = pos;
 	
-	//Convert to view projection space space.
-	vec4 glPos = viewProjMat * vec4(pos, 1.0);
-	
-	//Use w coord instead of z making sure that depth is at maximum rendering behind everything else.
-	gl_Position = glPos.xyww;
-
+	gl_Position = vec4(pos, 0.0, 1.0);
+	texCoord = pos;
 }

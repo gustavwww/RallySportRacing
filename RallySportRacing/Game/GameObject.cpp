@@ -115,6 +115,7 @@ namespace Game{
 		motionState->setWorldTransform(initialTransform);
 
 		dynamicsWorld->addRigidBody(rigidBody);
+
 	}
 
 	GameObject::~GameObject() {

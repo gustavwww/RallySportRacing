@@ -2,7 +2,6 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-#pragma comment(lib, "freetype.lib")
 #include <iostream>
 #include <GL/glew.h>
 

@@ -16,6 +16,7 @@ namespace Networking {
 		glm::vec3 pos;
 		glm::quat orientation;
 		float speed;
+		glm::vec3 velocity;
 		string soundString;
 
 		glm::vec3 frontLeftPos;

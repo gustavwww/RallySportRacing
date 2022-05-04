@@ -1,26 +1,28 @@
 #ifndef SOUNDSOURCE
 #define SOUNDSOURCE
+#include "audio.h"
 
 #include <iostream>
 #include <string>
 #include <windows.h>
 #include "../../External/irrKlang/include/irrKlang.h"
+#include <glm/glm.hpp>
 
 using namespace std;
 using namespace irrklang;
 
 class SoundSource {
 public:
-	SoundSource(int ID, tuple <float, float, float> position);
+	SoundSource(int ID, glm::vec3 position);
 	~SoundSource();
-	void update(tuple <float, float, float> positionXYZ, tuple <float, float, float> velPerFrame, float speed, string sounds);
+	void update(glm::vec3 positionXYZ, glm::vec3 velPerFrame, float speed, string sounds);
 	string getSoundString();
 
 private:
 	void horn(bool x, irrklang::vec3df position, irrklang::vec3df velMetersPerSec);
 	void exhaust(bool x, irrklang::vec3df position);
 	void engineStart(bool x, irrklang::vec3df position);
-	void engine(bool x, float speed, irrklang::vec3df position);
+	void engine(bool x, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec);
 	void engineOff(bool x, irrklang::vec3df position);
 
 	string soundString;

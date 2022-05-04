@@ -41,6 +41,8 @@ namespace Rendering {
 		void setCamOrientation(glm::vec3 camOr);
 		GLint getDebugID();
 
+		glm::vec3 getLightPosition();
+
 
 
 	private:
