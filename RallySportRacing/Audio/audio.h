@@ -21,14 +21,12 @@ public:
 	void volumeDown();
 	void volumeSet(float v);
 
-	void createSoundSource(int ID, tuple <float, float, float> position);
-	void updateSoundSource(int ID, tuple <float, float, float> position, tuple <float, float, float> velPerFrame, float speed, string sounds);
+	void createSoundSource(int ID, glm::vec3 position);
+	void updateSoundSource(int ID, glm::vec3 position, glm::vec3 velPerFrame, float speed, string sounds);
 	void removeSoundSource(int ID);
 	string getSoundString(int ID);
-	void setListenerParameters(tuple <float, float, float> positionXYZ, tuple <float, float, float> direction, tuple <float, float, float> velPerFrame, float speed);
-	static irrklang::vec3df getVelMetersPerSec(tuple <float, float, float> velPerFrame, float speedKmPerh);
-	static string velocityToString(float speedKmPerh, tuple<float, float, float> velPerFrame);
-	static tuple<float, float, float, float> stringToVelocity(string velocity);
+	void setListenerParameters(glm::vec3 positionXYZ, glm::vec3 direction, glm::vec3 velPerFrame, float speed);
+	static irrklang::vec3df getVelMetersPerSec(glm::vec3 velPerFrame, float speedKmPerh);
 
 
 	static ISoundEngine* SoundEngine;

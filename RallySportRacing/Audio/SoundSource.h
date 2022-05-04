@@ -13,9 +13,9 @@ using namespace irrklang;
 
 class SoundSource {
 public:
-	SoundSource(int ID, tuple <float, float, float> position);
+	SoundSource(int ID, glm::vec3 position);
 	~SoundSource();
-	void update(tuple <float, float, float> positionXYZ, tuple <float, float, float> velPerFrame, float speed, string sounds);
+	void update(glm::vec3 positionXYZ, glm::vec3 velPerFrame, float speed, string sounds);
 	string getSoundString();
 
 private:

@@ -198,12 +198,12 @@ namespace Game {
 	}
 
 	// Function that returns velocity vector in speed per frame
-	tuple<float, float, float> Game::Vehicle::getVelocity() {
+	glm::vec3 Game::Vehicle::getVelocity() {
 		btVector3 velocity = vehicle->getRigidBody()->getLinearVelocity();
-		float speedX = velocity.getX();
-		float speedY = velocity.getY();
-		float speedZ = velocity.getZ();
-		return make_tuple(speedX, speedY, speedZ);
+		float velX = velocity.getX();
+		float velY = velocity.getY();
+		float velZ = velocity.getZ();
+		return glm::vec3(velX, velY, velZ);
 	}
 
 	void Vehicle::updateTransform()

@@ -116,7 +116,7 @@ namespace Networking {
 						cout << "A player has joined the game: " << p->getName() << endl;
 
 						// Create sound source
-						sound->createSoundSource(id, make_tuple(data.pos.x, data.pos.y, data.pos.z));
+						sound->createSoundSource(id, data.pos);
 					}
 					else {
 						// Player already created, updating position...
@@ -125,8 +125,7 @@ namespace Networking {
 						playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
 
 						// Update sound source
-						
-						sound->updateSoundSource(id, make_tuple(data.pos.x, data.pos.y, data.pos.z), data.velocity, data.speed, data.soundString);
+						sound->updateSoundSource(id, data.pos, data.velocity, data.speed, data.soundString);
 					}
 
 				}
@@ -157,7 +156,7 @@ namespace Networking {
 		while (inGame) {
 			glm::vec3 pos = vehicle->getPosition();
 			glm::quat qu = vehicle->getQuaternion();
-			tuple<float, float, float> velocity = vehicle->getVelocity();
+			glm::vec3 vel = vehicle->getVelocity();
 			glm::vec3 frontLeftPos = vehicle->wheel1->getPosition();
 			glm::quat frontLeftOr = vehicle->wheel1->getQuaternion();
 			glm::vec3 frontRightPos = vehicle->wheel2->getPosition();
@@ -174,9 +173,9 @@ namespace Networking {
 				+ to_string(qu.z) + ","
 				+ to_string(qu.w) + ","
 				+ to_string(vehicle->getSpeed()) + ","
-				+ to_string(get<0>(velocity)) + ","
-				+ to_string(get<1>(velocity)) + ","
-				+ to_string(get<2>(velocity)) + ","
+				+ to_string(vel.x) + ","
+				+ to_string(vel.y) + ","
+				+ to_string(vel.z) + ","
 				+ sound->getSoundString(0) + ","
 				+ to_string(frontLeftPos.x) + ","
 				+ to_string(frontLeftPos.y) + ","

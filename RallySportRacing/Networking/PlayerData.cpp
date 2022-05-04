@@ -24,11 +24,11 @@ namespace Networking {
 
 		speed = stof(cmd.getArgs()[index + 9]);
 
-		float velocityX = stof(cmd.getArgs()[index + 10]);
-		float velocityY = stof(cmd.getArgs()[index + 11]);
-		float velocityZ = stof(cmd.getArgs()[index + 12]);
+		float velX = stof(cmd.getArgs()[index + 10]);
+		float velY = stof(cmd.getArgs()[index + 11]);
+		float velZ = stof(cmd.getArgs()[index + 12]);
 
-		velocity = make_tuple(velocityX, velocityY, velocityZ);
+		velocity = glm::vec3(velX, velY, velZ);
 
 		soundString = cmd.getArgs()[index + 13];
 

@@ -9,9 +9,9 @@ using namespace irrklang;
 float speed;
 float playBackSpeed;
 
-SoundSource::SoundSource(int ID, tuple<float, float, float> positionXYZ)
+SoundSource::SoundSource(int ID, glm::vec3 positionXYZ)
 {
-	irrklang::vec3df position(get<0>(positionXYZ)/Audio::distanceScalar, get<1>(positionXYZ)/ Audio::distanceScalar, get<2>(positionXYZ)/ Audio::distanceScalar);
+	irrklang::vec3df position(positionXYZ.x/Audio::distanceScalar, positionXYZ.y/ Audio::distanceScalar, positionXYZ.z/ Audio::distanceScalar);
 	speed = 0.0F;
 
 	// Init engine sound
@@ -41,8 +41,8 @@ SoundSource::~SoundSource()	{
 }
 
 // Function that updates source
-void SoundSource::update(tuple <float, float, float> positionXYZ, tuple <float, float, float> velPerFrame, float speed, string soundString) {
-	irrklang::vec3df position(get<0>(positionXYZ)/Audio::distanceScalar, get<1>(positionXYZ)/Audio::distanceScalar, get<2>(positionXYZ)/Audio::distanceScalar);
+void SoundSource::update(glm::vec3 positionXYZ, glm::vec3 velPerFrame, float speed, string soundString) {
+	irrklang::vec3df position(positionXYZ.x/Audio::distanceScalar, positionXYZ.y/Audio::distanceScalar, positionXYZ.z/Audio::distanceScalar);
 
 	// Get velocity vector in m/s
 	irrklang::vec3df velMetersPerSecond = Audio::getVelMetersPerSec(velPerFrame, speed);
