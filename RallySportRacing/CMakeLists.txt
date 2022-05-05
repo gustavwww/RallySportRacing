@@ -34,7 +34,6 @@ target_include_directories(RallySportRacing PUBLIC
                             "${CMAKE_SOURCE_DIR}/External/SDL/include"
                             "${CMAKE_SOURCE_DIR}/External/glm"
                             "${CMAKE_SOURCE_DIR}/External/tinygltf"
-                            "${CMAKE_SOURCE_DIR}/External/FreeType/include"
                             ${BULLET_INCLUDE_DIR}
                             "External/bullet/include/bullet/" 
                           )
@@ -43,7 +42,6 @@ target_link_libraries(RallySportRacing PUBLIC
                             "${CMAKE_SOURCE_DIR}/External/GLEW/lib/Release/x64/glew32.lib"
                             "${CMAKE_SOURCE_DIR}/External/SDL/lib/x64/SDL2.lib"
                             "${CMAKE_SOURCE_DIR}/External/SDL/lib/x64/SDL2main.lib"
-                            "${CMAKE_SOURCE_DIR}/External/FreeType/lib/freetype.lib"
 
                             "${OPENGL_LIBRARIES}"
                             ${BULLET_LIBRARIES}
