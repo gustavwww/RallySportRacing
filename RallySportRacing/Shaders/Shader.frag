@@ -14,6 +14,7 @@ uniform float roughness;
 ////////////////////////////////
 layout(binding = 7) uniform sampler2D irradianceMap;
 layout(binding = 8) uniform sampler2D reflectionMap;
+layout(binding = 9) uniform sampler2D shadowMap;
 ////////////////////////////////
 //Shadow
 ////////////////////////////////
@@ -35,6 +36,7 @@ uniform vec3 lightColor;
 in vec3 vertexPosition_viewspace;
 in vec3 normal_viewspace;
 in vec2 texCoord;
+in vec4 posLightSpace;
 
 ////////////////////////////////
 //Uniforms input
@@ -46,6 +48,22 @@ uniform mat4 viewInverse;
 // Outputs
 ////////////////////////////////
 out vec4 fragmentColor;
+
+//Check if fragment is in shadow.
+float shadow(float LdotN){
+	vec3 pos = posLightSpace.xyz * 0.5 + 0.5;
+	//Caping z value to be max 1.
+	if(pos.z > 1.0){
+		pos.z = 1.0;
+	}
+	float depth = texture(shadowMap, pos.xy).r;
+	//Change bias until it looks good.
+	float bias = max(0.05 * (1.0 - LdotN), 0.005);
+
+	//ToDo add surroding samples for better shadows.
+
+	return (depth + bias) < pos.z ? 0.0 : 1.0;
+}
 
 //Trowbridge-Reitz GGX normal distrubition function: a^2 / pi( (n dot h)^2 * (a^2 - 1) + 1 )^2
 //Aproximates the relative surface area of microfacets aligned with the halfway vector.
