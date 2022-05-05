@@ -11,7 +11,6 @@
 #include "Game/GameObject.h"
 #include "Player.h"
 #include "Rendering/SDLWindowHandler.h"
-#include "Rendering/Model.h"
 #include <glm/gtx/quaternion.hpp>
 #include <Audio/audio.h>
 

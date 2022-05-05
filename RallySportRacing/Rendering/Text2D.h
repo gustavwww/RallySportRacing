@@ -17,6 +17,8 @@ namespace Rendering {
 	    Text2D(string text, glm::vec3 color, glm::vec2 pos);
 	    void render(GLint programID);
 
+        void updatePos(glm::vec2 pos);
+
     private:
 
         string text;

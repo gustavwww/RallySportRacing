@@ -55,7 +55,7 @@ namespace Rendering {
 			float x = pos.x;
 			float y = pos.y;
 
-			float scale = 1;
+			float scale = 10;
 			float xpos = x + ch.Bearing.x * scale;
 			float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 
@@ -81,6 +81,10 @@ namespace Rendering {
 		}
 		glBindVertexArray(0);
 		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	void Text2D::updatePos(glm::vec2 pos) {
+		this->pos = pos;
 	}
 
 	void loadCharacters() {
