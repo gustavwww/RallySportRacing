@@ -2,12 +2,15 @@
 #include <iostream>
 #include <fstream>
 #include <stb_image_write.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 
 namespace Utils {
 
 	//Framebuffers
 	unsigned int hdrIrraFBO;
 	unsigned int mipmapFBO;
+	unsigned int shadowMapFBO;
 
 	//VertexArrayObjects
 	unsigned int renderVAO;
@@ -18,6 +21,8 @@ namespace Utils {
 
 	//Texture
 	unsigned int irraTexture;
+	unsigned int texture;
+	unsigned int shadowMap;
 
 	/// <param name="filePath">File path to which hdr image the irradiance hdr should be based on.</param>
 	void HdrFileGenerator::createIrradianceHDR(GLuint programID, string filePath) {
@@ -55,8 +60,37 @@ namespace Utils {
 	}
 
 	//ToDo write this function.
-	void HdrFileGenerator::createReflectionHDRs(string filePath) {
+	void HdrFileGenerator::createReflectionHDRs(GLuint programID, string filePath) {
+		static unsigned int envTexture = 0;
+		if (envTexture == 0)
+		{
+			envTexture = loadHDRTexture(filePath);
+		}
+		setUpFrameBuffers();
 
+		glUseProgram(programID);
+
+		glActiveTexture(GL_TEXTURE16);
+		glBindTexture(GL_TEXTURE_2D, envTexture);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, mipmapFBO);
+
+		GLint lwidth, lheight;
+		glGetTextureLevelParameteriv(mipmapFBO, 1, GL_TEXTURE_WIDTH, &lwidth);
+		glGetTextureLevelParameteriv(mipmapFBO, 1, GL_TEXTURE_HEIGHT, &lheight);
+		glViewport(0, 0, 1643, 821);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		drawScreenQuad();
+		std::vector<float> data;
+		data.resize(size_t(lwidth) * lheight * 4);
+		glGetTextureSubImage(irraTexture, 1, 0, 0, 0, lwidth, lheight, 1, GL_RGBA, GL_FLOAT, data.size() * sizeof(float), data.data());
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		//Take data from texture and store in HDR file.
+		stbi_flip_vertically_on_write(1);
+		stbi_write_hdr("../Textures/Background/test.hdr", lwidth, lheight, 4, &data[0]);
 	}
 
 	unsigned int HdrFileGenerator::loadHDRTexture(const std::string& filename) {
@@ -137,11 +171,35 @@ namespace Utils {
 	//ToDo finish writing this function and change width and height.
 	void HdrFileGenerator::setUpFrameBuffers() {
 
-		//Generate buffers
-		glGenFramebuffers(7, &mipmapFBO);
+		if (mipmapFBO != 0)
+		{
+			return;
+		}
+		//Generate buffer.
+		glGenFramebuffers(1, &mipmapFBO);
 
-		//Bind buffer
+		//Bind buffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, mipmapFBO);
+
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1643, 821, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, attachments);
+
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			throw "Framebuffer not complete";
+		}
 	}
 
 	void HdrFileGenerator::drawScreenQuad() {
@@ -171,4 +229,73 @@ namespace Utils {
 
 	}
 
+	void HdrFileGenerator::setUpshadowMapFrameBuffer() {
+
+		if (shadowMapFBO != 0)
+		{
+			return;
+		}
+
+		//Generate depthBuffer.
+		glGenFramebuffers(1, &shadowMapFBO);
+
+		//Generate depthMapTexture.
+		glGenTextures(1, &shadowMap);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+		//Setup for framebuffer.
+		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
+		
+		//Prevent from reading or writing to the color buffer.
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+
+		//Set default framebuffer.
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void HdrFileGenerator::createShadowMap(GLuint programID, glm::vec3 lightPos) {
+
+		setUpshadowMapFrameBuffer();
+
+		//ToDo mess around with these numbers until the shadows look good.
+		float nearPlane = 1.0f, farPlane = 75.0f;
+		glm::mat4 lightProjection = glm::ortho(-35.0f, 35.0f, -35.0f, 35.0f, nearPlane, farPlane);
+		glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+		glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+		glUseProgram(programID);
+		glUniformMatrix4fv(glGetUniformLocation(programID, "lightSpaceMatrix"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
+
+		glEnable(GL_DEPTH_TEST);
+		glViewport(0, 0, 1024, 1024);
+		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+		glClear(GL_DEPTH_BUFFER_BIT);
+
+		//ToDo render scene here.
+
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	//ToDo finish method.
+	void HdrFileGenerator::renderShadowMap(GLuint programID) {
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glViewport(0, 0, 1024, 1024);
+		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(programID);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+
+	}
 }
