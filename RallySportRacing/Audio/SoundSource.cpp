@@ -28,7 +28,7 @@ SoundSource::SoundSource(int ID, glm::vec3 positionVec3)
 	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
 	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/BetterCarAudio.mp3",position,  true, true, true);
 	this->rainSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/Rain.mp3", position, true, true, true);
-	this->pavementSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainPavement.mp3", position, true, true, true);
+	this->pavementSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainPavement2.mp3", position, true, true, true);
 	this->dirtSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainDirt.mp3", position, true, true, true);
 }
 
@@ -147,7 +147,7 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 				this->pavementSound->setIsPaused(false);
 			}
 		}
-		this->pavementSound->setPlaybackSpeed(0.5F + abs(speed) / 400);
+		this->pavementSound->setPlaybackSpeed(0.5F + abs(speed) / 300);
 		this->pavementSound->setVolume(abs(speed) / 200);
 
 		if (!this->dirtSound->getIsPaused()) {
@@ -155,7 +155,6 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 		}
 	}
 	else if (terrain == '1') {
-		cout << "dirt";
 		this->dirtSound->setPosition(position);
 		this->dirtSound->setVelocity(velMetersPerSec);
 
@@ -164,7 +163,7 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 				this->dirtSound->setIsPaused(false);
 			}
 		}
-		this->dirtSound->setPlaybackSpeed(0.5F + abs(speed) / 400);
+		this->dirtSound->setPlaybackSpeed(0.5F + abs(speed) / 300);
 		this->dirtSound->setVolume(abs(speed) / 200);
 
 		if (!this->pavementSound->getIsPaused()) {
