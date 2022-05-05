@@ -42,10 +42,9 @@ namespace Rendering {
 		this->rotationMat = rotationMat;
 	}
 
-
 	void Model::render(glm::mat4 projection, glm::mat4 view, GLint programID) {
 
-		// Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
+		//Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
 		glm::mat4 model = translationMat * rotationMat * scaleMat;
 
 		glm::mat4 modelViewMatrix = view * model;
@@ -56,6 +55,9 @@ namespace Rendering {
 		//Send matrix to shader
 		GLuint matrixID = glGetUniformLocation(programID, "MVP");
 		glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
+
+		GLuint modelMatrixID = glGetUniformLocation(programID, "modelMatrix");
+		glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &model[0][0]);
 
 		GLuint modelViewMatrixID = glGetUniformLocation(programID, "modelViewMatrix");
 		glUniformMatrix4fv(modelViewMatrixID, 1, GL_FALSE, &modelViewMatrix[0][0]);
