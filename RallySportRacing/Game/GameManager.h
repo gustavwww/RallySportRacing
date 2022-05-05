@@ -20,6 +20,8 @@ namespace Game {
 	void drawDebug();
 	void applicationExit();
 	Rendering::SDLWindowHandler* getHandler();
+	float getRaceTime();
+	float getCountDownTime();
 }
 
 #endif

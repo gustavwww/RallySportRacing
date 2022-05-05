@@ -133,7 +133,7 @@ namespace Game {
 			vehicle->applyEngineForce(0, 2);
 			vehicle->applyEngineForce(0, 3);
 		}
-		else if (vehicle->getCurrentSpeedKmHour() <= 200) { // max speed
+		else if (vehicle->getCurrentSpeedKmHour() <= 200 && vehicle->getCurrentSpeedKmHour() >= -60) { // max speed // max speed whilst reversing
 			vehicle->applyEngineForce(direction * engineForce, 1);
 			vehicle->applyEngineForce(direction * engineForce, 0);
 			vehicle->setBrake(0, 2);

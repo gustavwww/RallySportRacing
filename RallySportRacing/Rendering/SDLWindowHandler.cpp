@@ -310,7 +310,7 @@ namespace Rendering {
 				p->render(particleProgramID, projection, view, width, height);
 			}
 
-			//Game::drawDebug();
+			Game::drawDebug();
 
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
