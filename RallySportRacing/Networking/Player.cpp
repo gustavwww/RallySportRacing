@@ -10,7 +10,7 @@ namespace Networking {
 
 		name = playerData.name;
 
-		label = new Rendering::Text2D(name, glm::vec3(207.0f, 63.0f, 77.0f), glm::vec2(playerData.pos.x, playerData.pos.y));
+		label = new Rendering::Text2D(name, glm::vec3(0.5, 0.8f, 0.2f), glm::vec2(playerData.pos.x, playerData.pos.y));
 		windowHandler->addText(label);
 
 		Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
