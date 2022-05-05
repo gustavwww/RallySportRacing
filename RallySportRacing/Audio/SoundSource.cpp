@@ -76,7 +76,7 @@ void SoundSource::update(glm::vec3 positionVec3, glm::vec3 velPerFrame, float sp
 
 	engineStart(this->soundString[0] == '1', position);
 	terrain(this->soundString[0] == '2', speed, position, velMetersPerSecond, this->soundString[3]);
-	engine(this->soundString[0] == '2', speed, position, velMetersPerSecond);
+	//engine(this->soundString[0] == '2', speed, position, velMetersPerSecond);
 	engineOff(this->soundString[0] == '3', position);
 }
 
@@ -147,14 +147,15 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 				this->pavementSound->setIsPaused(false);
 			}
 		}
-		this->pavementSound->setPlaybackSpeed(0.9F + abs(speed) / 300);
-		this->pavementSound->setVolume(0.5F + abs(speed) / 500);
+		this->pavementSound->setPlaybackSpeed(abs(speed) / 200);
+		this->pavementSound->setVolume(abs(speed) / 200);
 
 		if (!this->dirtSound->getIsPaused()) {
 			this->dirtSound->setIsPaused(true);
 		}
 	}
 	else if (terrain == '1') {
+		cout << "dirt";
 		this->dirtSound->setPosition(position);
 		this->dirtSound->setVelocity(velMetersPerSec);
 
@@ -163,8 +164,8 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 				this->dirtSound->setIsPaused(false);
 			}
 		}
-		this->dirtSound->setPlaybackSpeed(0.9F + abs(speed) / 300);
-		this->dirtSound->setVolume(0.5F + abs(speed) / 500);
+		this->dirtSound->setPlaybackSpeed(abs(speed) / 200);
+		this->dirtSound->setVolume(abs(speed) / 200);
 
 		if (!this->pavementSound->getIsPaused()) {
 			this->pavementSound->setIsPaused(true);
