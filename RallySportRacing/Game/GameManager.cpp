@@ -44,8 +44,8 @@ namespace Game {
 	GameObject* wall;
 	GameObject* wall2;
 	GameObject* test1;
-	//GameObject* test21;
-	//GameObject* test31;
+	GameObject* test21;
+	GameObject* test31;
 	vector<GameObject*> gameObjects;
 
 	Vehicle* vehicle;
@@ -268,7 +268,7 @@ namespace Game {
 		test1->setInitialPosition(btVector3(-700, -90, 0));
 
 		
-		/*/ test environment finished track
+		// test environment finished track
 		Rendering::Model* test2 = Rendering::Model::loadModel("../Models/HighwayModel.gltf", true);
 		windowHandler->addModel(test2);
 		test21 = new GameObject(test2, true, dirtFriction, physics->dynamicsWorld); // test
@@ -280,7 +280,7 @@ namespace Game {
 		windowHandler->addModel(test3);
 		test31 = new GameObject(test3, true, 2.5f, physics->dynamicsWorld); // test
 		gameObjects.push_back(test31);
-		test31->setInitialPosition(btVector3(-700, -90, 0));*/
+		test31->setInitialPosition(btVector3(-700, -90, 0));
 
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -440,7 +440,7 @@ namespace Game {
 		return raceCountDown;
 	}
 
-	void update() {
+	void checkCollisions() {
 		// Collisionhandling between a pair of objects
 		// Bullet physics does not give a predefined check collision with method
 		int numManifolds = physics->dynamicsWorld->getDispatcher()->getNumManifolds();
@@ -469,16 +469,15 @@ namespace Game {
 						if (obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[i]->getWorldArrayIndex()) {
 							//cout << "Kollision med: " << checkpoints[i]->getWorldArrayIndex() << endl;
 							latestReachedCheckpoint = checkpoints[i];
+							//cout << checkpoints.size();
 						}
 					}
-
-					//cout << "vehicle: " << vehicle->vehicle->getRigidBody()->getWorldArrayIndex() << endl;
-					//cout << "checkpoint: " << checkpoints[0]->getWorldArrayIndex() << endl;
-					//cout << "A: " << obA->getWorldArrayIndex() << endl;
-					//cout << "B: " << obB->getWorldArrayIndex() << endl;
 				}
 			}
 		}
+	}
+
+	void update() {
 
 		// debug drawing, takes a lot of performance
 		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
@@ -487,7 +486,8 @@ namespace Game {
 		}
 		//physics->dynamicsWorld->debugDrawWorld(); 
 
-
+		// method for handling collisions with checkpoints
+		checkCollisions();
 
 		// updates position and orientation of all gameObjects
 		for (int i = 0; i < gameObjects.size(); i++) {
@@ -545,7 +545,7 @@ namespace Game {
 		if (isCountingDown) {
 			vehicle->vehicle->getRigidBody()->setLinearVelocity(btVector3(0, 0, 0));
 			raceCountDown -= gameTimer->getDeltaTime(); // variable to show on screen. Maybe cast to int or round it
-			//cout << (int) raceCountDown << endl; skipps 3 because it does not round. Better to use roundf i think
+			//cout << roundf(raceCountDown) << endl; skipps 3 because it does not round. Better to use roundf i think
 		}
 		if (raceCountDown <= 0) {
 			isCountingDown = false;
@@ -599,12 +599,19 @@ namespace Game {
 
 			if (isOn == true) {
 				
-				if (keyboard_state_array[SDL_SCANCODE_W] && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == dirtFriction) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
+				if ((vehicle->getSpeed() <= -10 || vehicle->getSpeed() >= 10) && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == dirtFriction) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
 					// For Dirt track. Waiting for the model before fully implementing
+					// 
+					// Spela upp ljud för åkande på jord?
 					glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
 					glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
 					dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 					dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+
+					glm::vec3 frontWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(0).getOrigin());
+					glm::vec3 frontWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(1).getOrigin());
+					dirtParticlesObject.emitParticle(frontWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+					dirtParticlesObject.emitParticle(frontWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 				}
 
 				// Engine sound on
