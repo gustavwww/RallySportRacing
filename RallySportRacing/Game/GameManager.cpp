@@ -254,12 +254,16 @@ namespace Game {
 		snowParticlesPointer = &snowParticlesObject;
 		handler->addParticleSystem(snowParticlesPointer);
 
+		// model loading
+
 		// test environment finished track
-		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape2.gltf", true);
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf2", true);
 		windowHandler->addModel(test);
 		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
 		test1->setInitialPosition(btVector3(-700, -90, 0));
+
+
 
 		// test wall
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf", false);
@@ -681,7 +685,7 @@ namespace Game {
 			perspective = 1;
 			camOrientation = glm::vec3(0, 1, 0);
 			cameraDistance = 11;
-			cameraDistance = 3;
+			cameraDistance2 = 3;
 		}
 		if ((keyboard_state_array[SDL_SCANCODE_C] || (buttons & SDL_BUTTON_RMASK) == SDL_BUTTON_RMASK) && perspective != 3) {
 			perspective = 2;
