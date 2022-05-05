@@ -261,7 +261,7 @@ namespace Game {
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// test environment finished track
-		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape2.gltf", true);
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/EnvironmentRallyTrack.gltf", true);
 		windowHandler->addModel(test);
 		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
