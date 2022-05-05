@@ -6,6 +6,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 #include <stb_image.h>
 
 #include <imgui.h>
@@ -20,9 +21,20 @@ namespace Rendering {
 
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
-	glm::vec4 lightPos = glm::vec4(1.0f, 500.0f, 1.0f, 1.0f);
+	glm::vec4 lightPos = glm::vec4(1.0f, 40.0f, 1.0f, 1.0f);
 	float envMultiplier = 1.5f;
 	
+	//Shadow maps.
+	unsigned int shadowMap;
+	unsigned int shadowMapFBO;
+	int shadowMapResolution = 2048;
+	float nearPlane = 1.0f, farPlane = 75.0f;
+	
+
+	//TESTING VARIABLE
+	unsigned int quadVAO = 0;
+	unsigned int quadVBO;
+
 	//Audio
 	int volume = 50;
 
@@ -208,6 +220,7 @@ namespace Rendering {
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
 		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
 		GLint shadowMapID = loadShader("../RallySportRacing/Shaders/ShadowMap.vert", "../RallySportRacing/Shaders/ShadowMap.frag");
+		GLint shadowDebugID = loadShader("../RallySportRacing/Shaders/ShadowDebug.vert", "../RallySportRacing/Shaders/ShadowDebug.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
@@ -217,7 +230,7 @@ namespace Rendering {
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
-		
+
 		string backgroundFileName = "../Textures/Background/001";
 		vector<string>reflectionLevels{
 			backgroundFileName + "_dl_0.hdr",
@@ -229,7 +242,7 @@ namespace Rendering {
 			backgroundFileName + "_dl_6.hdr",
 			backgroundFileName + "_dl_7.hdr"
 		};
-		
+
 		//Create irrdiance and reflection files.
 		//Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFileName + ".hdr");
 		//Utils::HdrFileGenerator::createReflectionHDRs(mapCreationID, backgroundFileName + ".hdr");
@@ -256,8 +269,8 @@ namespace Rendering {
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		
-		SDL_Event windowEvent; 
+
+		SDL_Event windowEvent;
 		while (true) {
 			// This needs to be the first thing checked for imgui to work well
 			if (SDL_PollEvent(&windowEvent)) {
@@ -301,8 +314,39 @@ namespace Rendering {
 				(*preRender)();
 			}
 
+			setUpShadowMapFrameBuffer();
+
+			
+			//ToDo mess around with these numbers until the shadows look good.
+			ImGui::DragFloat("shadowFarPlane", &farPlane);
+			ImGui::DragFloat("shadowNearPlane", &nearPlane);
+			glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
+			glm::mat4 lightView = glm::lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+			glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+
+			glUseProgram(shadowMapID);
+			glUniformMatrix4fv(glGetUniformLocation(shadowMapID, "lightProjection"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
+
+			//glEnable(GL_DEPTH_TEST);
+			glViewport(0, 0, shadowMapResolution, shadowMapResolution);
+			glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+			
+
+			//ToDo render all models here.
+			for (Model* m : models) {
+				m->render(projection, view, shadowMapID);
+			}
+			//Set deafult framebuffer and viewport.
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, width, height);
+
 			// Clear the colorbuffer
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glActiveTexture(GL_TEXTURE9);
+			glBindTexture(GL_TEXTURE_2D, shadowMap);
 
 			//Draw background
 			glUseProgram(skyboxProgramID);
@@ -316,8 +360,9 @@ namespace Rendering {
 			//Set uniforms for light source.
 			glUniform3fv(glGetUniformLocation(programID, "viewSpaceLightPos"), 1, &viewSpaceLightPos[0]);
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
-	
-			
+			glUniformMatrix4fv(glGetUniformLocation(programID, "lightSpaceMatrix"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
+
+
 			for (Model* m : models) {
 				m->render(projection, view, programID);
 			}
@@ -326,9 +371,12 @@ namespace Rendering {
 				p->render(particleProgramID, projection, view, width, height);
 			}
 
+			//Render shadow map for testing.
+			//debugRenderShadowMap(shadowDebugID);
+
 			//Game::drawDebug();
 
-			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
 			ImGui::Render();
 			if (showDebugGUI) {
@@ -337,6 +385,76 @@ namespace Rendering {
 			SDL_GL_SwapWindow(window);
 		}
 
+	}
+
+	void SDLWindowHandler::setUpShadowMapFrameBuffer() {
+		if (shadowMapFBO != 0) {
+			return;
+		}
+
+		//Generate depthBuffer.
+		glGenFramebuffers(1, &shadowMapFBO);
+
+		//Generate depthMapTexture.
+		glGenTextures(1, &shadowMap);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapResolution, shadowMapResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+		float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
+		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+		//Setup for framebuffer.
+		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
+
+		//Prevent from reading or writing to the color buffer.
+		glDrawBuffer(GL_NONE);
+		glReadBuffer(GL_NONE);
+
+		//Set default framebuffer.
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	}
+
+	void SDLWindowHandler::debugRenderShadowMap(GLuint programID) {
+		glViewport(0, 0, shadowMapResolution, shadowMapResolution);
+		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glUseProgram(programID);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, shadowMap);
+		debugRenderQuad();
+		//Reset viewport.
+		glViewport(0, 0, width, height);
+	}
+
+	void SDLWindowHandler::debugRenderQuad() {
+		if (quadVAO == 0)
+		{
+			float quadVertices[] = {
+				// positions        // texture Coords
+				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+				 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+				 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+			};
+			// setup plane VAO
+			glGenVertexArrays(1, &quadVAO);
+			glGenBuffers(1, &quadVBO);
+			glBindVertexArray(quadVAO);
+			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+			glEnableVertexAttribArray(0);
+			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+		}
+		glBindVertexArray(quadVAO);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glBindVertexArray(0);
 	}
 
 	void SDLWindowHandler::addModel(Model* model) {

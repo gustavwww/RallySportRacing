@@ -39,7 +39,8 @@ namespace Rendering {
 
 		glm::vec3 getLightPosition();
 
-
+		void renderTestScene(GLuint shader);
+		void renderCube();
 
 	private:
 		SDL_Window* window = nullptr;
@@ -53,6 +54,12 @@ namespace Rendering {
 		glm::vec3 camPosition = glm::vec3(0, 0, 20);
 		glm::vec3 camDirection = glm::vec3(0, 0, 0);
 		glm::vec3 camOrientation = glm::vec3(0, 1, 0);
+
+		void setUpShadowMapFrameBuffer();
+		void debugRenderShadowMap(GLuint programID);
+		void debugRenderQuad();
+
+	
 	};
 
 }

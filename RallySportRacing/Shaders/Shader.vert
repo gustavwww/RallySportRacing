@@ -10,13 +10,16 @@ layout(location = 2) in vec2 texCoordIn;
 uniform mat4 MVP;
 uniform mat4 modelViewMatrix;
 uniform mat4 normalMatrix;
-uniform mat4 ligtSpaceMatrix;
+uniform mat4 modelMatrix;
+
+
+uniform mat4 lightSpaceMatrix;
 
 // Outputs for fragment shader.
 out vec3 vertexPosition_viewspace;
 out vec3 normal_viewspace;
 out vec2 texCoord;
-out vec4 posLightSpace;
+out vec4 shadowMapCoord;
 
 void main(){
   gl_Position = MVP * vec4(vertexPosition_worldSpace, 1);
@@ -26,7 +29,7 @@ void main(){
   normal_viewspace = (normalMatrix * vec4(normals_modelspace, 0.0)).xyz;
   
   //ToDo uncomment when shadow map is implemented.
-  //posLightSpace = ligtSpaceMatrix * vec4(vertexPosition_worldSpace, 1.0);
+  shadowMapCoord = lightSpaceMatrix * modelMatrix * vec4(vertexPosition_worldSpace, 1.0);
 
   texCoord = texCoordIn;
 }

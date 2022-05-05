@@ -44,9 +44,6 @@ namespace Utils {
 		static unsigned int loadHDRTexture(const std::string& filename);
 		static unsigned int loadHdrMipmapTexture(const std::vector<std::string>& filenames);
 		static void drawScreenQuad();
-		static void setUpshadowMapFrameBuffer();
-		static void createShadowMap(GLuint programID, glm::vec3 lightPos);
-		static void renderShadowMap(GLuint programID);
 
 	private:
 		static void setUpFrameBuffer();
