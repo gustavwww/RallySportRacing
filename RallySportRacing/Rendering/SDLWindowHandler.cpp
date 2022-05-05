@@ -207,6 +207,7 @@ namespace Rendering {
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
 		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
+		GLint shadowMapID = loadShader("../RallySportRacing/Shaders/ShadowMap.vert", "../RallySportRacing/Shaders/ShadowMap.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
@@ -231,7 +232,7 @@ namespace Rendering {
 		
 		//Create irrdiance and reflection files.
 		//Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFileName + ".hdr");
-		Utils::HdrFileGenerator::createReflectionHDRs(mapCreationID, backgroundFileName + ".hdr", 0);
+		//Utils::HdrFileGenerator::createReflectionHDRs(mapCreationID, backgroundFileName + ".hdr");
 
 		//Load environment textures.
 		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture(backgroundFileName + ".hdr");
