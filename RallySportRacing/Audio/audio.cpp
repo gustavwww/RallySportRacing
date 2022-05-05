@@ -15,6 +15,7 @@ map<int, SoundSource*> sources;
 
 Audio* Audio::instance = nullptr;
 
+// Function that ensures a single instance of audio is that which becomes available to all that need access
 Audio* Audio::Instance() {
 	if (instance == nullptr) {
 		instance = new Audio();
@@ -25,6 +26,7 @@ Audio* Audio::Instance() {
 // Init sound engine
 ISoundEngine* Audio::SoundEngine = createIrrKlangDevice();
 
+// Constructor of audio
 Audio::Audio() {
 
 	// Init master volume
@@ -32,6 +34,7 @@ Audio::Audio() {
 	SoundEngine->setSoundVolume(volume);
 }
 
+// Function that changes volume up by 5%
 void Audio::volumeUp() {
 	if (volume < 1.0F) {
 		volume = volume + 0.05F;
@@ -39,6 +42,7 @@ void Audio::volumeUp() {
 	SoundEngine->setSoundVolume(volume);
 }
 
+// Function that changes volume down by 5%
 void Audio::volumeDown() {
 	if (volume > 0.0F) {
 		volume = volume - 0.05F;
@@ -46,18 +50,20 @@ void Audio::volumeDown() {
 	SoundEngine->setSoundVolume(volume);
 }
 
+// Function that sets master volume to value v which should be a float between 0.0F and 1.0F
 void Audio::volumeSet(float v) {
 	volume = v;
 	SoundEngine->setSoundVolume(volume);
 }
 
-void Audio::createSoundSource(int ID, glm::vec3 position) {
-	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(ID, position)));
+// Function that creates sound source and adds to the map of sources with its key ID
+void Audio::createSoundSource(int ID, glm::vec3 positionVec3) {
+	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(ID, positionVec3)));
 }
 
 // Function that updates sound source in map with key ID
-void Audio::updateSoundSource(int ID, glm::vec3 position, glm::vec3 velPerFrame, float speed, string sounds) {
-	sources.at(ID)->update(position, velPerFrame, speed, sounds);
+void Audio::updateSoundSource(int ID, glm::vec3 positionVec3, glm::vec3 velPerFrame, float speed, string sounds) {
+	sources.at(ID)->update(positionVec3, velPerFrame, speed, sounds);
 }
 
 void Audio::removeSoundSource(int ID) {
@@ -69,9 +75,9 @@ string Audio::getSoundString(int ID) {
 }
 
 // Function that updates the listeners position, orientation and velocity
-void Audio::setListenerParameters(glm::vec3 positionXYZ, glm::vec3 direction, glm::vec3 velPerFrame, float speedKmPerh) {
+void Audio::setListenerParameters(glm::vec3 positionVec3, glm::vec3 direction, glm::vec3 velPerFrame, float speedKmPerh) {
 
-	irrklang::vec3df position(positionXYZ.x/distanceScalar, positionXYZ.y/distanceScalar, positionXYZ.z/distanceScalar);	// position of the listener
+	irrklang::vec3df position(positionVec3.x/distanceScalar, positionVec3.y/distanceScalar, positionVec3.z/distanceScalar);	// position of the listener
 	irrklang::vec3df lookDirection(direction.x, direction.y, direction.z); // the direction the listener looks into
 	irrklang::vec3df velPerSecond = getVelMetersPerSec(velPerFrame, speedKmPerh);   // only relevant for doppler effects
 	irrklang::vec3df upVector(0, 1, 0);        // where 'up' is in your 3D scene
@@ -96,4 +102,12 @@ irrklang::vec3df Audio::getVelMetersPerSec(glm::vec3 velPerFrame, float speedKmP
 	return velMetersPerSec;
 }
 
+// Function that plays start countdown
+void Audio::playStartSound() {
+	SoundEngine->play2D("../RallySportRacing/Audio/StartBeeping.mp3");
+}
 
+// Function that sets rain sound to play or not
+void Audio::playRainSound(bool playRain) {
+	sources.at(0)->setPlayRain(playRain);
+}

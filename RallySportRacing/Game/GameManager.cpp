@@ -90,7 +90,7 @@ namespace Game {
 
 	Audio* sound;
 	int volumeButtonDelay = 0;
-	string soundString = "000";
+	string soundString = "0000";
 
 	//Colors to select from when creating a model
 	glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
@@ -510,10 +510,12 @@ namespace Game {
 		if (keyboard_state_array[SDL_SCANCODE_F1]) {
 			toggleRain = false;
 			toggleSnow = false;
+			sound->playRainSound(false);
 		}
 		if (keyboard_state_array[SDL_SCANCODE_F2]) {
 			toggleRain = true;
 			toggleSnow = false;
+			sound->playRainSound(true);
 		}
 		if (keyboard_state_array[SDL_SCANCODE_F3]) {
 			toggleSnow = true;
@@ -831,7 +833,7 @@ namespace Game {
 		sound->setListenerParameters(camPosition, camDirection, vehicle->getVelocity(), vehicle->getSpeed());
 		
 		// Reset sounds
-		soundString = "000";
+		soundString = "0000";
 	}
 
 	void adjustCamPosition() {
