@@ -44,6 +44,8 @@ namespace Game {
 	GameObject* wall;
 	GameObject* wall2;
 	GameObject* test1;
+	//GameObject* test21;
+	//GameObject* test31;
 	vector<GameObject*> gameObjects;
 
 	Vehicle* vehicle;
@@ -203,7 +205,7 @@ namespace Game {
 
 		latestReachedCheckpoint = checkpoints[0]; // sets the latestcheckpointreached to the first checkpoint, 0 is spawn point, 1 is start checkpoint 
 	}
-
+	double dirtFriction = 2.0f; // test for dirt particles
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 		physics = new Physics();
 		gameTimer = GameTimer::Instance();
@@ -256,14 +258,31 @@ namespace Game {
 
 		// model loading
 
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
+
 		// test environment finished track
-		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape.gltf2", true);
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/TerrainCollisionShape2.gltf", true);
 		windowHandler->addModel(test);
 		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
 		test1->setInitialPosition(btVector3(-700, -90, 0));
 
+		
+		/*/ test environment finished track
+		Rendering::Model* test2 = Rendering::Model::loadModel("../Models/HighwayModel.gltf", true);
+		windowHandler->addModel(test2);
+		test21 = new GameObject(test2, true, dirtFriction, physics->dynamicsWorld); // test
+		gameObjects.push_back(test21);
+		test21->setInitialPosition(btVector3(-700, -90, 0));
 
+		// test environment finished track
+		Rendering::Model* test3 = Rendering::Model::loadModel("../Models/DirtRoadModel.gltf", true);
+		windowHandler->addModel(test3);
+		test31 = new GameObject(test3, true, 2.5f, physics->dynamicsWorld); // test
+		gameObjects.push_back(test31);
+		test31->setInitialPosition(btVector3(-700, -90, 0));*/
+
+		//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// test wall
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf", false);
@@ -410,6 +429,15 @@ namespace Game {
 
 		glm::vec3 rainOffset4 = glm::vec3(25 * random.Float(), 25 * random.Float(), -25 * random.Float());
 		snowParticlesObject.emitParticle(vehicle->getPosition() + rainOffset4, glm::vec3(0, -2, 0), 4, 3);
+	}
+
+	float Game::getRaceTime()
+	{
+		return raceTime;
+	}
+	float Game::getCountDownTime()
+	{
+		return raceCountDown;
 	}
 
 	void update() {
@@ -569,6 +597,14 @@ namespace Game {
 
 			if (isOn == true) {
 				
+				if (keyboard_state_array[SDL_SCANCODE_W] && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == dirtFriction) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
+					// For Dirt track. Waiting for the model before fully implementing
+					glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+					glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+					dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+					dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+				}
+
 				// Engine sound on
 				if (soundString[0] == '0') {
 					soundString[0] = '2';
@@ -659,12 +695,6 @@ namespace Game {
 			cout << vehicle->getTransform().getOrigin().x() << endl;
 			cout << vehicle->getTransform().getOrigin().y() << endl;
 			cout << vehicle->getTransform().getOrigin().z() << endl;
-
-			// For Dirt track. Waiting for the model before fully implementing
-			//glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
-			//glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
-			//dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
-			//dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 
 		}
 
