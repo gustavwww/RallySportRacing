@@ -9,12 +9,20 @@ using namespace std;
 
 namespace Rendering {
 
+	struct Character {
+		unsigned int TextureID;  // ID handle of the glyph texture
+		glm::vec2   Size;       // Size of glyph
+		glm::vec2   Bearing;    // Offset from baseline to left/top of glyph
+		unsigned int Advance;    // Offset to advance to next glyph
+	};
 
-	Text2D::Text2D(string text) {
+	map<char, Character> characters;
+
+	Text2D::Text2D(string text, glm::vec3 color, glm::vec2 pos) {
 		this->text = text;
 		this->color = color;
+		this->pos = pos;
 	}
-
 
 	void Text2D::setupText() {
 		glGenVertexArrays(1, &VAO);
@@ -44,6 +52,9 @@ namespace Rendering {
 
 			Character ch = characters[*c];
 
+			float x = pos.x;
+			float y = pos.y;
+
 			float scale = 1;
 			float xpos = x + ch.Bearing.x * scale;
 			float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
@@ -72,9 +83,7 @@ namespace Rendering {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	
-
-	static void Text2D::loadCharacters() {
+	void loadCharacters() {
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft)) {
 			cout << "Error initializing FreeType" << endl;

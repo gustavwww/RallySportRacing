@@ -243,7 +243,7 @@ namespace Rendering {
 		bool showDebugGUI = false;
 
 		// Load character glyphs from font.
-		Text2D::loadCharacters();
+		loadCharacters();
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
