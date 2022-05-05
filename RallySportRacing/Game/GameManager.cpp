@@ -148,6 +148,7 @@ namespace Game {
 		transform9.setIdentity(); // initilizes the different transforms
 	 
 		transform0.setOrigin(btVector3(0, 0, 0)); // hardcoded values for the position for the specific checkpoint
+		transform0.setRotation(btQuaternion(btVector3(0, 1, 0), PI/12));
 		transform1.setOrigin(btVector3(9.2, -1.3, 42)); // hardcoded values for the position for the specific checkpoint
 		transform2.setOrigin(btVector3(-16, 0, 1094)); // hardcoded values for the position for the specific checkpoint
 		transform3.setOrigin(btVector3(-386, 12, -180)); // hardcoded values for the position for the specific checkpoint
@@ -162,8 +163,8 @@ namespace Game {
 		transform7.setRotation(btQuaternion(btVector3(0, 1, 0), PI / 4));
 		transform8.setOrigin(btVector3(-248, 8, -768)); // hardcoded values for the position for the specific checkpoint
 		transform8.setRotation(btQuaternion(btVector3(0, 1, 0), 3*PI/5));
-		transform9.setOrigin(btVector3(-32, -3, -88)); // hardcoded values for the position for the specific checkpoint
-		//transform9.setRotation(btQuaternion(btVector3(0, 1, 0), 3 * PI / 5));
+		transform9.setOrigin(btVector3(-126.6, 1, -307)); // hardcoded values for the position for the specific checkpoint
+		transform9.setRotation(btQuaternion(btVector3(0, 1, 0), PI/11));
 		 
 		// adds all checkpoints objects to list
 		checkpoints.push_back(checkpoint0);
@@ -200,7 +201,7 @@ namespace Game {
 			physics->dynamicsWorld->addCollisionObject(checkpoints[i]);
 		}
 
-		latestReachedCheckpoint = checkpoints[1]; // sets the latestcheckpointreached to the first checkpoint, 0 is spawn point, 1 is start checkpoint 
+		latestReachedCheckpoint = checkpoints[0]; // sets the latestcheckpointreached to the first checkpoint, 0 is spawn point, 1 is start checkpoint 
 	}
 
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
@@ -321,6 +322,10 @@ namespace Game {
 	glm::vec3 camOffsetVector;
 	glm::vec3 camOffset;
 
+	// temp names for adjusting camera distance when in perspective 1
+	double cameraDistance = 11;
+	double cameraDistance2 = 3;
+
 	int perspective = 1; // 1 = normal thirdperson, 2 = reverse, 3 = from a static camera above in a corner
 	float radius = 10;
 	float maxDistance = 30;
@@ -369,6 +374,12 @@ namespace Game {
 	bool toggleRain = false;
 	bool toggleSnow = false;
 
+	// variables for starting the race
+	float raceCountDown = 3;
+	bool isCountingDown = false;
+	float raceTime = 0;
+	bool timingRace = false;
+
 	void activateRain() {
 		glm::vec3 rainOffset1 = glm::vec3(25 * random.Float(), 25 * random.Float(), 25 * random.Float());
 		rainParticlesObject.emitParticle(vehicle->getPosition() + rainOffset1, glm::vec3(0, -9, 0), 2, 2);
@@ -414,9 +425,13 @@ namespace Game {
 				if (pt.getDistance() < 0.f)
 				{
 
-					//const btVector3& ptA = pt.getPositionWorldOnA();
-					//const btVector3& ptB = pt.getPositionWorldOnB();
-					//const btVector3& normalOnB = pt.m_normalWorldOnB;
+					// if we hit the last checkpoint (finishline) (which currently is the start checkpoint) and have touched the checkpoint before. Then we have finished the race. Racetimer stops counting
+					// could change so that it also checks a variable if we have hit all checkpoints. Now we can just go back and forward to complete the race
+					if ((obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[0]->getWorldArrayIndex()) && (latestReachedCheckpoint == checkpoints[checkpoints.size() - 1])) {
+						timingRace = false;
+						// do something here, Like show the timer or put it in a leaderboard
+						// raceTime is the timer for the race
+					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
 						if (obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[i]->getWorldArrayIndex()) {
@@ -436,7 +451,7 @@ namespace Game {
 		// debug drawing, takes a lot of performance
 		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
 		for (int i = 0; i < checkpoints.size(); i++) { // draws every checkpoints
-			physics->dynamicsWorld->debugDrawObject(transforms[i], checkPointShape, btVector3(0, 0, 0));
+			physics->dynamicsWorld->debugDrawObject(transforms[i], checkPointShape, btVector3(0, 255, 0));
 		}
 		//physics->dynamicsWorld->debugDrawWorld(); 
 
@@ -478,6 +493,37 @@ namespace Game {
 		if (toggleSnow) {
 			activateSnow();
 		}
+
+		// Start race
+		if (keyboard_state_array[SDL_SCANCODE_RETURN] && resetCarToggle) {
+			perspective = 1;
+			resetCarToggle = false;
+			resetCarDelay = 0;
+
+			vehicle->vehicle->getRigidBody()->setLinearVelocity(btVector3(0, 0, 0));
+			latestReachedCheckpoint = checkpoints[0];
+			vehicle->setInitialPosition(latestReachedCheckpoint->getWorldTransform().getOrigin() + btVector3(0, -2, 0));
+			vehicle->setInitialRotation(latestReachedCheckpoint->getWorldTransform().getRotation());
+
+			raceCountDown = 3;
+			isCountingDown = true;
+		}
+		if (isCountingDown) {
+			vehicle->vehicle->getRigidBody()->setLinearVelocity(btVector3(0, 0, 0));
+			raceCountDown -= gameTimer->getDeltaTime(); // variable to show on screen. Maybe cast to int or round it
+			//cout << (int) raceCountDown << endl; skipps 3 because it does not round. Better to use roundf i think
+		}
+		if (raceCountDown <= 0) {
+			isCountingDown = false;
+			raceTime = 0;
+			timingRace = true;
+			raceCountDown = 3; // to stop the if 
+		}
+		if (timingRace) {
+			raceTime += gameTimer->getDeltaTime();
+			//cout << roundf(raceTime) << endl;
+		}
+
 
 
 		// Car movement
@@ -606,19 +652,16 @@ namespace Game {
 
 		if (keyboard_state_array[SDL_SCANCODE_T]) { // for testing purpose
 
-			//cout << vehicle->getTransform().getOrigin().x() << endl;
-			//cout << vehicle->getTransform().getOrigin().y() << endl;
-			//cout << vehicle->getTransform().getOrigin().z() << endl;
+			cout << vehicle->getTransform().getOrigin().x() << endl;
+			cout << vehicle->getTransform().getOrigin().y() << endl;
+			cout << vehicle->getTransform().getOrigin().z() << endl;
 
 			// For Dirt track. Waiting for the model before fully implementing
-			glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
-			glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
-			dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
-			dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+			//glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+			//glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+			//dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
+			//dirtParticlesObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 
-			//vehicle->setInitialPosition(vehicle->getTransform().getOrigin() + btVector3(0, 2, 0));
-			//btQuaternion rotate = btQuaternion(vehicle->getTransform().getRotation().getX(), vehicle->getTransform().getRotation().getY(), 1, vehicle->getTransform().getRotation().getW()); 
-			//vehicle->setInitialRotation(rotate);
 		}
 
 		// Complete reset the vehicle to a certain position. Could be used for checkpoints
@@ -637,6 +680,8 @@ namespace Game {
 		if (keyboard_state_array[SDL_SCANCODE_1] || (buttons & SDL_BUTTON_LMASK) == SDL_BUTTON_LMASK) {
 			perspective = 1;
 			camOrientation = glm::vec3(0, 1, 0);
+			cameraDistance = 11;
+			cameraDistance = 3;
 		}
 		if ((keyboard_state_array[SDL_SCANCODE_C] || (buttons & SDL_BUTTON_RMASK) == SDL_BUTTON_RMASK) && perspective != 3) {
 			perspective = 2;
@@ -655,16 +700,18 @@ namespace Game {
 		// Camera handling for the different perspectives
 		// Perspective 1 => start perspective following the car
 		if (perspective == 1) {
-			camOffset = glm::vec3(11 * vehicle->getOrientation().x, 11 * vehicle->getOrientation().y + 3, 11 * vehicle->getOrientation().z); //offset 20. Height 3
+			camOffset = glm::vec3(cameraDistance * vehicle->getOrientation().x, cameraDistance * vehicle->getOrientation().y + cameraDistance2, cameraDistance * vehicle->getOrientation().z); //offset xx. Height xx
 			// Interpolation on camdirection and position which creates a delay. More smooth camera movement. More immersive
 			camDirection = camPosition + (vehicle->getPosition() - camPosition) * 0.5f;
 			camPosition = camPosition + (camOffset + vehicle->getPosition() - camPosition) * 0.1f;
 		}
-
+		if (perspective == 1 && keyboard_state_array[SDL_SCANCODE_V]) {
+			cameraDistance = 6;
+			cameraDistance2 = 2;
+		}
 		// Perspective 2 => for reversing
 		else if (perspective == 2) {
 			camOffset = glm::vec3(15 * vehicle->getOrientation().x * -1, -15 * vehicle->getOrientation().y + 3, 15 * vehicle->getOrientation().z * -1); //offset 20. Height 3
-
 			camDirection = vehicle->getPosition();
 			camPosition = camOffset + vehicle->getPosition();
 		}
