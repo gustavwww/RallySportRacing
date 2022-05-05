@@ -601,8 +601,10 @@ namespace Game {
 				
 				if ((vehicle->getSpeed() <= -10 || vehicle->getSpeed() >= 10) && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == dirtFriction) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
 					// For Dirt track. Waiting for the model before fully implementing
-					// 
-					// Spela upp ljud för åkande på jord?
+					
+					// Change soundString terrain identifier
+					soundString[3] = '1';
+
 					glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
 					glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
 					dirtParticlesObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
