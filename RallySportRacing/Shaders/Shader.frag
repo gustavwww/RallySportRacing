@@ -4,11 +4,33 @@
 precision highp float;
 
 ////////////////////////////////
-// Materials
+// Material textures
 ////////////////////////////////
-uniform vec3 albedo;
-uniform float metallic;
-uniform float roughness;
+uniform sampler2D baseColorTexture;
+uniform sampler2D metallicTexture;
+uniform sampler2D roughnessTexture;
+
+////////////////////////////////
+// Material values
+////////////////////////////////
+uniform vec3 albedoValue;
+uniform float metallicValue;
+uniform float roughnessValue;
+
+////////////////////////////////
+// Material bools
+////////////////////////////////
+uniform unsigned int useBaseColorTexture;
+uniform unsigned int useMetallicTexture;
+uniform unsigned int useRoughnessTexture;
+
+////////////////////////////////
+// Used Material 
+////////////////////////////////
+vec3 albedo;
+float metallic;
+float roughness;
+
 ////////////////////////////////
 // Envoirment
 ////////////////////////////////
@@ -79,6 +101,33 @@ vec3 fresnelSchlick(float HdotV, vec3 baseReflectivity){
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - HdotV, 5.0);
 }
 
+void loadPBRValues(){
+		//BaseColor / Albedo
+		if(useBaseColorTexture == 0){
+			albedo = albedoValue;
+		}else{
+			vec4 albedoA = texture(baseColorTexture, texCoord);
+			if(albedoA.a < 0.1)
+				discard;
+			albedo = texture(baseColorTexture, texCoord).rgb;
+
+		}
+		
+		//Metallic
+		if(useMetallicTexture == 0){
+			metallic = metallicValue;
+		}else{
+			metallic = texture(metallicTexture, texCoord).r;
+		}
+
+		//Roughness
+		if(useRoughnessTexture == 0){
+			roughness = roughnessValue;
+		}else{
+			roughness = texture(roughnessTexture, texCoord).r;
+		}
+}
+
 vec3 fresnelSchlickRoughness(float HdotV, vec3 baseReflectivity, float roughness){
 	
 	return baseReflectivity + (max(vec3(1.0 - roughness), baseReflectivity) - baseReflectivity) * pow(1.0 - HdotV, 5.0);
@@ -89,12 +138,15 @@ void main(){
 	/////////////////////////////////
 	//NEW PBR PIPELINE
 	/////////////////////////////////
+	
+	loadPBRValues();
+	
 	//Normalize direction vector and normal vector.
 	vec3 normal = normalize(normal_viewspace);
 	vec3 viewDir = normalize(vec3(0,0,0) - vertexPosition_viewspace);
 
 	//If a dia-electric use baseReflectivity 0.04 and if metal use the albedo color as baseReflectivity.
-	vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
+	vec3 baseReflectivity = mix(vec3(0.04), albedo.rgb, metallic);
 
 	//Luminance output.
 	vec3 Lo = vec3(0.0f);
@@ -132,7 +184,7 @@ void main(){
 	//Remove diffuse component if metal.
 	kDiff *= 1.0 - metallic;
 
-	Lo += (kDiff * albedo / PI + specular) * radiance * NdotL;
+	Lo += (kDiff * albedo.rgb / PI + specular) * radiance * NdotL;
 
 	//ToDo end for each light loop here.
 	

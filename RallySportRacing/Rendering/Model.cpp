@@ -70,6 +70,39 @@ namespace Rendering {
 			m.renderMesh(programID);
 		}
 	}
+	
+	//ToDo finish method.
+	unsigned int Model::loadModelTexture(const char* filePath, GLint channels) {
+		
+		ifstream textureStream(filePath, ios::in);
+		if (!textureStream.is_open()) {
+			printf("Could not open %s. Maybe in the wrong directory?\n", filePath);
+			return 0;
+		}
+
+		int width, height, nrChannels;
+		unsigned char* image = stbi_load(filePath, &width, &height, &nrChannels, STBI_rgb_alpha);
+		unsigned int textureID;
+
+		glGenTextures(1, &textureID);
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, channels, width, height, 0, channels, GL_UNSIGNED_BYTE, image);
+		free(image);
+
+		//Set wrapping type.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		//Mipmap and filtering.
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
+
+		return textureID;
+	}
+	
+	
 	double maxX = 0;
 	double maxY = 0;
 	double maxZ = 0;
@@ -100,13 +133,36 @@ namespace Rendering {
 		bool res = loader.LoadASCIIFromFile(&gltfmodel, &err, &warn, file);
 
 		//Temp variable.
-		Material material;
+		
 
 		//Load materials.
 		for each (tinygltf::Material gltfMaterial in gltfmodel.materials) {
+			Material material = Material();
 			material.metallic = gltfMaterial.pbrMetallicRoughness.metallicFactor;
 			material.roughness = gltfMaterial.pbrMetallicRoughness.roughnessFactor;
 			material.albedo = glm::vec3(gltfMaterial.pbrMetallicRoughness.baseColorFactor[0], gltfMaterial.pbrMetallicRoughness.baseColorFactor[1], gltfMaterial.pbrMetallicRoughness.baseColorFactor[2]);
+		
+			//Basecolor texture
+			int baseColorTextureIndex = gltfMaterial.pbrMetallicRoughness.baseColorTexture.index;
+			//If no texture found.
+			if (baseColorTextureIndex != -1) {
+				string path = "../Models/" + gltfmodel.images[baseColorTextureIndex].uri;
+				const char* baseColorTexturePath = path.c_str();
+				material.baseColorTexture = loadModelTexture(baseColorTexturePath, GL_RGBA);
+			}
+			
+			//ToDo finish loading textures.
+			//Metallic roughness texture
+			int metallicRoughnessTextureIndex = gltfMaterial.pbrMetallicRoughness.metallicRoughnessTexture.index;
+			//If no texture found.
+			if (metallicRoughnessTextureIndex != -1) {
+				string path = "../Models/" + gltfmodel.images[metallicRoughnessTextureIndex].uri;
+				const char* metallicRoughnessTexturePath = path.c_str();
+				material.ambientOcclusionTexture = loadModelTexture(metallicRoughnessTexturePath, GL_RED);
+				material.roughnessTexture = loadModelTexture(metallicRoughnessTexturePath, GL_GREEN);
+				material.metallicTexture = loadModelTexture(metallicRoughnessTexturePath, GL_BLUE);
+			}
+			
 			materials.push_back(material);
 		}
 
@@ -122,10 +178,8 @@ namespace Rendering {
 				vector<Vertex> vertices;
 				vector<unsigned int> indices;
 
-
 				//Temp variable
 				Vertex vertex;
-
 				//Positions accessor.
 				const tinygltf::Accessor& accessorPositions = gltfmodel.accessors[primitive.attributes["POSITION"]];
 				const tinygltf::BufferView& bufferViewPositions = gltfmodel.bufferViews[accessorPositions.bufferView];
@@ -138,12 +192,17 @@ namespace Rendering {
 				const tinygltf::Buffer& bufferNormals = gltfmodel.buffers[bufferViewNormals.buffer];
 				const float* normals = reinterpret_cast<const float*>(&bufferNormals.data[bufferViewNormals.byteOffset + accessorNormals.byteOffset]);
 
-
+				//TexCoords accessor.
+				const tinygltf::Accessor& accessorTexCoords = gltfmodel.accessors[primitive.attributes["TEXCOORD_0"]];
+				const tinygltf::BufferView& bufferViewTexCoords = gltfmodel.bufferViews[accessorTexCoords.bufferView];
+				const tinygltf::Buffer& bufferTexCoords = gltfmodel.buffers[bufferViewTexCoords.buffer];
+				const float* texCoords = reinterpret_cast<const float*>(&bufferTexCoords.data[bufferViewTexCoords.byteOffset + accessorTexCoords.byteOffset]);
 
 				//Contructing vertices.
 				for (size_t i = 0; i < accessorPositions.count; i++) {
 					vertex.position = glm::vec3(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]);
 					vertex.normal = glm::vec3(normals[i * 3 + 0], normals[i * 3 + 1], normals[i * 3 + 2]);
+					vertex.texCoord = glm::vec2(texCoords[i * 2 + 0], texCoords[i * 2 + 1]);
 					vertices.push_back(vertex);
 
 					if (maxX <= vertex.position.x) {
@@ -196,11 +255,8 @@ namespace Rendering {
 						}
 					}
 				}
-
-				
-
 				//Add SubMesh to Mesh.
-				subMeshes.push_back(new SubMesh(vertices, indices, materials[primitive.material].roughness, materials[primitive.material].metallic, materials[primitive.material].albedo));
+				subMeshes.push_back(new SubMesh(vertices, indices, materials[primitive.material]));
 			}
 			
 			meshes.push_back(Mesh(subMeshes, gltfMesh.name));

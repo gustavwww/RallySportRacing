@@ -14,12 +14,6 @@ using namespace std;
 
 namespace Rendering {
 
-	struct Material {
-		glm::vec3 albedo;
-		float metallic;
-		float roughness;
-	};
-
 	class Model {
 	public:
 		vector<Mesh> meshes;
@@ -38,6 +32,7 @@ namespace Rendering {
 		btVector3 Model::generateCollisionShapeOffset();
 
 		static Model* loadModel(const char* file, bool isTerrain);
+		static unsigned int loadModelTexture(const char* filePath, GLint channels);
 
 		btTriangleMesh* getMeshInterface();
 
