@@ -22,7 +22,7 @@ public:
 	void volumeSet(float v);
 
 	void createSoundSource(int ID, glm::vec3 positionVec3);
-	void updateSoundSource(int ID, glm::vec3 positionVec3, glm::vec3 velPerFrame, float speed, string sounds);
+	void updateSoundSource(int ID, glm::vec3 positionVec3, glm::vec3 velPerFrame, float speed, string soundString);
 	void removeSoundSource(int ID);
 	string getSoundString(int ID);
 	void setListenerParameters(glm::vec3 positionVec3, glm::vec3 direction, glm::vec3 velPerFrame, float speed);

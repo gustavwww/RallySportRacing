@@ -10,6 +10,9 @@ float speed;
 
 float rainFade;
 
+int wPressed;
+int sPressed;
+
 SoundSource::SoundSource(int ID, glm::vec3 positionVec3)
 {
 	// Set inital position of sound source
@@ -18,7 +21,7 @@ SoundSource::SoundSource(int ID, glm::vec3 positionVec3)
 
 	// Init engine sound
 
-	this->soundString = "0000";
+	this->soundString = "00000";
 	startSoundTimer = 0;
 
 	playRain = false;
@@ -26,7 +29,12 @@ SoundSource::SoundSource(int ID, glm::vec3 positionVec3)
 	
 	// Init looping sounds
 	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
+
+
 	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/EngineRumble.mp3",position,  true, true, true);
+	this->engineSoundHigh = Audio::SoundEngine->play3D("../RallySportRacing/Audio/EngineRumble.mp3", position, true, true, true);
+
+
 	this->rainSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/Rain.mp3", position, true, true, true);
 	this->pavementSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainPavement2.mp3", position, true, true, true);
 	this->dirtSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainDirt.mp3", position, true, true, true);
@@ -76,7 +84,7 @@ void SoundSource::update(glm::vec3 positionVec3, glm::vec3 velPerFrame, float sp
 
 	engineStart(this->soundString[0] == '1', position);
 	terrain(this->soundString[0] == '2', speed, position, velMetersPerSecond, this->soundString[3]);
-	engine(this->soundString[0] == '2', speed, position, velMetersPerSecond);
+	engine(this->soundString[0] == '2', this->soundString[4], speed, position, velMetersPerSecond);
 	engineOff(this->soundString[0] == '3', position);
 }
 
@@ -148,7 +156,7 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 			}
 		}
 		this->pavementSound->setPlaybackSpeed(0.5F + abs(speed) / 300);
-		this->pavementSound->setVolume(abs(speed) / 200);
+		this->pavementSound->setVolume(abs(speed) / 300);
 
 		if (!this->dirtSound->getIsPaused()) {
 			this->dirtSound->setIsPaused(true);
@@ -164,7 +172,7 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 			}
 		}
 		this->dirtSound->setPlaybackSpeed(0.5F + abs(speed) / 300);
-		this->dirtSound->setVolume(abs(speed) / 200);
+		this->dirtSound->setVolume(abs(speed) / 300);
 
 		if (!this->pavementSound->getIsPaused()) {
 			this->pavementSound->setIsPaused(true);
@@ -173,11 +181,14 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 }
 
 // Function that plays engine sound
-void SoundSource::engine(bool x, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
+void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
 	this->engineSound->setPosition(position);
 	this->engineSound->setVelocity(velMetersPerSec);
 
-	if (x) {
+	this->engineSoundHigh->setPosition(position);
+	this->engineSoundHigh->setVelocity(velMetersPerSec);
+
+	if (engineOn) {
 		if (this->engineSound->getIsPaused()) {
 			this->engineSound->setIsPaused(false);
 		}
@@ -188,6 +199,30 @@ void SoundSource::engine(bool x, float speed, irrklang::vec3df position, irrklan
 		}
 	}
 	this->engineSound->setPlaybackSpeed(1.0 + abs(speed) / 100);
+
+
+	if (engineOn && WorSPressed == '1') {
+		if (wPressed < 1000) {
+			wPressed++;
+		}
+
+		this->engineSoundHigh->setPlaybackSpeed(2.0F + abs(wPressed) / 1000);
+		this->engineSoundHigh->setVolume(0.5F + abs(wPressed) / 1000);
+
+		if (this->engineSoundHigh->getIsPaused()) {
+			this->engineSoundHigh->setIsPaused(false);
+		}
+	}
+	else {
+		if (!this->engineSoundHigh->getIsPaused()) {
+			this->engineSoundHigh->setIsPaused(true);
+		}
+
+		if (wPressed > 0) {
+			wPressed--;
+		}
+	}
+
 }
 
 // Function that plays engine off sound

@@ -62,8 +62,8 @@ void Audio::createSoundSource(int ID, glm::vec3 positionVec3) {
 }
 
 // Function that updates sound source in map with key ID
-void Audio::updateSoundSource(int ID, glm::vec3 positionVec3, glm::vec3 velPerFrame, float speed, string sounds) {
-	sources.at(ID)->update(positionVec3, velPerFrame, speed, sounds);
+void Audio::updateSoundSource(int ID, glm::vec3 positionVec3, glm::vec3 velPerFrame, float speed, string soundString) {
+	sources.at(ID)->update(positionVec3, velPerFrame, speed, soundString);
 }
 
 void Audio::removeSoundSource(int ID) {

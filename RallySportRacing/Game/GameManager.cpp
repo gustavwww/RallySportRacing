@@ -99,7 +99,7 @@ namespace Game {
 
 	Audio* sound;
 	int volumeButtonDelay = 0;
-	string soundString = "0000";
+	string soundString = "00000";
 
 	//Colors to select from when creating a model
 	glm::vec3 red = glm::vec3(1.0f, 0.f, 0.f);
@@ -708,9 +708,11 @@ namespace Game {
 				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->drive(1);
 					pressedW = true;
+					soundString[4] = '1';
 				}
 				else if (keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->drive(-1);
+					soundString[4] = '2';
 				}
 				if (keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->handBrake();
@@ -919,7 +921,7 @@ namespace Game {
 		sound->setListenerParameters(camPosition, camDirection, vehicle->getVelocity(), vehicle->getSpeed());
 		
 		// Reset sounds
-		soundString = "0000";
+		soundString = "00000";
 	}
 
 	void adjustCamPosition() {
