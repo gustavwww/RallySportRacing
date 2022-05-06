@@ -58,6 +58,8 @@ namespace Game {
 	unsigned int dirtTexture;
 	unsigned int rainTexture;
 	unsigned int snowTexture;
+	unsigned int terrainParticleTexture;
+	unsigned int terrainParticleTexture2;
 
 	//ParticleSystems
 	Rendering::ParticleSystem smokeParticlesObject;
@@ -80,6 +82,12 @@ namespace Game {
 
 	Rendering::ParticleSystem snowParticlesObject;
 	Rendering::ParticleSystem* snowParticlesPointer;
+
+	Rendering::ParticleSystem terrainParticleObject;
+	Rendering::ParticleSystem* terrainParticlePointer;
+
+	Rendering::ParticleSystem terrainParticleObject2;
+	Rendering::ParticleSystem* terrainParticlePointer2;
 
 	//Debug GameObject
 	GameObject* debugEnvironment;
@@ -259,6 +267,18 @@ namespace Game {
 		snowParticlesObject = Rendering::ParticleSystem(1000000, snowTexture);
 		snowParticlesPointer = &snowParticlesObject;
 		handler->addParticleSystem(snowParticlesPointer);
+
+		//Load and add terrainParticletexture to particle render list.
+		terrainParticleTexture = handler->loadTexture("../Textures/terrainParticleTexture.png");
+		terrainParticleObject = Rendering::ParticleSystem(1000000, terrainParticleTexture);
+		terrainParticlePointer = &terrainParticleObject;
+		handler->addParticleSystem(terrainParticlePointer);
+
+		//Load and add terrainParticletexture to particle render list.
+		terrainParticleTexture2 = handler->loadTexture("../Textures/terrainParticleTexture2.png");
+		terrainParticleObject2 = Rendering::ParticleSystem(1000000, terrainParticleTexture2);
+		terrainParticlePointer2 = &terrainParticleObject2;
+		handler->addParticleSystem(terrainParticlePointer2);
 
 		// model loading
 
@@ -622,8 +642,8 @@ namespace Game {
 
 			if (isOn == true) {
 				
+				// dirt particles
 				if ((vehicle->getSpeed() <= -10 || vehicle->getSpeed() >= 10) && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == dirtFriction) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
-					// For Dirt track. Waiting for the model before fully implementing
 					
 					// Change soundString terrain identifier
 					soundString[3] = '1';
@@ -638,6 +658,29 @@ namespace Game {
 					dirtParticlesObject.emitParticle(frontWheel1Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 					dirtParticlesObject.emitParticle(frontWheel2Pos, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.3);
 				}
+
+				// terrain particles
+				if ((vehicle->getSpeed() <= -10 || vehicle->getSpeed() >= 10) && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == terrainFriction) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
+
+					glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+					glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+
+					terrainParticleObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.3);
+					terrainParticleObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.3);
+					terrainParticleObject2.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.3);
+					terrainParticleObject2.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.3);
+				}
+				if ((vehicle->getSpeed() <= -10 || vehicle->getSpeed() >= 10) && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == highwayFriction) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
+					glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+					glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+
+					terrainParticleObject.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.1);
+					terrainParticleObject.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.1);
+					terrainParticleObject2.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.1);
+					terrainParticleObject2.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.1);
+				}
+
+
 
 				// Engine sound on
 				if (soundString[0] == '0') {
