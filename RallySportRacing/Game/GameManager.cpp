@@ -829,7 +829,7 @@ namespace Game {
 		}
 		if (perspective == 1 && keyboard_state_array[SDL_SCANCODE_V]) {
 			cameraDistance = 6;
-			cameraDistance2 = 2;
+			cameraDistance2 = 1.5;
 		}
 		// Perspective 2 => for reversing
 		else if (perspective == 2) {
