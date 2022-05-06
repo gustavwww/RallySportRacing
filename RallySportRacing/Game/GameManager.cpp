@@ -294,7 +294,7 @@ namespace Game {
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel, physics->dynamicsWorld);
 		gameObjects.push_back(wall);
-		wall->setInitialPosition(btVector3(-70, 2, 0));
+		wall->setInitialPosition(btVector3(-70, 0, 0));
 		//wall->setInitialRotation(btQuaternion(0,0,1,1));
 
 		// test light
