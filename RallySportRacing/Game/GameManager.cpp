@@ -105,11 +105,11 @@ namespace Game {
 	btCollisionObject* checkpoint2;
 	btCollisionObject* checkpoint3;
 	btCollisionObject* checkpoint4;
-	btCollisionObject* checkpoint5;
-	btCollisionObject* checkpoint6;
-	btCollisionObject* checkpoint7;
-	btCollisionObject* checkpoint8;
-	btCollisionObject* checkpoint9; // could be end point or we just have the start point as the endpoint
+	//btCollisionObject* checkpoint5;
+	//btCollisionObject* checkpoint6;
+	//btCollisionObject* checkpoint7;
+	//btCollisionObject* checkpoint8;
+	//btCollisionObject* checkpoint9; // could be end point or we just have the start point as the endpoint
 	vector<btCollisionObject*> checkpoints; // list of all checkpoints
 
 	// transforms one for every checkpoint
@@ -118,11 +118,11 @@ namespace Game {
 	btTransform transform2;
 	btTransform transform3;
 	btTransform transform4;
-	btTransform transform5;
-	btTransform transform6;
-	btTransform transform7;
-	btTransform transform8;
-	btTransform transform9;
+	//btTransform transform5;
+	//btTransform transform6;
+	//btTransform transform7;
+	//btTransform transform8;
+	//btTransform transform9;
 	vector<btTransform> transforms; // list of all transforms for checkpoints
 
 	btCollisionObject* latestReachedCheckpoint;
@@ -143,30 +143,30 @@ namespace Game {
 		transform2.setIdentity(); // initilizes the different transforms
 		transform3.setIdentity(); // initilizes the different transforms
 		transform4.setIdentity(); // initilizes the different transforms
-		transform5.setIdentity(); // initilizes the different transforms
-		transform6.setIdentity(); // initilizes the different transforms
-		transform7.setIdentity(); // initilizes the different transforms
-		transform8.setIdentity(); // initilizes the different transforms
-		transform9.setIdentity(); // initilizes the different transforms
+		//transform5.setIdentity(); // initilizes the different transforms
+		//transform6.setIdentity(); // initilizes the different transforms
+		//transform7.setIdentity(); // initilizes the different transforms
+		//transform8.setIdentity(); // initilizes the different transforms
+		//transform9.setIdentity(); // initilizes the different transforms
 	 
-		transform0.setOrigin(btVector3(0, 0, 0)); // hardcoded values for the position for the specific checkpoint
-		transform0.setRotation(btQuaternion(btVector3(0, 1, 0), PI/12));
-		transform1.setOrigin(btVector3(9.2, -1.3, 42)); // hardcoded values for the position for the specific checkpoint
-		transform2.setOrigin(btVector3(-16, 0, 1094)); // hardcoded values for the position for the specific checkpoint
-		transform3.setOrigin(btVector3(-386, 12, -180)); // hardcoded values for the position for the specific checkpoint
-		transform3.setRotation(btQuaternion(btVector3(0, 1, 0), PI));
-		transform4.setOrigin(btVector3(-1112, 38, -398)); // hardcoded values for the position for the specific checkpoint
-		transform4.setRotation(btQuaternion(btVector3(0, 1, 0), 3*PI/2));
-		transform5.setOrigin(btVector3(-1467, 44, -73)); // hardcoded values for the position for the specific checkpoint
-		transform5.setRotation(btQuaternion(btVector3(0, 1, 0), 2.75*PI/2));
-		transform6.setOrigin(btVector3(-931, 29, -1000)); // hardcoded values for the position for the specific checkpoint
-		transform6.setRotation(btQuaternion(btVector3(0, 1, 0), PI/2));
-		transform7.setOrigin(btVector3(-703, 27, -776)); // hardcoded values for the position for the specific checkpoint
-		transform7.setRotation(btQuaternion(btVector3(0, 1, 0), PI / 4));
-		transform8.setOrigin(btVector3(-248, 8, -768)); // hardcoded values for the position for the specific checkpoint
-		transform8.setRotation(btQuaternion(btVector3(0, 1, 0), 3*PI/5));
-		transform9.setOrigin(btVector3(-126.6, 1, -307)); // hardcoded values for the position for the specific checkpoint
-		transform9.setRotation(btQuaternion(btVector3(0, 1, 0), PI/11));
+		transform0.setOrigin(btVector3(27.1616, -4.12893, -5.84862)); // hardcoded values for the position for the specific checkpoint
+		//transform0.setRotation(btQuaternion(btVector3(0, 1, 0), PI/12));
+		transform1.setOrigin(btVector3(34.2678, -1.31098, 146.879)); // hardcoded values for the position for the specific checkpoint
+		transform2.setOrigin(btVector3(2.95493, -2.90796, 746.112)); // hardcoded values for the position for the specific checkpoint
+		transform3.setOrigin(btVector3(-234.78, 0.601453, 271.287)); // hardcoded values for the position for the specific checkpoint
+		transform3.setRotation(btQuaternion(btVector3(0, 1, 0), 9*PI/8));
+		transform4.setOrigin(btVector3(-218.226, 4.75948, -1118.54)); // hardcoded values for the position for the specific checkpoint
+		transform4.setRotation(btQuaternion(btVector3(0, 1, 0), PI/8)); // temporary last checkpoint, untill the models gets finished
+		//transform5.setOrigin(btVector3(-1467, 44, -73)); // hardcoded values for the position for the specific checkpoint
+		//transform5.setRotation(btQuaternion(btVector3(0, 1, 0), 2.75*PI/2));
+		//transform6.setOrigin(btVector3(-931, 29, -1000)); // hardcoded values for the position for the specific checkpoint
+		//transform6.setRotation(btQuaternion(btVector3(0, 1, 0), PI/2));
+		//transform7.setOrigin(btVector3(-703, 27, -776)); // hardcoded values for the position for the specific checkpoint
+		//transform7.setRotation(btQuaternion(btVector3(0, 1, 0), PI / 4));
+		//transform8.setOrigin(btVector3(-248, 8, -768)); // hardcoded values for the position for the specific checkpoint
+		//transform8.setRotation(btQuaternion(btVector3(0, 1, 0), 3*PI/5));
+		//transform9.setOrigin(btVector3(-126.6, 1, -307)); // hardcoded values for the position for the specific checkpoint
+		//transform9.setRotation(btQuaternion(btVector3(0, 1, 0), PI/11));
 		 
 		// adds all checkpoints objects to list
 		checkpoints.push_back(checkpoint0);
@@ -174,11 +174,11 @@ namespace Game {
 		checkpoints.push_back(checkpoint2);
 		checkpoints.push_back(checkpoint3);
 		checkpoints.push_back(checkpoint4);
-		checkpoints.push_back(checkpoint5);
-		checkpoints.push_back(checkpoint6);
-		checkpoints.push_back(checkpoint7);
-		checkpoints.push_back(checkpoint8);
-		checkpoints.push_back(checkpoint9);
+		//checkpoints.push_back(checkpoint5);
+		//checkpoints.push_back(checkpoint6);
+		//checkpoints.push_back(checkpoint7);
+		//checkpoints.push_back(checkpoint8);
+		//checkpoints.push_back(checkpoint9);
 
 		// adds all checkpoints transforms to list
 		transforms.push_back(transform0);
@@ -186,11 +186,11 @@ namespace Game {
 		transforms.push_back(transform2);
 		transforms.push_back(transform3);
 		transforms.push_back(transform4);
-		transforms.push_back(transform5);
-		transforms.push_back(transform6);
-		transforms.push_back(transform7);
-		transforms.push_back(transform8);
-		transforms.push_back(transform9);
+		//transforms.push_back(transform5);
+		//transforms.push_back(transform6);
+		//transforms.push_back(transform7);
+		//transforms.push_back(transform8);
+		//transforms.push_back(transform9);
 
 
 		for (int i = 0; i < checkpoints.size(); i++) {
@@ -205,7 +205,11 @@ namespace Game {
 
 		latestReachedCheckpoint = checkpoints[0]; // sets the latestcheckpointreached to the first checkpoint, 0 is spawn point, 1 is start checkpoint 
 	}
-	double dirtFriction = 2.0f; // test for dirt particles
+
+	double dirtFriction = 2.0f; // friction of dirtroad
+	double terrainFriction = 1.9f; // friction of other terrain
+	double highwayFriction = 2.5f; // friction of other terrain
+
 	void setupGame(Rendering::SDLWindowHandler* windowHandler) {
 		physics = new Physics();
 		gameTimer = GameTimer::Instance();
@@ -263,7 +267,7 @@ namespace Game {
 		// test environment finished track
 		Rendering::Model* test = Rendering::Model::loadModel("../Models/EnvironmentRallyTrack.gltf", true);
 		windowHandler->addModel(test);
-		test1 = new GameObject(test, true, 2.5f, physics->dynamicsWorld); // test
+		test1 = new GameObject(test, true, terrainFriction, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
 		test1->setInitialPosition(btVector3(-700, -90, 0));
 
@@ -271,14 +275,14 @@ namespace Game {
 		// test environment finished track
 		Rendering::Model* test2 = Rendering::Model::loadModel("../Models/HighwayModel.gltf", true);
 		windowHandler->addModel(test2);
-		test21 = new GameObject(test2, true, dirtFriction, physics->dynamicsWorld); // test
+		test21 = new GameObject(test2, true, highwayFriction, physics->dynamicsWorld); // test
 		gameObjects.push_back(test21);
 		test21->setInitialPosition(btVector3(-700, -90, 0));
 
 		// test environment finished track
 		Rendering::Model* test3 = Rendering::Model::loadModel("../Models/DirtRoadModel.gltf", true);
 		windowHandler->addModel(test3);
-		test31 = new GameObject(test3, true, 2.5f, physics->dynamicsWorld); // test
+		test31 = new GameObject(test3, true, dirtFriction, physics->dynamicsWorld); // test
 		gameObjects.push_back(test31);
 		test31->setInitialPosition(btVector3(-700, -90, 0));
 
@@ -297,7 +301,7 @@ namespace Game {
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
-		vehicle->setInitialPosition(btVector3(0, 5, 0));
+		vehicle->setInitialPosition(btVector3(27.1616, 1, -5.84862));
 
 		// Create player sound source
 		sound->createSoundSource(0, vehicle->getPosition());
@@ -397,11 +401,12 @@ namespace Game {
 	bool toggleRain = false;
 	bool toggleSnow = false;
 
-	// variables for starting the race
+	// variables for starting the race and handling race
 	float raceCountDown = 3;
 	bool isCountingDown = false;
 	float raceTime = 0;
 	bool timingRace = false;
+	int checkpointsReached = 0;
 
 	void activateRain() {
 		glm::vec3 rainOffset1 = glm::vec3(25 * random.Float(), 25 * random.Float(), 25 * random.Float());
@@ -459,17 +464,23 @@ namespace Game {
 
 					// if we hit the last checkpoint (finishline) (which currently is the start checkpoint) and have touched the checkpoint before. Then we have finished the race. Racetimer stops counting
 					// could change so that it also checks a variable if we have hit all checkpoints. Now we can just go back and forward to complete the race
-					if ((obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[0]->getWorldArrayIndex()) && (latestReachedCheckpoint == checkpoints[checkpoints.size() - 1])) {
+					if ((obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[0]->getWorldArrayIndex()) && (checkpointsReached == (checkpoints.size()-1))) {
 						timingRace = false;
+						checkpointsReached++;
+						cout << checkpointsReached << endl;
+						cout << roundf(raceTime) << endl;
 						// do something here, Like show the timer or put it in a leaderboard
 						// raceTime is the timer for the race
 					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
-						if (obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[i]->getWorldArrayIndex()) {
-							//cout << "Kollision med: " << checkpoints[i]->getWorldArrayIndex() << endl;
-							latestReachedCheckpoint = checkpoints[i];
-							//cout << checkpoints.size();
+						if (i != 0) {
+							if (obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[i]->getWorldArrayIndex() && latestReachedCheckpoint == checkpoints[i - 1]) {
+								//cout << "Kollision med: " << checkpoints[i]->getWorldArrayIndex() << endl;
+								latestReachedCheckpoint = checkpoints[i];
+								checkpointsReached++;
+								cout << checkpointsReached << endl;
+							}
 						}
 					}
 				}
@@ -520,6 +531,7 @@ namespace Game {
 		if (keyboard_state_array[SDL_SCANCODE_F3]) {
 			toggleSnow = true;
 			toggleRain = false;
+			sound->playRainSound(false);
 		}
 		if (toggleRain) {
 			activateRain();
@@ -533,10 +545,11 @@ namespace Game {
 			perspective = 1;
 			resetCarToggle = false;
 			resetCarDelay = 0;
+			checkpointsReached = 0;
 
 			vehicle->vehicle->getRigidBody()->setLinearVelocity(btVector3(0, 0, 0));
 			latestReachedCheckpoint = checkpoints[0];
-			vehicle->setInitialPosition(latestReachedCheckpoint->getWorldTransform().getOrigin() + btVector3(0, -2, 0));
+			vehicle->setInitialPosition(latestReachedCheckpoint->getWorldTransform().getOrigin() + btVector3(0, 0, 0));
 			vehicle->setInitialRotation(latestReachedCheckpoint->getWorldTransform().getRotation());
 
 			raceCountDown = 3;
@@ -562,6 +575,16 @@ namespace Game {
 
 		// Car movement
 		if (((buttons & SDL_BUTTON_RMASK) != SDL_BUTTON_RMASK) || perspective != 3) {
+
+			if (vehicle->vehicle->getWheelInfo(2).m_frictionSlip == terrainFriction) { // checks one rear wheel if it is in contact with terrain
+				vehicle->setMaxSpeed(80);
+			}
+			if (vehicle->vehicle->getWheelInfo(2).m_frictionSlip == dirtFriction) { // checks one rear wheel if it is in contact with terrain
+				vehicle->setMaxSpeed(200);
+			}
+			if (vehicle->vehicle->getWheelInfo(2).m_frictionSlip == highwayFriction) { // checks one rear wheel if it is in contact with terrain
+				vehicle->setMaxSpeed(250);
+			}
 
 			if (engineOnOffToggle) {
 				if (keyboard_state_array[SDL_SCANCODE_E] && isOn == false) {
@@ -713,7 +736,7 @@ namespace Game {
 		if (keyboard_state_array[SDL_SCANCODE_0] && completeResetCarToggle) {
 			completeResetCarToggle = false;
 			completeResetCarDelay = 0;
-			vehicle->setInitialPosition(btVector3(0, 1, 0)); // certain position
+			vehicle->setInitialPosition(btVector3(10, 1, 10)); // certain position
 			vehicle->setInitialRotation(btQuaternion(0, 0, 0, 1));
 		}
 		completeResetCarDelay += gameTimer->getDeltaTime();
