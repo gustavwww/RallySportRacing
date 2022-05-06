@@ -26,7 +26,7 @@ SoundSource::SoundSource(int ID, glm::vec3 positionVec3)
 	
 	// Init looping sounds
 	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
-	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/BetterCarAudio.mp3",position,  true, true, true);
+	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/EngineRumble.mp3",position,  true, true, true);
 	this->rainSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/Rain.mp3", position, true, true, true);
 	this->pavementSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainPavement2.mp3", position, true, true, true);
 	this->dirtSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainDirt.mp3", position, true, true, true);
