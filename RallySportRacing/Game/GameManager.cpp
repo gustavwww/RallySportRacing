@@ -492,7 +492,7 @@ namespace Game {
 
 					// if we hit the last checkpoint (finishline) (which currently is the start checkpoint) and have touched the checkpoint before. Then we have finished the race. Racetimer stops counting
 					// could change so that it also checks a variable if we have hit all checkpoints. Now we can just go back and forward to complete the race
-					if ((obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[0]->getWorldArrayIndex()) && (checkpointsReached == (checkpoints.size()-1))) {
+					if ((obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[0]->getWorldArrayIndex()) && (checkpointsReached == (checkpoints.size()-1)) && timingRace) {
 						timingRace = false;
 						checkpointsReached++;
 						cout << checkpointsReached << endl;
@@ -503,7 +503,7 @@ namespace Game {
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
 						if (i != 0) {
-							if (obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[i]->getWorldArrayIndex() && latestReachedCheckpoint == checkpoints[i - 1]) {
+							if (obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[i]->getWorldArrayIndex() && latestReachedCheckpoint == checkpoints[i - 1] && timingRace) {
 								//cout << "Kollision med: " << checkpoints[i]->getWorldArrayIndex() << endl;
 								latestReachedCheckpoint = checkpoints[i];
 								checkpointsReached++;
@@ -725,7 +725,7 @@ namespace Game {
 				if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->notGasing();
 				
-					if (vehicle->getSpeed() >= 100 && pressedW == true && backFireToggle == true) {
+					if (vehicle->getSpeed() >= 169 && pressedW == true && backFireToggle == true) {
 						// spela upp ljud explosion
 						
 						soundString[2] = '1';
@@ -737,6 +737,7 @@ namespace Game {
 						pressedW = false;
 						backFireToggle = false;
 						backFireDelay = 0;
+						soundString[2] = '1'; // sounds better with this added=)
 					}
 				}
 				backFireDelay += gameTimer->getDeltaTime();

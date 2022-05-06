@@ -98,7 +98,7 @@ void SoundSource::horn(bool x, irrklang::vec3df position, irrklang::vec3df velMe
 // Function that plays exhaust sound
 void SoundSource::exhaust(bool x, irrklang::vec3df position) {
 	if (x) {
-		Audio::SoundEngine->play3D("../RallySportRacing/Audio/Backfire.mp3", position);
+		Audio::SoundEngine->play3D("../RallySportRacing/Audio/Backfire2.wav", position);
 	}
 }
 
