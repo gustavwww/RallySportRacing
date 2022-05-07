@@ -241,12 +241,12 @@ namespace Game {
 		test1->setInitialPosition(btVector3(-700, -90, 0));
 
 		// test wall
-		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/Wall.gltf", false);
+		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false);
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel, physics->dynamicsWorld);
 		gameObjects.push_back(wall);
 		wall->setInitialPosition(btVector3(-70, 4, 0));
-		wall->setInitialRotation(btQuaternion(0,0,1,1));
+		//wall->setInitialRotation(btQuaternion(0,0,1,1));
 
 		// player vehicle, use setInitialpos to change position when starting the game
 		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
@@ -263,28 +263,7 @@ namespace Game {
 		initCheckPoints();
 
 		// Multiplayer setup
-		Networking::setupNetwork(vehicle, windowHandler);
-
-		// environment 1 test
-		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
-		windowHandler->addModel(environmentModel);
-		environment = new GameObject(environmentModel, true, 4.0f, physics->dynamicsWorld); // use false if not terrain or use another constructor
-		gameObjects.push_back(environment);
-		environment->setInitialPosition(btVector3(0, 0, 0));*/
-
-		// environment 2 test
-		/*Rendering::Model* environmentModel2 = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true);
-		windowHandler->addModel(environmentModel2);
-		environment2 = new GameObject(environmentModel2, true, 1.0f, physics->dynamicsWorld);
-		gameObjects.push_back(environment2);
-		environment2->setInitialPosition(btVector3(-50, 0, 0));*/
-
-		//Light Debugging Environment
-		/*Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false); //
-		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
-		gameObjects.push_back(debugEnvironment);
-		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));*/
+		//Networking::setupNetwork(vehicle, windowHandler);
 	}
 
 	bool toScreen = true;
