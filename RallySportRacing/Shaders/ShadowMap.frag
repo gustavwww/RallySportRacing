@@ -1,5 +1,8 @@
 #version 420
 
+layout(location = 0) out vec4 fragmentColor;
+
 void main(){
-//Nothing here since we dont want to render any color.
+	
+	fragmentColor = vec4(gl_FragCoord.z);
 }

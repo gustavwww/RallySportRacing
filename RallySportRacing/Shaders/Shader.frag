@@ -14,7 +14,7 @@ uniform float roughness;
 ////////////////////////////////
 layout(binding = 7) uniform sampler2D irradianceMap;
 layout(binding = 8) uniform sampler2D reflectionMap;
-layout(binding = 9) uniform sampler2D shadowMap;
+layout(binding = 9) uniform sampler2DShadow shadowMap;
 ////////////////////////////////
 //Shadow
 ////////////////////////////////
@@ -24,6 +24,7 @@ layout(binding = 9) uniform sampler2D shadowMap;
 ////////////////////////////////
 uniform vec3 viewSpaceLightPos;
 uniform vec3 lightColor;
+uniform float lightIntensity;
 
 ////////////////////////////////
 // Constants
@@ -47,27 +48,6 @@ uniform mat4 viewInverse;
 // Outputs
 ////////////////////////////////
 out vec4 fragmentColor;
-
-//Check if fragment is in shadow.
-float ShadowValue(float LdotN){
-	vec3 pos = shadowMapCoord.xyz * 0.5 + 0.5;
-	if(pos.z > 1.0){
-		pos.z = 1.0;
-	}
-
-	float bias = max(0.05 * (1.0 - LdotN), 0.005);
-
-	//Percentage-closer filter
-	float shadow = 0.0;
-	vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-	for(int x = -1; x <= 1; ++x){
-		for(int y = -1; y <= 1; ++y){
-			float depth = texture(shadowMap, pos.xy + vec2(x,y) * texelSize).r;
-			shadow += (depth + bias) < pos.z ? 0.0 : 1.0;
-		}
-	}
-	return shadow / 9.0;
-}
 
 //Trowbridge-Reitz GGX normal distrubition function: a^2 / pi( (n dot h)^2 * (a^2 - 1) + 1 )^2
 //Aproximates the relative surface area of microfacets aligned with the halfway vector.
@@ -133,7 +113,7 @@ void main(){
 
 		float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
 		float attenuation = 1.0/(d * d);
-		vec3 radiance = lightColor * 500000 * attenuation;
+		vec3 radiance = lightColor * lightIntensity * attenuation;
 
 		//Dot products.
 		float NdotV = max(dot(normal, viewDir), 0.0000001);
@@ -157,7 +137,7 @@ void main(){
 		//Remove diffuse component if metal.
 		kDiff *= 1.0 - metallic;
 		vec3 light = (kDiff * albedo / PI + specular) * radiance * NdotL;
-		float shadow = ShadowValue(LdotN);
+		float shadow = textureProj(shadowMap, shadowMapCoord);
 		Lo += light * shadow;
 	}
 	//ToDo end for each light loop here.
@@ -200,11 +180,10 @@ void main(){
 	vec3 radiance = 1.5 * textureLod(reflectionMap, lookup, roughness * MAX_REFLECTION_LOD).rgb;
 	//vec2 brdf = texture(brdfLUT, vec2(NdotV, roughness)).rg;
 	//vec3 specularAmbient = prefilteredColor * (F * brdf.r +brdf.g);
-	vec3 specularAmbient = radiance *kSpec;
-	//vec3 specularAmbient = vec3(0.0);
+	vec3 specularAmbient = radiance * kSpec;
 
-	//vec3 ambient = (diffuseAmbient + specularAmbient);
-	vec3 color =  Lo;
+	vec3 ambient = (diffuseAmbient + specularAmbient);
+	vec3 color =  Lo + ambient;
 
 	//HDR tonemapping.
 	color = color / (color + vec3(1.0));

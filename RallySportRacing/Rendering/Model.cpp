@@ -56,9 +56,6 @@ namespace Rendering {
 		GLuint matrixID = glGetUniformLocation(programID, "MVP");
 		glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
 
-		GLuint modelMatrixID = glGetUniformLocation(programID, "modelMatrix");
-		glUniformMatrix4fv(modelMatrixID, 1, GL_FALSE, &model[0][0]);
-
 		GLuint modelViewMatrixID = glGetUniformLocation(programID, "modelViewMatrix");
 		glUniformMatrix4fv(modelViewMatrixID, 1, GL_FALSE, &modelViewMatrix[0][0]);
 		

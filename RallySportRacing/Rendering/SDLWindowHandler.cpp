@@ -6,6 +6,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.inl>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <stb_image.h>
 
@@ -14,22 +15,25 @@
 #include "imgui_impl_opengl3.h"
 #include "Game/GameManager.h"
 #include "Utils/HdrFileGenerator.h"
+#include "FrameBufferObject.h"
 
 using namespace std;
 
 namespace Rendering {
 
+	//Camera
+	float nearPlane = 0.1f, farPlane = 500.0f, fov = 45.0f;
+
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(1.0f, 40.0f, 1.0f, 1.0f);
+	float lightIntensity = 50000.0f;
 	float envMultiplier = 1.5f;
 	
 	//Shadow maps.
-	unsigned int shadowMap;
-	unsigned int shadowMapFBO;
-	int shadowMapResolution = 2048;
-	float nearPlane = 1.0f, farPlane = 75.0f;
-	
+	FboInfo shadowMapFB;
+	int shadowMapResolution = 4096;
+	float polygonFactor = 3.5f, polygonUnits = 1.0f;
 
 	//TESTING VARIABLE
 	unsigned int quadVAO = 0;
@@ -225,7 +229,7 @@ namespace Rendering {
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 5000.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, nearPlane, farPlane);
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
@@ -252,6 +256,15 @@ namespace Rendering {
 		unsigned int irradianceMap = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/irradiance.hdr");
 		unsigned int reflectionMap = Utils::HdrFileGenerator::loadHdrMipmapTexture(reflectionLevels);
 
+		//Shadow map setup.
+		shadowMapFB.resize(shadowMapResolution, shadowMapResolution);
+		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
+
 		//Bind textures.
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, skybox);
@@ -259,6 +272,9 @@ namespace Rendering {
 		glBindTexture(GL_TEXTURE_2D, irradianceMap);
 		glActiveTexture(GL_TEXTURE8);
 		glBindTexture(GL_TEXTURE_2D, reflectionMap);
+		glActiveTexture(GL_TEXTURE9);
+		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+
 
 		//Environment uniforms.
 		glUseProgram(skyboxProgramID);
@@ -290,6 +306,9 @@ namespace Rendering {
 			//Set slider to change in scene.
 			ImGui::DragFloat3("light pos", &lightPos.x);
 			ImGui::DragFloat3("light color", &lightColor.x);
+			ImGui::DragFloat("light intensity", &lightIntensity);
+			ImGui::DragFloat("polygon factor", &polygonFactor);
+			ImGui::DragFloat("polygon units", &polygonUnits);
 
 			//Toggle DebugGUI with 'G'.
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_g) {
@@ -313,40 +332,31 @@ namespace Rendering {
 			if (preRender) {
 				(*preRender)();
 			}
-
-			setUpShadowMapFrameBuffer();
-
 			
-			//ToDo mess around with these numbers until the shadows look good.
-			ImGui::DragFloat("shadowFarPlane", &farPlane);
-			ImGui::DragFloat("shadowNearPlane", &nearPlane);
-			glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
-			glm::mat4 lightView = glm::lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-			glm::mat4 lightSpaceMatrix = lightProjection * lightView;
+			//Shadow maps creation.
+			glm::mat4 lightViewMatrix = lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+			//glm::mat4 lightProjMatrix = getLightProjection(lightViewMatrix);
+			glm::mat4 lightProjMatrix = glm::perspective(glm::radians(45.0f), float(width/height), 25.0f, 1000.0f);
 
-			glUseProgram(shadowMapID);
-			glUniformMatrix4fv(glGetUniformLocation(shadowMapID, "lightProjection"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
+			glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFB.framebufferId);
+			glViewport(0, 0, shadowMapFB.width, shadowMapFB.height);
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			//glEnable(GL_DEPTH_TEST);
-			glViewport(0, 0, shadowMapResolution, shadowMapResolution);
-			glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
-			glClear(GL_DEPTH_BUFFER_BIT);
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(polygonFactor, polygonUnits);
 
-			
-
-			//ToDo render all models here.
 			for (Model* m : models) {
-				m->render(projection, view, shadowMapID);
+				m->render(lightProjMatrix, lightViewMatrix, shadowMapID);
 			}
+			glDisable(GL_POLYGON_OFFSET_FILL);
+
 			//Set deafult framebuffer and viewport.
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, width, height);
 
 			// Clear the colorbuffer
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			glActiveTexture(GL_TEXTURE9);
-			glBindTexture(GL_TEXTURE_2D, shadowMap);
 
 			//Draw background
 			glUseProgram(skyboxProgramID);
@@ -358,9 +368,11 @@ namespace Rendering {
 			glUseProgram(programID);
 
 			//Set uniforms for light source.
+			glm::mat4 lightMatrix = glm::translate(glm::vec3(0.5f)) * glm::scale(glm::vec3(0.5f)) * lightProjMatrix * lightViewMatrix * inverse(view);
 			glUniform3fv(glGetUniformLocation(programID, "viewSpaceLightPos"), 1, &viewSpaceLightPos[0]);
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
-			glUniformMatrix4fv(glGetUniformLocation(programID, "lightSpaceMatrix"), 1, GL_FALSE, &lightSpaceMatrix[0][0]);
+			glUniform1fv(glGetUniformLocation(programID, "lightIntensity"), 1, &lightIntensity);
+			glUniformMatrix4fv(glGetUniformLocation(programID, "lightMatrix"), 1, GL_FALSE, &lightMatrix[0][0]);
 
 
 			for (Model* m : models) {
@@ -370,10 +382,8 @@ namespace Rendering {
 			for (ParticleSystem* p : particleSystems) {
 				p->render(particleProgramID, projection, view, width, height);
 			}
-
-			//Render shadow map for testing.
-			//debugRenderShadowMap(shadowDebugID);
-
+		
+			ImGui::Image((ImTextureID)shadowMapFB.colorTextureTarget, ImVec2(700, 700));
 			//Game::drawDebug();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -387,74 +397,81 @@ namespace Rendering {
 
 	}
 
-	void SDLWindowHandler::setUpShadowMapFrameBuffer() {
-		if (shadowMapFBO != 0) {
-			return;
-		}
+	glm::mat4 SDLWindowHandler::getLightProjection(glm::mat4 lightView) {
+		float aspectRatio = float(width / height);
+		
+		//Calculate width and height of far plane and near plane.
+		float heightNear = 2 * tan(fov / 2) * nearPlane;
+		float widthNear = heightNear * aspectRatio;
+		float heightFar = 2 * tan(fov / 2) * farPlane;
+		float widthFar = heightFar * aspectRatio;
+		
+		//Calculate right vector and normalize it.
+		glm::vec3 camOrientationTEST = normalize(camOrientation);
+		glm::vec3 camDirectionTEST = normalize(camDirection);
+		glm::vec3 camRight = cross(camOrientation, camDirection);
+		camRight = normalize(camRight);
+		
+		//Find the center for points for far and near plane.
+		glm::vec3 centerNear = camPosition + camDirectionTEST * nearPlane;
+		glm::vec3 centerFar = camPosition + camDirectionTEST * farPlane;
 
-		//Generate depthBuffer.
-		glGenFramebuffers(1, &shadowMapFBO);
+		//Find the 8 corners of the viewFrustrum.
+		glm::vec3 topLeftNear = centerNear + (camOrientationTEST * (heightNear / 2)) - (camRight * (widthNear / 2));
+		glm::vec3 topRightNear = centerNear + (camOrientationTEST * (heightNear / 2)) + (camRight * (widthNear / 2));
+		glm::vec3 botLeftNear = centerNear - (camOrientationTEST * (heightNear / 2)) - (camRight * (widthNear / 2));
+		glm::vec3 botRightNear = centerNear - (camOrientationTEST * (heightNear / 2)) + (camRight * (widthNear / 2));
+		
+		glm::vec3 topLeftFar = centerFar + (camOrientationTEST * (heightFar / 2)) - (camRight * (widthFar / 2));
+		glm::vec3 topRightFar = centerFar + (camOrientationTEST * (heightFar / 2)) + (camRight * (widthFar / 2));
+		glm::vec3 botLeftFar = centerFar - (camOrientationTEST * (heightFar / 2)) - (camRight * (widthFar / 2));
+		glm::vec3 botRightFar = centerFar - (camOrientationTEST * (heightFar / 2)) + (camRight * (widthFar / 2));
 
-		//Generate depthMapTexture.
-		glGenTextures(1, &shadowMap);
-		glBindTexture(GL_TEXTURE_2D, shadowMap);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, shadowMapResolution, shadowMapResolution, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-		float borderColor[] = { 1.0, 1.0, 1.0, 1.0 };
-		glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
+		//Convert corners to lightSpace.
+		vector<glm::vec3> frustumInLightSpace{
+			lightView * glm::vec4(topLeftNear, 1.0),
+			lightView* glm::vec4(topRightNear, 1.0),
+			lightView* glm::vec4(botLeftNear, 1.0),
+			lightView* glm::vec4(botRightNear, 1.0),
+			lightView* glm::vec4(topLeftFar, 1.0),
+			lightView* glm::vec4(topRightFar, 1.0),
+			lightView* glm::vec4(botLeftFar, 1.0),
+			lightView* glm::vec4(botRightFar, 1.0)
+		};
 
-		//Setup for framebuffer.
-		glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFBO);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadowMap, 0);
-
-		//Prevent from reading or writing to the color buffer.
-		glDrawBuffer(GL_NONE);
-		glReadBuffer(GL_NONE);
-
-		//Set default framebuffer.
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	}
-
-	void SDLWindowHandler::debugRenderShadowMap(GLuint programID) {
-		glViewport(0, 0, shadowMapResolution, shadowMapResolution);
-		glClearColor(0.0, 0.0, 0.0, 1.0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glUseProgram(programID);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, shadowMap);
-		debugRenderQuad();
-		//Reset viewport.
-		glViewport(0, 0, width, height);
-	}
-
-	void SDLWindowHandler::debugRenderQuad() {
-		if (quadVAO == 0)
+		//Find max and min points.
+		glm::vec3 min{ INFINITY, INFINITY, INFINITY };
+		glm::vec3 max{ -INFINITY, -INFINITY, -INFINITY };
+		for (unsigned int i = 0; i < frustumInLightSpace.size(); i++)
 		{
-			float quadVertices[] = {
-				// positions        // texture Coords
-				-1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-				-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-				 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-				 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-			};
-			// setup plane VAO
-			glGenVertexArrays(1, &quadVAO);
-			glGenBuffers(1, &quadVBO);
-			glBindVertexArray(quadVAO);
-			glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-			glEnableVertexAttribArray(1);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+			//Update min value.
+			if (frustumInLightSpace[i].x < min.x)
+				min.x = frustumInLightSpace[i].x;
+			if (frustumInLightSpace[i].y < min.y)
+				min.y = frustumInLightSpace[i].y;
+			if (frustumInLightSpace[i].z < min.z)
+				min.z = frustumInLightSpace[i].z;
+
+			//Update max value.
+			if (frustumInLightSpace[i].x > max.x)
+				max.x = frustumInLightSpace[i].x;
+			if (frustumInLightSpace[i].y > max.y)
+				max.y = frustumInLightSpace[i].y;
+			if (frustumInLightSpace[i].z > max.z)
+				max.z = frustumInLightSpace[i].z;
 		}
-		glBindVertexArray(quadVAO);
-		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-		glBindVertexArray(0);
+
+		float minX = min.x;
+		float maxX = max.x;
+		float minY = min.y;
+		float maxY = max.y;
+		
+		//Change sign since pos z is towards the camera.
+		float minZ = -min.z;
+		float maxZ = -max.z;
+		
+		
+		return glm::ortho(minX, maxX, minY, maxY, maxZ, minZ);
 	}
 
 	void SDLWindowHandler::addModel(Model* model) {

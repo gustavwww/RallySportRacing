@@ -13,7 +13,7 @@ uniform mat4 normalMatrix;
 uniform mat4 modelMatrix;
 
 
-uniform mat4 lightSpaceMatrix;
+uniform mat4 lightMatrix;
 
 // Outputs for fragment shader.
 out vec3 vertexPosition_viewspace;
@@ -29,7 +29,7 @@ void main(){
   normal_viewspace = (normalMatrix * vec4(normals_modelspace, 0.0)).xyz;
   
   //ToDo uncomment when shadow map is implemented.
-  shadowMapCoord = lightSpaceMatrix * modelMatrix * vec4(vertexPosition_worldSpace, 1.0);
+  shadowMapCoord = lightMatrix * vec4(vertexPosition_viewspace, 1.0);
 
   texCoord = texCoordIn;
 }
