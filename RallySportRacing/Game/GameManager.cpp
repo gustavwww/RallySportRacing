@@ -473,6 +473,16 @@ namespace Game {
 		return raceCountDown;
 	}
 
+	float Game::getVehicleSpeed()
+	{
+		return vehicle->getSpeed();
+	}
+
+	bool Game::getCountDown()
+	{
+		return isCountingDown;
+	}
+
 	void checkCollisions() {
 		// Collisionhandling between a pair of objects
 		// Bullet physics does not give a predefined check collision with method

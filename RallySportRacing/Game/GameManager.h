@@ -22,6 +22,8 @@ namespace Game {
 	Rendering::SDLWindowHandler* getHandler();
 	float getRaceTime();
 	float getCountDownTime();
+	float getVehicleSpeed();
+	bool getCountDown();
 }
 
 #endif

@@ -13,6 +13,7 @@
 #include "imgui_impl_opengl3.h"
 #include "Game/GameManager.h"
 #include "Utils/HdrFileGenerator.h"
+#include "Audio/audio.h"
 
 using namespace std;
 
@@ -24,7 +25,22 @@ namespace Rendering {
 	float envMultiplier = 1.5f;
 	
 	//Audio
+	Audio* sound;
 	int volume = 50;
+
+	//Menu
+	bool startMenu = true;
+	int menuButtonWidth = 300;
+	int menuButtonHeight = 150;
+	int settingsButtonSize = 96;
+	int carColorCycleVariable = 0;
+
+	//Speed
+	float trackerPos = 0.0f;
+	float speed = 0.0f;
+
+	float raceTime = 0;
+	float countDownTime = 3.0f;
 
 	glm::vec3 SDLWindowHandler::getLightPosition() {
 		return glm::vec3(lightPos);
@@ -209,6 +225,24 @@ namespace Rendering {
 		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
+		int mainMenuTexture = loadTexture("../IMGS/main-menu.png");
+		int startButtonTexture = loadTexture("../IMGS/start-button.png");
+		int settingsButtonTexture = loadTexture("../IMGS/settings-button.png");
+		int settingsTexture = loadTexture("../IMGS/settingsbackground.png");
+		int speedometerTexture = loadTexture("../IMGS/Speedometer-final.png");
+		int speedTrackerTexture = loadTexture("../IMGS/Speed-tracker.png");
+		int checkpoint = loadTexture("../IMGS/checkpoints.png");
+		int leftButtonTexture1 = loadTexture("../IMGS/left-button.png");
+		int rightButtonTexture1 = loadTexture("../IMGS/right-button.png");
+		int leftButtonTexture2 = loadTexture("../IMGS/left-button.png");
+		int rightButtonTexture2 = loadTexture("../IMGS/right-button.png");
+		int blueCarTexture = loadTexture("../IMGS/blue-car.png");
+		int greenCarTexture = loadTexture("../IMGS/green-car.png");
+		int pinkCarTexture = loadTexture("../IMGS/pink-car.png");
+		int countOne = loadTexture("../IMGS/1.png");
+		int countTwo = loadTexture("../IMGS/2.png");
+		int countThree = loadTexture("../IMGS/3.png");
+		int countGo = loadTexture("../IMGS/go.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 5000.0f);
@@ -237,6 +271,8 @@ namespace Rendering {
 
 		//GUI bool
 		bool showDebugGUI = false;
+		bool mainMenu = false;
+		bool settingsMenu = false;
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
@@ -258,26 +294,199 @@ namespace Rendering {
 			ImGui_ImplSDL2_NewFrame(window);
 			ImGui::NewFrame();
 
-			//Set slider to change in scene.
-			ImGui::DragFloat3("light pos", &lightPos.x);
-			ImGui::DragFloat3("light color", &lightColor.x);
-
 			//Toggle DebugGUI with 'G'.
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_g) {
-
 				showDebugGUI = !showDebugGUI;
 			}
 
-			//Volume control menu
-			if (ImGui::ArrowButton("volDownButton", 0)) { if (volume >= 5) { volume = volume - 5; cout << "Left button!\n"; } }
-			ImGui::SameLine(50);
-			ImGui::Text("VOLUME: ");
-			ImGui::SameLine(150);
-			std::string volString = std::to_string(volume) + "%%";
-			char const* volChar = volString.c_str();
-			ImGui::Text(volChar);
-			ImGui::SameLine(200);
-			if (ImGui::ArrowButton("volUpButton", 1)) { if (volume <= 95) { volume = volume + 5; cout << "Right button!\n"; } }
+			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_m) {
+				mainMenu = !mainMenu;
+			}
+
+			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_6) {
+				
+			}
+
+			ImGui::SetNextWindowSize(ImVec2(750, 200), 0);
+			ImGui::SetNextWindowPos(ImVec2(627, 920), 0);
+			ImGui::Begin("Speedometer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+			ImGui::Image((void*)(intptr_t)speedometerTexture, ImVec2(666, 146));
+
+			ImGui::End();
+
+			speed = Game::getVehicleSpeed();
+			if (648 + speed > 918) {
+				trackerPos = 918;
+			}
+			else {
+				trackerPos = 648 + abs(speed*2.3);
+			}
+			ImGui::SetNextWindowSize(ImVec2(750, 200), 0);
+			ImGui::SetNextWindowPos(ImVec2(trackerPos, 976), 0);
+			ImGui::Begin("Speed Tracker", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+			ImGui::Image((void*)(intptr_t)speedTrackerTexture, ImVec2(11, 80));
+
+			ImGui::End();
+
+
+			ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
+			ImGui::SetNextWindowPos(ImVec2(1550, 30), 0);
+			ImGui::Begin("Position tracker", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+			ImGui::Image((void*)(intptr_t)checkpoint, ImVec2(636/2, 350/2));
+
+			ImGui::End();
+
+
+			if (mainMenu) {
+				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				//ImGui::BeginChildFrame('h', ImVec2(width, height));
+				ImGui::Image((void*)(intptr_t)mainMenuTexture, ImVec2(width, height));
+				//ImGui::EndChildFrame();
+
+				ImGui::End();
+
+				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::Begin("Inner Main Menu", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::Indent(width / 2 - menuButtonWidth / 2);
+				//ImGui::SameLine();
+				ImGui::Dummy(ImVec2(0, 600));
+				if (ImGui::ImageButton((void*)(intptr_t)startButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = false; }
+
+
+				ImGui::Dummy(ImVec2(0, 100));
+				if (ImGui::ImageButton((void*)(intptr_t)settingsButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = true; }
+
+				ImGui::End();
+			}
+			else if (settingsMenu) {
+				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				//ImGui::BeginChildFrame('h', ImVec2(width, height));
+				ImGui::Image((void*)(intptr_t)settingsTexture, ImVec2(width, height));
+				//ImGui::EndChildFrame();
+
+				ImGui::End();
+
+				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::Begin("Inner Main Menu", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::Dummy(ImVec2(0, 250));
+
+				ImGui::Indent(width / 2 - menuButtonWidth / 2 - 200);
+				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume >= 5) { sound->volumeDown(); volume = volume - 5; } }
+				ImGui::SameLine();
+				ImGui::Indent(300);
+				std::string volString = std::to_string(volume) + "%%";
+				char const* volChar = volString.c_str();
+				ImGui::Text(volChar);
+				ImGui::SameLine();
+				ImGui::Indent(300);
+				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume <= 95) { sound->volumeUp(); volume = volume + 5; } }
+
+
+
+				ImGui::Dummy(ImVec2(0, 300));
+
+				ImGui::Indent(-100 - settingsButtonSize * 2 - menuButtonWidth);
+				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
+					carColorCycleVariable--;
+					if (carColorCycleVariable < 0) { carColorCycleVariable = 2; }
+				}
+
+				ImGui::SameLine();
+				ImGui::Indent(settingsButtonSize + 100);
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
+				if (carColorCycleVariable == 1) {
+					if (ImGui::ImageButton((void*)(intptr_t)pinkCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = false; }
+				}
+				else if (carColorCycleVariable == 2) {
+					if (ImGui::ImageButton((void*)(intptr_t)greenCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = false; }
+				}
+				else {
+					if (ImGui::ImageButton((void*)(intptr_t)blueCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = false; }
+				}
+
+				ImGui::PopStyleColor(3);
+				ImGui::SameLine();
+				ImGui::Indent(settingsButtonSize + menuButtonWidth);
+				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
+					carColorCycleVariable++;
+					if (carColorCycleVariable > 2) { carColorCycleVariable = 0; }
+				}
+
+				ImGui::End();
+			}
+
+			countDownTime = Game::getCountDownTime();
+			if (countDownTime < 3.0f) {
+				ImGui::SetNextWindowSize(ImVec2(300, 300), 0);
+				ImGui::SetNextWindowPos(ImVec2(width/2-100, height/2-160), 0);
+				ImGui::Begin("Count Down", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				if (countDownTime > 2) {
+					ImGui::Image((void*)(intptr_t)countThree, ImVec2(209, 266));
+				}
+				else if(countDownTime > 1) {
+					ImGui::Image((void*)(intptr_t)countTwo, ImVec2(216, 261));
+				}
+				else if(countDownTime > 0){
+					ImGui::Image((void*)(intptr_t)countOne, ImVec2(129, 256));
+				}
+				
+
+				ImGui::End();
+			}
+
+			raceTime = Game::getRaceTime();
+
+			if (raceTime > 0 && raceTime < 1) {
+				ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
+				ImGui::SetNextWindowPos(ImVec2(width/2-607/2, height/2-300/2), 0);
+				ImGui::Begin("Count Go", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::Image((void*)(intptr_t)countGo, ImVec2(607, 266));
+
+
+				ImGui::End();
+			}
+			else if (raceTime > 1) {
+				ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::Begin("Race Timer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				std::string timerString = std::to_string(raceTime);
+				char const* timerChar = timerString.c_str();
+				ImGui::Text(timerChar);
+
+
+				ImGui::End();
+			}
+
+
+			if (showDebugGUI) {
+				ImGui::SetNextWindowSize(ImVec2(300, 300), 0);
+				ImGui::SetNextWindowPos(ImVec2(300, 300), 0);
+				ImGui::Begin("Options", 0, 0);
+
+				//Set slider to change in scene.
+				ImGui::DragFloat3("light pos", &lightPos.x);
+				ImGui::DragFloat3("light color", &lightColor.x);
+
+				ImGui::End();
+			}
 
 			view = glm::lookAt(camPosition, camDirection, camOrientation);
 			glm::vec4 viewSpaceLightPos = view * lightPos;
@@ -315,9 +524,7 @@ namespace Rendering {
 			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
 			ImGui::Render();
-			if (showDebugGUI) {
-				ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-			}
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			SDL_GL_SwapWindow(window);
 		}
 
