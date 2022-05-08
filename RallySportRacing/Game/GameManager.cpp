@@ -483,6 +483,11 @@ namespace Game {
 		return isCountingDown;
 	}
 
+	int Game::getCheckpointsReached()
+	{
+		return checkpointsReached;
+	}
+
 	void checkCollisions() {
 		// Collisionhandling between a pair of objects
 		// Bullet physics does not give a predefined check collision with method
