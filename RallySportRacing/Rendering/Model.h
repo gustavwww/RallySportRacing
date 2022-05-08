@@ -16,10 +16,17 @@ namespace Rendering {
 
 	class Model {
 	public:
-		vector<Mesh> meshes;
-;
+		struct Node {
+			unsigned int meshNumber;
+			glm::vec3 relativeTranslation;
+			glm::vec3 scale;
+			glm::vec4 rotation;
+		};
 
-		Model(vector<Mesh> meshes);
+		vector<Mesh> meshes;
+		vector<Node> nodes;
+
+		Model(vector<Mesh> meshes, vector<Node> nodes);
 		~Model();
 
 		void setTranslationMatrix(glm::mat4 translationMat);

@@ -19,8 +19,9 @@ using namespace tinygltf;
 
 namespace Rendering {
 
-	Model::Model(vector<Mesh> meshes) {
+	Model::Model(vector<Mesh> meshes, vector<Node> nodes) {
 		this->meshes = meshes;
+		this->nodes = nodes;
 	}
 
 	Model::~Model() {
@@ -66,8 +67,8 @@ namespace Rendering {
 		GLuint viewInverseMatrixID = glGetUniformLocation(programID, "viewInverse");
 		glUniformMatrix4fv(viewInverseMatrixID, 1, GL_FALSE, &viewInverse[0][0]);
 
-		for each (Mesh m in meshes) {
-			m.renderMesh(programID);
+		for each (Node n in nodes) {
+			meshes[n.meshNumber].renderMesh(programID);
 		}
 	}
 	
@@ -102,7 +103,6 @@ namespace Rendering {
 		return textureID;
 	}
 	
-	
 	double maxX = 0;
 	double maxY = 0;
 	double maxZ = 0;
@@ -127,6 +127,7 @@ namespace Rendering {
 		std::string warn;
 
 		//Model data vector.
+		vector<Node> nodes;
 		vector<Rendering::Mesh> meshes;
 		vector<Material> materials;
 		
@@ -164,6 +165,20 @@ namespace Rendering {
 			}
 			
 			materials.push_back(material);
+		}
+		for each (tinygltf::Node gltfNode in gltfmodel.nodes) {
+			Node node = Node();
+			node.meshNumber = gltfNode.mesh;
+			if (size(gltfNode.translation) == 3) {
+				node.relativeTranslation = glm::vec3(gltfNode.translation[0], gltfNode.translation[1], gltfNode.translation[2]);
+			}
+			if (size(gltfNode.scale) == 3) {
+				node.scale = glm::vec3(gltfNode.scale[0], gltfNode.scale[1], gltfNode.scale[2]);
+			}
+			if (size(gltfNode.rotation) == 4) {
+				node.rotation = glm::vec4(gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2], gltfNode.rotation[3]);
+			}
+			nodes.push_back(node);
 		}
 
 		for each (tinygltf::Mesh gltfMesh in gltfmodel.meshes) {
@@ -262,7 +277,7 @@ namespace Rendering {
 			meshes.push_back(Mesh(subMeshes, gltfMesh.name));
 
 		}
-		Model* model = new Model(meshes);
+		Model* model = new Model(meshes, nodes);
 
 		return model;
 	}
