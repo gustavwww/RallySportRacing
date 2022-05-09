@@ -114,9 +114,9 @@ namespace Game {
 	btCollisionObject* checkpoint2;
 	btCollisionObject* checkpoint3;
 	btCollisionObject* checkpoint4;
-	//btCollisionObject* checkpoint5;
-	//btCollisionObject* checkpoint6;
-	//btCollisionObject* checkpoint7;
+	btCollisionObject* checkpoint5;
+	btCollisionObject* checkpoint6;
+	btCollisionObject* checkpoint7;
 	//btCollisionObject* checkpoint8;
 	//btCollisionObject* checkpoint9; // could be end point or we just have the start point as the endpoint
 	vector<btCollisionObject*> checkpoints; // list of all checkpoints
@@ -127,9 +127,9 @@ namespace Game {
 	btTransform transform2;
 	btTransform transform3;
 	btTransform transform4;
-	//btTransform transform5;
-	//btTransform transform6;
-	//btTransform transform7;
+	btTransform transform5;
+	btTransform transform6;
+	btTransform transform7;
 	//btTransform transform8;
 	//btTransform transform9;
 	vector<btTransform> transforms; // list of all transforms for checkpoints
@@ -152,26 +152,27 @@ namespace Game {
 		transform2.setIdentity(); // initilizes the different transforms
 		transform3.setIdentity(); // initilizes the different transforms
 		transform4.setIdentity(); // initilizes the different transforms
-		//transform5.setIdentity(); // initilizes the different transforms
-		//transform6.setIdentity(); // initilizes the different transforms
-		//transform7.setIdentity(); // initilizes the different transforms
+		transform5.setIdentity(); // initilizes the different transforms
+		transform6.setIdentity(); // initilizes the different transforms
+		transform7.setIdentity(); // initilizes the different transforms
 		//transform8.setIdentity(); // initilizes the different transforms
 		//transform9.setIdentity(); // initilizes the different transforms
 	 
-		transform0.setOrigin(btVector3(27.1616, -4.12893, -5.84862)); // hardcoded values for the position for the specific checkpoint
-		//transform0.setRotation(btQuaternion(btVector3(0, 1, 0), PI/12));
-		transform1.setOrigin(btVector3(34.2678, -1.31098, 146.879)); // hardcoded values for the position for the specific checkpoint
-		transform2.setOrigin(btVector3(2.95493, -2.90796, 746.112)); // hardcoded values for the position for the specific checkpoint
-		transform3.setOrigin(btVector3(-234.78, 0.601453, 271.287)); // hardcoded values for the position for the specific checkpoint
-		transform3.setRotation(btQuaternion(btVector3(0, 1, 0), 9*PI/8));
-		transform4.setOrigin(btVector3(-218.226, 4.75948, -1118.54)); // hardcoded values for the position for the specific checkpoint
-		transform4.setRotation(btQuaternion(btVector3(0, 1, 0), PI/8)); // temporary last checkpoint, untill the models gets finished
-		//transform5.setOrigin(btVector3(-1467, 44, -73)); // hardcoded values for the position for the specific checkpoint
-		//transform5.setRotation(btQuaternion(btVector3(0, 1, 0), 2.75*PI/2));
-		//transform6.setOrigin(btVector3(-931, 29, -1000)); // hardcoded values for the position for the specific checkpoint
-		//transform6.setRotation(btQuaternion(btVector3(0, 1, 0), PI/2));
-		//transform7.setOrigin(btVector3(-703, 27, -776)); // hardcoded values for the position for the specific checkpoint
-		//transform7.setRotation(btQuaternion(btVector3(0, 1, 0), PI / 4));
+		transform0.setOrigin(btVector3(-1432.38, 38.5744, -474.198)); // hardcoded values for the position for the specific checkpoint
+		transform0.setRotation(btQuaternion(btVector3(0, 1, 0), -1.125 *PI));
+		transform1.setOrigin(btVector3(-1277.25, 35.2272, -1105.91)); // hardcoded values for the position for the specific checkpoint
+		transform1.setRotation(btQuaternion(btVector3(0, 1, 0), -1.2 * PI));
+		transform2.setOrigin(btVector3(-645.366, 24.9702, -1107.97)); // hardcoded values for the position for the specific checkpoint
+		transform2.setRotation(btQuaternion(btVector3(0, 1, 0), 2 * PI /4));
+		transform3.setOrigin(btVector3(25.3112, -4.35853, 42.0755)); // hardcoded values for the position for the specific checkpoint
+		transform4.setOrigin(btVector3(-216.312, -3.24275, 477.574)); // hardcoded values for the position for the specific checkpoint
+		transform4.setRotation(btQuaternion(btVector3(0, 1, 0), 2*PI/2)); // temporary last checkpoint, untill the models gets finished
+		transform5.setOrigin(btVector3(-364.28, 10.8325, -545.443)); // hardcoded values for the position for the specific checkpoint
+		transform5.setRotation(btQuaternion(btVector3(0, 1, 0), 2*PI * 0.57));
+		transform6.setOrigin(btVector3(-1134.75, 36.4135, -741.386)); // hardcoded values for the position for the specific checkpoint
+		transform6.setRotation(btQuaternion(btVector3(0, 1, 0), -PI/4));
+		transform7.setOrigin(btVector3(-1403.99, 38.0386, -416.225)); // hardcoded values for the position for the specific checkpoint
+		transform7.setRotation(btQuaternion(btVector3(0, 1, 0), -PI / 2));
 		//transform8.setOrigin(btVector3(-248, 8, -768)); // hardcoded values for the position for the specific checkpoint
 		//transform8.setRotation(btQuaternion(btVector3(0, 1, 0), 3*PI/5));
 		//transform9.setOrigin(btVector3(-126.6, 1, -307)); // hardcoded values for the position for the specific checkpoint
@@ -183,9 +184,9 @@ namespace Game {
 		checkpoints.push_back(checkpoint2);
 		checkpoints.push_back(checkpoint3);
 		checkpoints.push_back(checkpoint4);
-		//checkpoints.push_back(checkpoint5);
-		//checkpoints.push_back(checkpoint6);
-		//checkpoints.push_back(checkpoint7);
+		checkpoints.push_back(checkpoint5);
+		checkpoints.push_back(checkpoint6);
+		checkpoints.push_back(checkpoint7);
 		//checkpoints.push_back(checkpoint8);
 		//checkpoints.push_back(checkpoint9);
 
@@ -195,9 +196,9 @@ namespace Game {
 		transforms.push_back(transform2);
 		transforms.push_back(transform3);
 		transforms.push_back(transform4);
-		//transforms.push_back(transform5);
-		//transforms.push_back(transform6);
-		//transforms.push_back(transform7);
+		transforms.push_back(transform5);
+		transforms.push_back(transform6);
+		transforms.push_back(transform7);
 		//transforms.push_back(transform8);
 		//transforms.push_back(transform9);
 
@@ -329,7 +330,8 @@ namespace Game {
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
-		vehicle->setInitialPosition(btVector3(27.1616, 1, -5.84862));
+		vehicle->setInitialPosition(btVector3(-1438.15, 39.6246+1, -458.328));
+		vehicle->vehicle->getRigidBody()->getWorldTransform().setRotation(btQuaternion(btVector3(0, 1, 0), -13*PI/12));
 
 		// Create player sound source
 		sound->createSoundSource(0, vehicle->getPosition());
