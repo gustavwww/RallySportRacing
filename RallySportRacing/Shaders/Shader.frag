@@ -159,7 +159,7 @@ void main(){
 
 	vec2 lookup = vec2(phi / (2.0 * PI), theta / PI);
 
-	vec3 irradiance = 1.5f * texture(irradianceMap, lookup).rgb;
+	vec3 irradiance = 0.5f * texture(irradianceMap, lookup).rgb;
 	vec3 diffuseAmbient =  irradiance  * albedo * (1.0/PI) * kDiff;
 
 
@@ -177,7 +177,7 @@ void main(){
 	}
 	lookup = vec2(phi / (2.0 * PI), theta / PI);
 	
-	vec3 radiance = 1.5 * textureLod(reflectionMap, lookup, roughness * MAX_REFLECTION_LOD).rgb;
+	vec3 radiance = 0.5 * textureLod(reflectionMap, lookup, roughness * MAX_REFLECTION_LOD).rgb;
 	//vec2 brdf = texture(brdfLUT, vec2(NdotV, roughness)).rg;
 	//vec3 specularAmbient = prefilteredColor * (F * brdf.r +brdf.g);
 	vec3 specularAmbient = radiance * kSpec;

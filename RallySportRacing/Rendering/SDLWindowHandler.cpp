@@ -16,23 +16,25 @@
 #include "Game/GameManager.h"
 #include "Utils/HdrFileGenerator.h"
 #include "FrameBufferObject.h"
+#include "ShadowBox.h"
+
 
 using namespace std;
 
 namespace Rendering {
 
 	//Camera
-	float nearPlane = 0.1f, farPlane = 500.0f, fov = 45.0f;
+	float nearPlane = 0.1f, farPlane = 100.0f, fov = 45.0f;
 
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(1.0f, 40.0f, 1.0f, 1.0f);
-	float lightIntensity = 50000.0f;
+	float lightIntensity = 5000.0f;
 	float envMultiplier = 1.5f;
 	
 	//Shadow maps.
 	FboInfo shadowMapFB;
-	int shadowMapResolution = 4096;
+	int shadowMapResolution = 8000;
 	float polygonFactor = 3.5f, polygonUnits = 1.0f;
 
 	//TESTING VARIABLE
@@ -334,9 +336,11 @@ namespace Rendering {
 			}
 			
 			//Shadow maps creation.
-			glm::mat4 lightViewMatrix = lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+			//glm::mat4 lightViewMatrix = lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+			glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(lightPos) + camPosition, camPosition, glm::vec3(0.0f, 1.0f, 0.0f));
+			glm::mat4 lightProjMatrix = glm::ortho(-50.f, 50.f, -50.f, 50.f, nearPlane, farPlane);
 			//glm::mat4 lightProjMatrix = getLightProjection(lightViewMatrix);
-			glm::mat4 lightProjMatrix = glm::perspective(glm::radians(45.0f), float(width/height), 25.0f, 1000.0f);
+			//glm::mat4 lightProjMatrix = glm::perspective(glm::radians(45.0f), float(width/height), 25.0f, 1000.0f);
 
 			glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFB.framebufferId);
 			glViewport(0, 0, shadowMapFB.width, shadowMapFB.height);
@@ -383,6 +387,7 @@ namespace Rendering {
 				p->render(particleProgramID, projection, view, width, height);
 			}
 		
+			glUseProgram(shadowMapID);
 			ImGui::Image((ImTextureID)shadowMapFB.colorTextureTarget, ImVec2(700, 700));
 			//Game::drawDebug();
 
@@ -397,14 +402,21 @@ namespace Rendering {
 
 	}
 
-	glm::mat4 SDLWindowHandler::getLightProjection(glm::mat4 lightView) {
+	//OLD METHODS SHOULD BE REMOVED
+	/*glm::mat4 SDLWindowHandler::getLightProjection(glm::mat4 lightView) {
 		float aspectRatio = float(width / height);
 		
 		//Calculate width and height of far plane and near plane.
-		float heightNear = 2 * tan(fov / 2) * nearPlane;
-		float widthNear = heightNear * aspectRatio;
-		float heightFar = 2 * tan(fov / 2) * farPlane;
-		float widthFar = heightFar * aspectRatio;
+		
+		float widthNear = (nearPlane * tan(glm::radians(fov)));
+		float heightNear = widthNear / (width / height);
+		float widthFar = (100 * tan(glm::radians(fov)));
+		float heightFar = widthFar / (width / height);
+		
+		//float heightNear = 2 * tan(glm::radians(fov) / 2) * nearPlane;
+		//float widthNear = heightNear * aspectRatio;
+		//float heightFar = 2 * tan(glm::radians(fov) / 2) * farPlane;
+		//float widthFar = heightFar * aspectRatio;
 		
 		//Calculate right vector and normalize it.
 		glm::vec3 camOrientationTEST = normalize(camOrientation);
@@ -430,13 +442,13 @@ namespace Rendering {
 		//Convert corners to lightSpace.
 		vector<glm::vec3> frustumInLightSpace{
 			lightView * glm::vec4(topLeftNear, 1.0),
-			lightView* glm::vec4(topRightNear, 1.0),
-			lightView* glm::vec4(botLeftNear, 1.0),
-			lightView* glm::vec4(botRightNear, 1.0),
-			lightView* glm::vec4(topLeftFar, 1.0),
-			lightView* glm::vec4(topRightFar, 1.0),
-			lightView* glm::vec4(botLeftFar, 1.0),
-			lightView* glm::vec4(botRightFar, 1.0)
+			lightView * glm::vec4(topRightNear, 1.0),
+			lightView * glm::vec4(botLeftNear, 1.0),
+			lightView * glm::vec4(botRightNear, 1.0),
+			lightView * glm::vec4(topLeftFar, 1.0),
+			lightView * glm::vec4(topRightFar, 1.0),
+			lightView * glm::vec4(botLeftFar, 1.0),
+			lightView * glm::vec4(botRightFar, 1.0)
 		};
 
 		//Find max and min points.
@@ -471,8 +483,15 @@ namespace Rendering {
 		float maxZ = -max.z;
 		
 		
+
 		return glm::ortho(minX, maxX, minY, maxY, maxZ, minZ);
-	}
+	}*/
+
+	/*glm::mat4 SDLWindowHandler::getLightView(glm::vec3 lightDirection, glm::vec3 centerPoint) {
+		glm::vec3 lightDir = normalize(lightDirection);
+		
+		float pitch = cos()
+	}*/
 
 	void SDLWindowHandler::addModel(Model* model) {
 		models.insert(model);
