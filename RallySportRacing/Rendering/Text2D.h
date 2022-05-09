@@ -15,7 +15,7 @@ namespace Rendering {
     class Text2D {
     public:
 	    Text2D(string text, glm::vec3 color, glm::vec2 pos);
-	    void render(GLint programID);
+	    void render(GLint programID, glm::mat4 projection, glm::mat4 view);
 
         void updatePos(glm::vec2 pos);
 

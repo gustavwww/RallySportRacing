@@ -28,7 +28,7 @@ namespace Rendering {
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
 		glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
 		glEnableVertexAttribArray(0);
 		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
@@ -37,25 +37,36 @@ namespace Rendering {
 	}
 
 
-	void Text2D::render(GLint programID) {
+	void Text2D::render(GLint programID, glm::mat4 projection, glm::mat4 view) {
 		if (!isTextSetup) {
 			setupText();
 			isTextSetup = true;
 		}
 
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+		glUseProgram(programID);
+
 		GLuint colorID = glGetUniformLocation(programID, "textColor");
 		glUniform3f(colorID, color.x, color.y, color.z);
+
+		glm::mat4 mat = projection * view;
+
+		GLuint matID = glGetUniformLocation(programID, "projection");
+		glUniformMatrix4fv(matID, 1, GL_FALSE, &mat[0][0]);
+
 		glActiveTexture(GL_TEXTURE0);
 		glBindVertexArray(VAO);
+
+		float x = pos.x;
+		float y = pos.y;
 
 		for (auto c = text.begin(); c != text.end(); c++) {
 
 			Character ch = characters[*c];
 
-			float x = pos.x;
-			float y = pos.y;
-
-			float scale = 10;
+			float scale = 1;
 			float xpos = x + ch.Bearing.x * scale;
 			float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 

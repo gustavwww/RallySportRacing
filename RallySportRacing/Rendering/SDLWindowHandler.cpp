@@ -318,7 +318,7 @@ namespace Rendering {
 			}
 
 			for (Text2D* t : texts) {
-				t->render(text2DProgramID);
+				t->render(text2DProgramID, projection, view);
 			}
 
 			//Game::drawDebug();
