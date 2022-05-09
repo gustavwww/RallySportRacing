@@ -43,10 +43,9 @@ namespace Rendering {
 		this->rotationMat = rotationMat;
 	}
 
-
 	void Model::render(glm::mat4 projection, glm::mat4 view, GLint programID) {
 
-		// Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
+		//Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
 		glm::mat4 model = translationMat * rotationMat * scaleMat;
 
 		glm::mat4 modelViewMatrix = view * model;

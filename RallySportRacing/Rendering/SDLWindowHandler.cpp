@@ -6,6 +6,8 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.inl>
+#include <glm/ext/matrix_clip_space.hpp>
 #include <stb_image.h>
 
 #include <imgui.h>
@@ -14,16 +16,26 @@
 #include "Game/GameManager.h"
 #include "Utils/HdrFileGenerator.h"
 #include "Audio/audio.h"
+#include "FrameBufferObject.h"
 
 using namespace std;
 
 namespace Rendering {
 
+	//Camera
+	float nearPlane = 0.1f, farPlane = 2000.0f, fov = 45.0f;
+
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
-	glm::vec4 lightPos = glm::vec4(1.0f, 500.0f, 1.0f, 1.0f);
+	glm::vec4 lightPos = glm::vec4(-400.0f, 1000.0f, -1300.0f, 1.0f);
+	float lightIntensity = 10.0f;
 	float envMultiplier = 1.5f;
 	
+	//Shadow maps.
+	FboInfo shadowMapFB;
+	int shadowMapResolution = 8000;
+	float polygonFactor = 3.5f, polygonUnits = 1.0f;
+
 	//Audio
 	Audio* sound;
 	int volume = 50;
@@ -223,6 +235,7 @@ namespace Rendering {
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
 		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
+		GLint shadowMapID = loadShader("../RallySportRacing/Shaders/ShadowMap.vert", "../RallySportRacing/Shaders/ShadowMap.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
 		int mainMenuTexture = loadTexture("../IMGS/main-menu.png");
@@ -245,25 +258,53 @@ namespace Rendering {
 		int countGo = loadTexture("../IMGS/go.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 5000.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, nearPlane, farPlane);
+		glm::mat4 lightProjMatrix = glm::ortho(-50.f, 50.f, -50.f, 50.f, nearPlane, farPlane);
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
 
-		//Create irrdiance file.
-		string backgroundFilePath = "../Textures/Background/kloppenheim_06_2k.hdr";
-		//Uncomment line under to create new irradiance file.
-		//Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFilePath);
+
+		string backgroundFileName = "../Textures/Background/001";
+		vector<string>reflectionLevels{
+			backgroundFileName + "_dl_0.hdr",
+			backgroundFileName + "_dl_1.hdr",
+			backgroundFileName + "_dl_2.hdr",
+			backgroundFileName + "_dl_3.hdr",
+			backgroundFileName + "_dl_4.hdr",
+			backgroundFileName + "_dl_5.hdr",
+			backgroundFileName + "_dl_6.hdr",
+			backgroundFileName + "_dl_7.hdr"
+		};
+
+		//Create irrdiance and reflection files.
+		//Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFileName + ".hdr");
+		//Utils::HdrFileGenerator::createReflectionHDRs(mapCreationID, backgroundFileName + ".hdr");
 
 		//Load environment textures.
-		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture(backgroundFilePath);
+		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture(backgroundFileName + ".hdr");
 		unsigned int irradianceMap = Utils::HdrFileGenerator::loadHDRTexture("../Textures/Background/irradiance.hdr");
+		unsigned int reflectionMap = Utils::HdrFileGenerator::loadHdrMipmapTexture(reflectionLevels);
+
+		//Shadow map setup.
+		shadowMapFB.resize(shadowMapResolution, shadowMapResolution);
+		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
+
+		glEnable(GL_DEPTH_TEST);
+		glEnable(GL_CULL_FACE);
 
 		//Bind textures.
 		glActiveTexture(GL_TEXTURE6);
 		glBindTexture(GL_TEXTURE_2D, skybox);
 		glActiveTexture(GL_TEXTURE7);
 		glBindTexture(GL_TEXTURE_2D, irradianceMap);
+		glActiveTexture(GL_TEXTURE8);
+		glBindTexture(GL_TEXTURE_2D, reflectionMap);
+		glActiveTexture(GL_TEXTURE9);
+		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+
 
 		//Environment uniforms.
 		glUseProgram(skyboxProgramID);
@@ -276,8 +317,8 @@ namespace Rendering {
 
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
-		
-		SDL_Event windowEvent; 
+
+		SDL_Event windowEvent;
 		while (true) {
 			// This needs to be the first thing checked for imgui to work well
 			if (SDL_PollEvent(&windowEvent)) {
@@ -484,6 +525,12 @@ namespace Rendering {
 				//Set slider to change in scene.
 				ImGui::DragFloat3("light pos", &lightPos.x);
 				ImGui::DragFloat3("light color", &lightColor.x);
+				ImGui::DragFloat("light intensity", &lightIntensity);
+				ImGui::DragFloat("polygon factor", &polygonFactor);
+				ImGui::DragFloat("polygon units", &polygonUnits);
+
+				glUseProgram(shadowMapID);
+				ImGui::Image((ImTextureID)shadowMapFB.colorTextureTarget, ImVec2(700, 700));
 
 				ImGui::End();
 			}
@@ -493,6 +540,26 @@ namespace Rendering {
 			if (preRender) {
 				(*preRender)();
 			}
+
+			//Shadow map creation.
+			glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(lightPos) + camPosition, camPosition, glm::vec3(0.0f, 1.0f, 0.0f));
+
+			glBindFramebuffer(GL_FRAMEBUFFER, shadowMapFB.framebufferId);
+			glViewport(0, 0, shadowMapFB.width, shadowMapFB.height);
+			glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			glEnable(GL_POLYGON_OFFSET_FILL);
+			glPolygonOffset(polygonFactor, polygonUnits);
+
+			for (Model* m : models) {
+				m->render(lightProjMatrix, lightViewMatrix, shadowMapID);
+			}
+			glDisable(GL_POLYGON_OFFSET_FILL);
+
+			//Set deafult framebuffer and viewport.
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glViewport(0, 0, width, height);
 
 			// Clear the colorbuffer
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -507,10 +574,14 @@ namespace Rendering {
 			glUseProgram(programID);
 
 			//Set uniforms for light source.
+			glm::mat4 lightMatrix = glm::translate(glm::vec3(0.5f)) * glm::scale(glm::vec3(0.5f)) * lightProjMatrix * lightViewMatrix * inverse(view);
 			glUniform3fv(glGetUniformLocation(programID, "viewSpaceLightPos"), 1, &viewSpaceLightPos[0]);
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
-	
-			
+			glUniform1fv(glGetUniformLocation(programID, "lightIntensity"), 1, &lightIntensity);
+			glUniform1fv(glGetUniformLocation(programID, "envMultiplier"), 1, &envMultiplier);
+			glUniformMatrix4fv(glGetUniformLocation(programID, "lightMatrix"), 1, GL_FALSE, &lightMatrix[0][0]);
+
+
 			for (Model* m : models) {
 				m->render(projection, view, programID);
 			}
@@ -521,13 +592,12 @@ namespace Rendering {
 
 			Game::drawDebug();
 
-			glBindFramebuffer( GL_FRAMEBUFFER, 0 );
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, (int)ImGui::GetIO().DisplaySize.x, (int)ImGui::GetIO().DisplaySize.y);
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 			SDL_GL_SwapWindow(window);
 		}
-
 	}
 
 	void SDLWindowHandler::addModel(Model* model) {

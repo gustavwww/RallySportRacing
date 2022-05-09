@@ -2,22 +2,30 @@
 #include <iostream>
 #include <fstream>
 #include <stb_image_write.h>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/ext/matrix_clip_space.hpp>
 
 namespace Utils {
 
 	//Framebuffers
 	unsigned int hdrIrraFBO;
 	unsigned int mipmapFBO;
+	unsigned int shadowMapFBO;
 
 	//VertexArrayObjects
 	unsigned int renderVAO;
 	unsigned int renderVBO;
+
+	unsigned int quadVAO = 0;
+	unsigned int quadVBO;
 
 	//Width and height
 	unsigned int irrTexWidth = 822, irrTexHeight = 411;
 
 	//Texture
 	unsigned int irraTexture;
+	unsigned int texture;
+	unsigned int shadowMap;
 
 	/// <param name="filePath">File path to which hdr image the irradiance hdr should be based on.</param>
 	void HdrFileGenerator::createIrradianceHDR(GLuint programID, string filePath) {
@@ -55,8 +63,37 @@ namespace Utils {
 	}
 
 	//ToDo write this function.
-	void HdrFileGenerator::createReflectionHDRs(string filePath) {
+	void HdrFileGenerator::createReflectionHDRs(GLuint programID, string filePath) {
+		static unsigned int envTexture = 0;
+		if (envTexture == 0)
+		{
+			envTexture = loadHDRTexture(filePath);
+		}
+		setUpFrameBuffers();
 
+		glUseProgram(programID);
+
+		glActiveTexture(GL_TEXTURE16);
+		glBindTexture(GL_TEXTURE_2D, envTexture);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, mipmapFBO);
+
+		GLint lwidth, lheight;
+		glGetTextureLevelParameteriv(mipmapFBO, 1, GL_TEXTURE_WIDTH, &lwidth);
+		glGetTextureLevelParameteriv(mipmapFBO, 1, GL_TEXTURE_HEIGHT, &lheight);
+		glViewport(0, 0, 1643, 821);
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		drawScreenQuad();
+		std::vector<float> data;
+		data.resize(size_t(lwidth) * lheight * 4);
+		glGetTextureSubImage(irraTexture, 1, 0, 0, 0, lwidth, lheight, 1, GL_RGBA, GL_FLOAT, data.size() * sizeof(float), data.data());
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		//Take data from texture and store in HDR file.
+		stbi_flip_vertically_on_write(1);
+		stbi_write_hdr("../Textures/Background/test.hdr", lwidth, lheight, 4, &data[0]);
 	}
 
 	unsigned int HdrFileGenerator::loadHDRTexture(const std::string& filename) {
@@ -137,11 +174,35 @@ namespace Utils {
 	//ToDo finish writing this function and change width and height.
 	void HdrFileGenerator::setUpFrameBuffers() {
 
-		//Generate buffers
-		glGenFramebuffers(7, &mipmapFBO);
+		if (mipmapFBO != 0)
+		{
+			return;
+		}
+		//Generate buffer.
+		glGenFramebuffers(1, &mipmapFBO);
 
-		//Bind buffer
+		//Bind buffer.
 		glBindFramebuffer(GL_FRAMEBUFFER, mipmapFBO);
+
+		glGenTextures(1, &texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1643, 821, 0, GL_RGBA, GL_FLOAT, nullptr);
+
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, attachments);
+
+		GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE)
+		{
+			throw "Framebuffer not complete";
+		}
 	}
 
 	void HdrFileGenerator::drawScreenQuad() {
@@ -170,5 +231,4 @@ namespace Utils {
 		glEnable(GL_DEPTH_TEST);
 
 	}
-
 }
