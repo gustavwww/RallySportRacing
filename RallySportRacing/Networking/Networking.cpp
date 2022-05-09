@@ -37,6 +37,7 @@ namespace Networking {
 	Audio* sound;
 
 	map<int, Player*> players;
+	map<string, float> times;
 
 	void setupNetwork(Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler) {
 		vehicle = playerObj;
@@ -57,6 +58,10 @@ namespace Networking {
 		tcpClient.sendPacket("join:" + id + "," + name);
 	}
 
+	void sendTime(float time) {
+		tcpClient.sendPacket("settime:" + to_string(time));
+	}
+
 	void tcpPacketReceived(string str) {
 		Protocol::Command cmd = Protocol::parseMessage(str);
 		string command = cmd.getCommand();
@@ -74,8 +79,20 @@ namespace Networking {
 				cout << "Successfully joined game." << endl;
 				inGame = true;
 				sendThread = thread(&Networking::sendStatusPacket);
+				tcpClient.sendPacket("get:times");
+			} else if (cmd.getArgs()[0] == "timeset") {
+				tcpClient.sendPacket("get:times");
 			}
 
+		} else if (command == "times") {
+			for (int i = 0; i < cmd.getArgsSize(); i += 2) {
+
+				string name = cmd.getArgs()[0];
+				float time = stof(cmd.getArgs()[1]);
+
+				times.insert(pair<string, float>(name, time));
+				cout << name << " " << to_string(time) << endl;
+			}
 		}
 
 	}
