@@ -15,6 +15,7 @@ uniform float roughness;
 layout(binding = 7) uniform sampler2D irradianceMap;
 layout(binding = 8) uniform sampler2D reflectionMap;
 layout(binding = 9) uniform sampler2DShadow shadowMap;
+uniform float envMultiplier;
 ////////////////////////////////
 //Shadow
 ////////////////////////////////
@@ -111,9 +112,9 @@ void main(){
 		vec3 lightDir = normalize(viewSpaceLightPos - vertexPosition_viewspace);
 		vec3 halfwayVector = normalize(viewDir + lightDir);
 
-		float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
-		float attenuation = 1.0/(d * d);
-		vec3 radiance = lightColor * lightIntensity * attenuation;
+		//float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
+		//float attenuation = 1.0/(d * d);
+		vec3 radiance = lightColor * lightIntensity; // * attenuation;
 
 		//Dot products.
 		float NdotV = max(dot(normal, viewDir), 0.0000001);
@@ -159,7 +160,7 @@ void main(){
 
 	vec2 lookup = vec2(phi / (2.0 * PI), theta / PI);
 
-	vec3 irradiance = 0.5f * texture(irradianceMap, lookup).rgb;
+	vec3 irradiance = envMultiplier * texture(irradianceMap, lookup).rgb;
 	vec3 diffuseAmbient =  irradiance  * albedo * (1.0/PI) * kDiff;
 
 
@@ -177,7 +178,7 @@ void main(){
 	}
 	lookup = vec2(phi / (2.0 * PI), theta / PI);
 	
-	vec3 radiance = 0.5 * textureLod(reflectionMap, lookup, roughness * MAX_REFLECTION_LOD).rgb;
+	vec3 radiance = envMultiplier * textureLod(reflectionMap, lookup, roughness * MAX_REFLECTION_LOD).rgb;
 	//vec2 brdf = texture(brdfLUT, vec2(NdotV, roughness)).rg;
 	//vec3 specularAmbient = prefilteredColor * (F * brdf.r +brdf.g);
 	vec3 specularAmbient = radiance * kSpec;

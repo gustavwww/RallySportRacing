@@ -16,30 +16,24 @@
 #include "Game/GameManager.h"
 #include "Utils/HdrFileGenerator.h"
 #include "FrameBufferObject.h"
-#include "ShadowBox.h"
-
 
 using namespace std;
 
 namespace Rendering {
 
 	//Camera
-	float nearPlane = 0.1f, farPlane = 100.0f, fov = 45.0f;
+	float nearPlane = 0.1f, farPlane = 2000.0f, fov = 45.0f;
 
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
-	glm::vec4 lightPos = glm::vec4(1.0f, 40.0f, 1.0f, 1.0f);
-	float lightIntensity = 5000.0f;
+	glm::vec4 lightPos = glm::vec4(-400.0f, 250.0f, -1300.0f, 1.0f);
+	float lightIntensity = 10.0f;
 	float envMultiplier = 1.5f;
 	
 	//Shadow maps.
 	FboInfo shadowMapFB;
 	int shadowMapResolution = 8000;
 	float polygonFactor = 3.5f, polygonUnits = 1.0f;
-
-	//TESTING VARIABLE
-	unsigned int quadVAO = 0;
-	unsigned int quadVBO;
 
 	//Audio
 	int volume = 50;
@@ -334,7 +328,7 @@ namespace Rendering {
 			if (preRender) {
 				(*preRender)();
 			}
-			
+
 			//Shadow maps creation.
 			//glm::mat4 lightViewMatrix = lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
 			glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(lightPos) + camPosition, camPosition, glm::vec3(0.0f, 1.0f, 0.0f));
@@ -376,6 +370,7 @@ namespace Rendering {
 			glUniform3fv(glGetUniformLocation(programID, "viewSpaceLightPos"), 1, &viewSpaceLightPos[0]);
 			glUniform3fv(glGetUniformLocation(programID, "lightColor"), 1, &lightColor[0]);
 			glUniform1fv(glGetUniformLocation(programID, "lightIntensity"), 1, &lightIntensity);
+			glUniform1fv(glGetUniformLocation(programID, "envMultiplier"), 1, &envMultiplier);
 			glUniformMatrix4fv(glGetUniformLocation(programID, "lightMatrix"), 1, GL_FALSE, &lightMatrix[0][0]);
 
 
@@ -386,7 +381,7 @@ namespace Rendering {
 			for (ParticleSystem* p : particleSystems) {
 				p->render(particleProgramID, projection, view, width, height);
 			}
-		
+
 			glUseProgram(shadowMapID);
 			ImGui::Image((ImTextureID)shadowMapFB.colorTextureTarget, ImVec2(700, 700));
 			//Game::drawDebug();
@@ -399,99 +394,7 @@ namespace Rendering {
 			}
 			SDL_GL_SwapWindow(window);
 		}
-
 	}
-
-	//OLD METHODS SHOULD BE REMOVED
-	/*glm::mat4 SDLWindowHandler::getLightProjection(glm::mat4 lightView) {
-		float aspectRatio = float(width / height);
-		
-		//Calculate width and height of far plane and near plane.
-		
-		float widthNear = (nearPlane * tan(glm::radians(fov)));
-		float heightNear = widthNear / (width / height);
-		float widthFar = (100 * tan(glm::radians(fov)));
-		float heightFar = widthFar / (width / height);
-		
-		//float heightNear = 2 * tan(glm::radians(fov) / 2) * nearPlane;
-		//float widthNear = heightNear * aspectRatio;
-		//float heightFar = 2 * tan(glm::radians(fov) / 2) * farPlane;
-		//float widthFar = heightFar * aspectRatio;
-		
-		//Calculate right vector and normalize it.
-		glm::vec3 camOrientationTEST = normalize(camOrientation);
-		glm::vec3 camDirectionTEST = normalize(camDirection);
-		glm::vec3 camRight = cross(camOrientation, camDirection);
-		camRight = normalize(camRight);
-		
-		//Find the center for points for far and near plane.
-		glm::vec3 centerNear = camPosition + camDirectionTEST * nearPlane;
-		glm::vec3 centerFar = camPosition + camDirectionTEST * farPlane;
-
-		//Find the 8 corners of the viewFrustrum.
-		glm::vec3 topLeftNear = centerNear + (camOrientationTEST * (heightNear / 2)) - (camRight * (widthNear / 2));
-		glm::vec3 topRightNear = centerNear + (camOrientationTEST * (heightNear / 2)) + (camRight * (widthNear / 2));
-		glm::vec3 botLeftNear = centerNear - (camOrientationTEST * (heightNear / 2)) - (camRight * (widthNear / 2));
-		glm::vec3 botRightNear = centerNear - (camOrientationTEST * (heightNear / 2)) + (camRight * (widthNear / 2));
-		
-		glm::vec3 topLeftFar = centerFar + (camOrientationTEST * (heightFar / 2)) - (camRight * (widthFar / 2));
-		glm::vec3 topRightFar = centerFar + (camOrientationTEST * (heightFar / 2)) + (camRight * (widthFar / 2));
-		glm::vec3 botLeftFar = centerFar - (camOrientationTEST * (heightFar / 2)) - (camRight * (widthFar / 2));
-		glm::vec3 botRightFar = centerFar - (camOrientationTEST * (heightFar / 2)) + (camRight * (widthFar / 2));
-
-		//Convert corners to lightSpace.
-		vector<glm::vec3> frustumInLightSpace{
-			lightView * glm::vec4(topLeftNear, 1.0),
-			lightView * glm::vec4(topRightNear, 1.0),
-			lightView * glm::vec4(botLeftNear, 1.0),
-			lightView * glm::vec4(botRightNear, 1.0),
-			lightView * glm::vec4(topLeftFar, 1.0),
-			lightView * glm::vec4(topRightFar, 1.0),
-			lightView * glm::vec4(botLeftFar, 1.0),
-			lightView * glm::vec4(botRightFar, 1.0)
-		};
-
-		//Find max and min points.
-		glm::vec3 min{ INFINITY, INFINITY, INFINITY };
-		glm::vec3 max{ -INFINITY, -INFINITY, -INFINITY };
-		for (unsigned int i = 0; i < frustumInLightSpace.size(); i++)
-		{
-			//Update min value.
-			if (frustumInLightSpace[i].x < min.x)
-				min.x = frustumInLightSpace[i].x;
-			if (frustumInLightSpace[i].y < min.y)
-				min.y = frustumInLightSpace[i].y;
-			if (frustumInLightSpace[i].z < min.z)
-				min.z = frustumInLightSpace[i].z;
-
-			//Update max value.
-			if (frustumInLightSpace[i].x > max.x)
-				max.x = frustumInLightSpace[i].x;
-			if (frustumInLightSpace[i].y > max.y)
-				max.y = frustumInLightSpace[i].y;
-			if (frustumInLightSpace[i].z > max.z)
-				max.z = frustumInLightSpace[i].z;
-		}
-
-		float minX = min.x;
-		float maxX = max.x;
-		float minY = min.y;
-		float maxY = max.y;
-		
-		//Change sign since pos z is towards the camera.
-		float minZ = -min.z;
-		float maxZ = -max.z;
-		
-		
-
-		return glm::ortho(minX, maxX, minY, maxY, maxZ, minZ);
-	}*/
-
-	/*glm::mat4 SDLWindowHandler::getLightView(glm::vec3 lightDirection, glm::vec3 centerPoint) {
-		glm::vec3 lightDir = normalize(lightDirection);
-		
-		float pitch = cos()
-	}*/
 
 	void SDLWindowHandler::addModel(Model* model) {
 		models.insert(model);
