@@ -42,11 +42,14 @@ namespace Rendering {
 			setupText();
 			isTextSetup = true;
 		}
-
+		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		glUseProgram(programID);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindVertexArray(VAO);
 
 		GLuint colorID = glGetUniformLocation(programID, "textColor");
 		glUniform3f(colorID, color.x, color.y, color.z);
@@ -55,9 +58,6 @@ namespace Rendering {
 
 		GLuint matID = glGetUniformLocation(programID, "projection");
 		glUniformMatrix4fv(matID, 1, GL_FALSE, &mat[0][0]);
-
-		glActiveTexture(GL_TEXTURE0);
-		glBindVertexArray(VAO);
 
 		float x = pos.x;
 		float y = pos.y;
@@ -86,7 +86,7 @@ namespace Rendering {
 			glBindBuffer(GL_ARRAY_BUFFER, VBO);
 			glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			cout << "Drawing" << endl;
+			
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			x += (ch.Advance >> 6) * scale;
 		}
@@ -112,6 +112,7 @@ namespace Rendering {
 		}
 
 		FT_Set_Pixel_Sizes(face, 0, 48);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		for (unsigned char c = 0; c < 128; c++) {
 
@@ -146,8 +147,6 @@ namespace Rendering {
 
 			characters.insert(pair<char, Character>(c, charecter));
 		}
-
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
 		FT_Done_Face(face);
 		FT_Done_FreeType(ft);
