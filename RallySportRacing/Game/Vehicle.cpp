@@ -26,6 +26,7 @@ namespace Game {
 		wheels.push_back(wheel3);
 		wheels.push_back(wheel4);
 
+		maxSpeed = 200;
 
 		steeringClamp = 0.4;
 		steeringIncrement = 1;
@@ -133,7 +134,7 @@ namespace Game {
 			vehicle->applyEngineForce(0, 2);
 			vehicle->applyEngineForce(0, 3);
 		}
-		else if (vehicle->getCurrentSpeedKmHour() <= 200) { // max speed
+		else if (vehicle->getCurrentSpeedKmHour() <= maxSpeed && vehicle->getCurrentSpeedKmHour() >= -60) { // max speed // max speed whilst reversing
 			vehicle->applyEngineForce(direction * engineForce, 1);
 			vehicle->applyEngineForce(direction * engineForce, 0);
 			vehicle->setBrake(0, 2);
@@ -195,6 +196,11 @@ namespace Game {
 	float Game::Vehicle::getSpeed()
 	{
 		return vehicle->getCurrentSpeedKmHour();
+	}
+
+	void Game::Vehicle::setMaxSpeed(int speed)
+	{
+		maxSpeed = speed;
 	}
 
 	// Function that returns velocity vector in speed per frame

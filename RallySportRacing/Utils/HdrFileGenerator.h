@@ -39,7 +39,7 @@ namespace Utils {
 
 	public:
 		static void createIrradianceHDR(GLuint programID, string filePath);
-		static void createReflectionHDRs(string filePath);
+		static void createReflectionHDRs(GLuint programID, string filePath);
 
 		static unsigned int loadHDRTexture(const std::string& filename);
 		static unsigned int loadHdrMipmapTexture(const std::vector<std::string>& filenames);

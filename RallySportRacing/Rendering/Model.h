@@ -14,18 +14,19 @@ using namespace std;
 
 namespace Rendering {
 
-	struct Material {
-		glm::vec3 albedo;
-		float metallic;
-		float roughness;
-	};
-
 	class Model {
 	public:
-		vector<Mesh> meshes;
-;
+		struct Node {
+			unsigned int meshNumber;
+			glm::vec3 relativeTranslation;
+			glm::vec3 scale;
+			glm::vec4 rotation;
+		};
 
-		Model(vector<Mesh> meshes);
+		vector<Mesh> meshes;
+		vector<Node> nodes;
+
+		Model(vector<Mesh> meshes, vector<Node> nodes);
 		~Model();
 
 		void setTranslationMatrix(glm::mat4 translationMat);
@@ -38,6 +39,7 @@ namespace Rendering {
 		btVector3 Model::generateCollisionShapeOffset();
 
 		static Model* loadModel(const char* file, bool isTerrain);
+		static unsigned int loadModelTexture(const char* filePath, GLint channels);
 
 		btTriangleMesh* getMeshInterface();
 

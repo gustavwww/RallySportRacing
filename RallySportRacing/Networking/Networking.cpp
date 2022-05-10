@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "Networking.h"
+#include "Networking/PlayerTime.h"
 #include "Services/TCPClient.h"
 #include "Services/UDPClient.h"
 #include "Services/Protocol/Command.h"
@@ -36,6 +37,7 @@ namespace Networking {
 	Audio* sound;
 
 	map<int, Player*> players;
+	vector<PlayerTime> times; // Player times, sorted with shortest time first.
 
 	void setupNetwork(Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler) {
 		vehicle = playerObj;
@@ -56,6 +58,10 @@ namespace Networking {
 		tcpClient.sendPacket("join:" + id + "," + name);
 	}
 
+	void sendTime(float time) {
+		tcpClient.sendPacket("settime:" + to_string(time));
+	}
+
 	void tcpPacketReceived(string str) {
 		Protocol::Command cmd = Protocol::parseMessage(str);
 		string command = cmd.getCommand();
@@ -73,8 +79,20 @@ namespace Networking {
 				cout << "Successfully joined game." << endl;
 				inGame = true;
 				sendThread = thread(&Networking::sendStatusPacket);
+				tcpClient.sendPacket("get:times");
+			} else if (cmd.getArgs()[0] == "timeset") {
+				tcpClient.sendPacket("get:times");
 			}
 
+		} else if (command == "times") {
+			times.clear();
+			for (int i = 0; i < cmd.getArgsSize(); i += 2) {
+
+				string name = cmd.getArgs()[i];
+				float time = stof(cmd.getArgs()[i + 1]);
+
+				times.push_back(PlayerTime(name, time));
+			}
 		}
 
 	}

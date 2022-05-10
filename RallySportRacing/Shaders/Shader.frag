@@ -4,15 +4,40 @@
 precision highp float;
 
 ////////////////////////////////
-// Materials
+// Material textures
 ////////////////////////////////
-uniform vec3 albedo;
-uniform float metallic;
-uniform float roughness;
+uniform sampler2D baseColorTexture;
+uniform sampler2D metallicTexture;
+uniform sampler2D roughnessTexture;
+
+////////////////////////////////
+// Material values
+////////////////////////////////
+uniform vec3 albedoValue;
+uniform float metallicValue;
+uniform float roughnessValue;
+
+////////////////////////////////
+// Material bools
+////////////////////////////////
+uniform unsigned int useBaseColorTexture;
+uniform unsigned int useMetallicTexture;
+uniform unsigned int useRoughnessTexture;
+
+////////////////////////////////
+// Used Material 
+////////////////////////////////
+vec3 albedo;
+float metallic;
+float roughness;
+
 ////////////////////////////////
 // Envoirment
 ////////////////////////////////
 layout(binding = 7) uniform sampler2D irradianceMap;
+layout(binding = 8) uniform sampler2D reflectionMap;
+layout(binding = 9) uniform sampler2DShadow shadowMap;
+uniform float envMultiplier;
 ////////////////////////////////
 //Shadow
 ////////////////////////////////
@@ -22,6 +47,7 @@ layout(binding = 7) uniform sampler2D irradianceMap;
 ////////////////////////////////
 uniform vec3 viewSpaceLightPos;
 uniform vec3 lightColor;
+uniform float lightIntensity;
 
 ////////////////////////////////
 // Constants
@@ -34,12 +60,12 @@ uniform vec3 lightColor;
 in vec3 vertexPosition_viewspace;
 in vec3 normal_viewspace;
 in vec2 texCoord;
+in vec4 shadowMapCoord;
 
 ////////////////////////////////
 //Uniforms input
 ////////////////////////////////
 uniform mat4 viewInverse;
-
 
 ////////////////////////////////
 // Outputs
@@ -79,9 +105,36 @@ vec3 fresnelSchlick(float HdotV, vec3 baseReflectivity){
 	return baseReflectivity + (1.0 - baseReflectivity) * pow(1.0 - HdotV, 5.0);
 }
 
-vec3 fresnelSchlickRoughness(float HdotV, vec3 baseReflectivity, float roughness){
+void loadPBRValues(){
+		//BaseColor / Albedo
+		if(useBaseColorTexture == 0){
+			albedo = albedoValue;
+		}else{
+			vec4 albedoA = texture(baseColorTexture, texCoord);
+			if(albedoA.a < 0.1)
+				discard;
+			albedo = texture(baseColorTexture, texCoord).rgb;
+
+		}
+		
+		//Metallic
+		if(useMetallicTexture == 0){
+			metallic = metallicValue;
+		}else{
+			metallic = texture(metallicTexture, texCoord).r;
+		}
+
+		//Roughness
+		if(useRoughnessTexture == 0){
+			roughness = roughnessValue;
+		}else{
+			roughness = texture(roughnessTexture, texCoord).r;
+		}
+}
+
+vec3 fresnelSchlickRoughness(float NdotV, vec3 baseReflectivity, float roughness){
 	
-	return baseReflectivity + (max(vec3(1.0 - roughness), baseReflectivity) - baseReflectivity) * pow(1.0 - HdotV, 5.0);
+	return baseReflectivity + (max(vec3(1.0 - roughness), baseReflectivity) - baseReflectivity) * pow(1.0 - NdotV, 5.0);
 }
 
 void main(){
@@ -89,12 +142,16 @@ void main(){
 	/////////////////////////////////
 	//NEW PBR PIPELINE
 	/////////////////////////////////
+	
+	loadPBRValues();
+	
 	//Normalize direction vector and normal vector.
+	vec3 pos = -normalize(vertexPosition_viewspace);
 	vec3 normal = normalize(normal_viewspace);
 	vec3 viewDir = normalize(vec3(0,0,0) - vertexPosition_viewspace);
 
 	//If a dia-electric use baseReflectivity 0.04 and if metal use the albedo color as baseReflectivity.
-	vec3 baseReflectivity = mix(vec3(0.04), albedo, metallic);
+	vec3 baseReflectivity = mix(vec3(0.04), albedo.rgb, metallic);
 
 	//Luminance output.
 	vec3 Lo = vec3(0.0f);
@@ -102,45 +159,50 @@ void main(){
 	///////////
 	//ToDo add for loop here for multiple light sources to calculate radiance per-light.
 	///////////
+	{
+		//Normalize direction vectors.
+		vec3 lightDir = normalize(viewSpaceLightPos - vertexPosition_viewspace);
+		vec3 halfwayVector = normalize(viewDir + lightDir);
 
-	//Normalize direction vectors.
-	vec3 lightDir = normalize(viewSpaceLightPos - vertexPosition_viewspace);
-	vec3 halfwayVector = normalize(viewDir + lightDir);
+		//float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
+		//float attenuation = 1.0/(d * d);
+		vec3 radiance = lightColor * lightIntensity; // * attenuation;
 
-	float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
-	float attenuation = 1.0/(d * d);
-	vec3 radiance = lightColor * 500000 * attenuation;
+		//Dot products.
+		float NdotV = max(dot(normal, viewDir), 0.0000001);
+		float NdotL = max(dot(normal, lightDir), 0.0000001);
+		float NdotH = max(dot(normal, halfwayVector), 0.0);
+		float HdotV = max(dot(halfwayVector, viewDir), 0.0);
+		float LdotN = max(dot(lightDir, normal), 0.0);
 
-	//Dot products.
-	float NdotV = max(dot(normal, viewDir), 0.0000001);
-	float NdotL = max(dot(normal, lightDir), 0.0000001);
-	float NdotH = max(dot(normal, halfwayVector), 0.0);
-	float HdotV = max(dot(halfwayVector, viewDir), 0.0);
+		//Cook-Torrance BRDF: D*F*G /( 4 * (w0 dot n) * (wi dot n) )
+		float D = normaldistrubutionGGX(NdotH, roughness + 0.01);
+		float G = geometryFunction(NdotV, NdotL, roughness  + 0.01);
+		vec3 F = fresnelSchlick(HdotV, baseReflectivity);
 
-	//Cook-Torrance BRDF: D*F*G /( 4 * (w0 dot n) * (wi dot n) )
-	float D = normaldistrubutionGGX(NdotH, roughness + 0.01);
-	float G = geometryFunction(NdotV, NdotL, roughness  + 0.01);
-	vec3 F = fresnelSchlick(HdotV, baseReflectivity);
+		vec3 specular = D * G * F;
+		specular /= 4.0 * NdotV * NdotL;
 
-	vec3 specular = D * G * F;
-	specular /= 4.0 * NdotV * NdotL;
-
-	//Specular energy contribution.
-	vec3 kSpec = F;
-	//Diffuse energy contribution.
-	vec3 kDiff = vec3(1.0) - kSpec;
-	//Remove diffuse component if metal.
-	kDiff *= 1.0 - metallic;
-
-	Lo += (kDiff * albedo / PI + specular) * radiance * NdotL;
-
+		//Specular energy contribution.
+		vec3 kSpec = F;
+		//Diffuse energy contribution.
+		vec3 kDiff = vec3(1.0) - kSpec;
+		//Remove diffuse component if metal.
+		kDiff *= 1.0 - metallic;
+		vec3 light = (kDiff * albedo.rgb / PI + specular) * radiance * NdotL;
+		float shadow = textureProj(shadowMap, shadowMapCoord);
+		Lo += light * shadow;
+	}
 	//ToDo end for each light loop here.
 	
 	//Ambient light.
+	vec3 F = fresnelSchlickRoughness(max(dot(normal, viewDir), 0.0), baseReflectivity, roughness);
+	vec3 kSpec = F;
+	vec3 kDiff = 1.0 - kSpec;
+	kDiff *= 1 - metallic;
 
-	//Testing lookUp.
+	//Diffuse component.
 	vec4 normalWorldSpace = viewInverse * vec4(normal, 0.0f);
-
 	float theta = acos(max(-1.0f, min(1.0f, normalWorldSpace.y)));
 	float phi = atan(normalWorldSpace.z, normalWorldSpace.x);
 	if(phi < 0.0f)
@@ -150,21 +212,31 @@ void main(){
 
 	vec2 lookup = vec2(phi / (2.0 * PI), theta / PI);
 
-	vec3 diffuseAmbient = 1.5f * texture(irradianceMap, lookup).rgb * albedo * kDiff;
-	
-	//vec3 diffuseAmbient = vec3(0.03) * albedo;
-	
-	//ToDo fix specular ambient light.
+	vec3 irradiance = envMultiplier * texture(irradianceMap, lookup).rgb;
+	vec3 diffuseAmbient =  irradiance  * albedo * (1.0/PI) * kDiff;
+
+
+	//Specular component.
+	vec4 wiWorldSpace = normalize(viewInverse * vec4(-reflect(pos, normal), 0.0f));
+	vec4 woWorldSpace = normalize(viewInverse * vec4(pos, 0.0f));
+
 	const float MAX_REFLECTION_LOD = 4.0;
-	//vec3 prefilteredColor = textureLod(prefilteredMap, reflect(-viewDir, normal), roughness * MAX_REFLECTION_LOD).rgb;
+	
+	theta = acos(max(-1.0f, min(1.0f, wiWorldSpace.y)));
+	phi = atan(wiWorldSpace.z, wiWorldSpace.x);
+	if(phi < 0.0f)
+	{
+		phi = phi + 2.0f * PI;
+	}
+	lookup = vec2(phi / (2.0 * PI), theta / PI);
+	
+	vec3 radiance = envMultiplier * textureLod(reflectionMap, lookup, roughness * MAX_REFLECTION_LOD).rgb;
 	//vec2 brdf = texture(brdfLUT, vec2(NdotV, roughness)).rg;
 	//vec3 specularAmbient = prefilteredColor * (F * brdf.r +brdf.g);
-	vec3 specularAmbient = vec3(0.0);
+	vec3 specularAmbient = radiance * kSpec;
 
 	vec3 ambient = (diffuseAmbient + specularAmbient);
-
-	
-	vec3 color = ambient + Lo;
+	vec3 color =  Lo + ambient;
 
 	//HDR tonemapping.
 	color = color / (color + vec3(1.0));
@@ -173,33 +245,4 @@ void main(){
 	color = pow(color, vec3(1.0/2.2));
 
 	fragmentColor = vec4(color, 1.0);
-	
-	/*
-	/////////////////////////////////
-	//OLD WAY
-	/////////////////////////////////
-	//Normalize direction vectors and normals.
-	vec3 normal = normalize(normal_viewspace);
-	vec3 lightDir = normalize(viewSpaceLightPos - vertexPosition_viewspace);
-	vec3 cameraDir = normalize(vec3(0,0,0) - vertexPosition_viewspace);
-	vec3 reflectDir = reflect(-lightDir, normal);
-
-	float d = distance(viewSpaceLightPos, vertexPosition_viewspace);
-	//Diffuse
-	float diffuseStrength = 500;
-	float diff = max(dot(normal,lightDir), 0.0) *  1/(d*d);
-	vec3 diffuse = diff * diffuseStrength * lightColor;
-	
-	//Ambient
-	float ambientStrength = 0.1;
-	vec3 ambient = ambientStrength * lightColor;
-
-	//Specular
-	float specularStrength = 0;
-	float spec = pow(max(dot(cameraDir, reflectDir), 0.0), 32);
-	vec3 specular = specularStrength * spec * lightColor;
-
-	fragmentColor = vec4( (diffuse + ambient + specular) * color, 1.0);
-	*/
 }
-

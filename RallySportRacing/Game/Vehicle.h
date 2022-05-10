@@ -16,6 +16,7 @@ namespace Game{
 		void steerRight(double deltaTime);
 		void steerLeft(double deltaTime);
 		void steerNeutral();
+		void setMaxSpeed(int speed);
 		void Vehicle::notGasing();
 		void Vehicle::handBrake();
 		float Vehicle::getSpeed();
@@ -29,6 +30,7 @@ namespace Game{
 		GameObject* wheel4;
 
 	protected:
+		int maxSpeed;
 		float steering;
 		float steeringClamp;
 		float steeringIncrement;
