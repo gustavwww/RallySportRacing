@@ -90,10 +90,12 @@ void SoundSource::update(glm::vec3 positionVec3, glm::vec3 velPerFrame, float sp
 
 // Function that plays horn sound
 void SoundSource::horn(bool x, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
-	this->hornSound->setPosition(position);
-	this->hornSound->setVelocity(velMetersPerSec);
 
 	if (x) {
+		// Update position and velocity
+		this->hornSound->setPosition(position);
+		this->hornSound->setVelocity(velMetersPerSec);
+
 		if (this->hornSound->getIsPaused()) {
 			this->hornSound->setIsPaused(false);
 		}
@@ -112,25 +114,29 @@ void SoundSource::exhaust(bool x, irrklang::vec3df position) {
 
 // Function that controls rain
 void SoundSource::rain(bool x, irrklang::vec3df position) {
-	this->rainSound->setPosition(position);
+	if(x) {
+		this->rainSound->setPosition(position);
 
-	if (rainFade < 1.0F && x) {
-		rainFade += 0.001F;
+		if (rainFade < 1.0F) {
+			rainFade += 0.001F;
 
-		this->rainSound->setVolume(rainFade);
+			this->rainSound->setVolume(rainFade);
 
-		if (this->rainSound->getIsPaused()) {
-			this->rainSound->setIsPaused(false);
+			if (this->rainSound->getIsPaused()) {
+				this->rainSound->setIsPaused(false);
+			}
 		}
 	}
-	else if (rainFade > 0.0F && !x) {
+	else if (rainFade > 0.0F) {
 		rainFade -= 0.001F;
+		this->rainSound->setPosition(position);
 
 		this->rainSound->setVolume(rainFade);
 	}
-	else if (rainFade == 0.0F && !x) {
+	else if (rainFade == 0.0F) {
 		this->rainSound->setIsPaused(true);
 	}
+	
 }
 
 // Function that plays engine start sound
@@ -182,22 +188,27 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 
 // Function that plays engine sound
 void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
-	this->engineSound->setPosition(position);
-	this->engineSound->setVelocity(velMetersPerSec);
-
-	this->engineSoundHigh->setPosition(position);
-	this->engineSoundHigh->setVelocity(velMetersPerSec);
 
 	if (engineOn) {
+		//Update position and velocity
+		this->engineSound->setPosition(position);
+		this->engineSound->setVelocity(velMetersPerSec);
+
+		this->engineSoundHigh->setPosition(position);
+		this->engineSoundHigh->setVelocity(velMetersPerSec);
+
+		// Play if paused
 		if (this->engineSound->getIsPaused()) {
 			this->engineSound->setIsPaused(false);
 		}
 	}
 	else {
+		// Pause if playing
 		if (!this->engineSound->getIsPaused()) {
 			this->engineSound->setIsPaused(true);
 		}
 	}
+	// Change playback speed based on speed
 	this->engineSound->setPlaybackSpeed(1.0 + abs(speed) / 100);
 
 
