@@ -531,10 +531,10 @@ namespace Game {
 	void update() {
 
 		// debug drawing, takes a lot of performance
-		physics->dynamicsWorld->setDebugDrawer(debugDrawer);
+		/*physics->dynamicsWorld->setDebugDrawer(debugDrawer);
 		for (int i = 0; i < checkpoints.size(); i++) { // draws every checkpoints
 			physics->dynamicsWorld->debugDrawObject(transforms[i], checkPointShape, btVector3(0, 255, 0));
-		}
+		}*/
 		//physics->dynamicsWorld->debugDrawWorld(); 
 
 		// method for handling collisions with checkpoints
