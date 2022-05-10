@@ -64,7 +64,6 @@ namespace Networking {
 	}
 
 	void tcpPacketReceived(string str) {
-		cout << str << endl;
 		Protocol::Command cmd = Protocol::parseMessage(str);
 		string command = cmd.getCommand();
 
