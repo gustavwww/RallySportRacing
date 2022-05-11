@@ -14,16 +14,16 @@ namespace Rendering {
 
     class Text2D {
     public:
-	    Text2D(string text, glm::vec3 color, glm::vec2 pos);
+	    Text2D(string text, glm::vec3 color, glm::vec3 pos);
 	    void render(GLint programID, glm::mat4 projection, glm::mat4 view);
 
-        void updatePos(glm::vec2 pos);
+        void updatePos(glm::vec3 pos);
 
     private:
 
         string text;
         glm::vec3 color;
-        glm::vec2 pos;
+        glm::vec3 pos;
 
         bool isTextSetup = false;
         void setupText();

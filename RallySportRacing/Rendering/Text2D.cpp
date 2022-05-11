@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <GL/glew.h>
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace std;
 
@@ -18,7 +19,7 @@ namespace Rendering {
 
 	map<char, Character> characters;
 
-	Text2D::Text2D(string text, glm::vec3 color, glm::vec2 pos) {
+	Text2D::Text2D(string text, glm::vec3 color, glm::vec3 pos) {
 		this->text = text;
 		this->color = color;
 		this->pos = pos;
@@ -45,6 +46,7 @@ namespace Rendering {
 		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnable(GL_CULL_FACE);
 
 		glUseProgram(programID);
 
@@ -54,13 +56,17 @@ namespace Rendering {
 		GLuint colorID = glGetUniformLocation(programID, "textColor");
 		glUniform3f(colorID, color.x, color.y, color.z);
 
-		glm::mat4 mat = projection * view;
+		glm::mat4 mat = glm::ortho(0.0f, 1920.0f, 0.0f, 1080.0f);
 
 		GLuint matID = glGetUniformLocation(programID, "projection");
 		glUniformMatrix4fv(matID, 1, GL_FALSE, &mat[0][0]);
 
-		float x = pos.x;
-		float y = pos.y;
+		glm::vec4 clipSpacePos = projection * (view * glm::vec4(pos.x, pos.y, pos.z, 1.0f));
+		glm::vec3 normalizedDeviceCoordinates = glm::vec3(clipSpacePos.x, clipSpacePos.y, clipSpacePos.z) / clipSpacePos.w;
+		glm::vec2 windowSpacePos = ((glm::vec2(normalizedDeviceCoordinates.x, normalizedDeviceCoordinates.y) + 1.0f) / 2.0f) * glm::vec2(1920.0f, 1080.0f);
+
+		float x = windowSpacePos.x;
+		float y = windowSpacePos.y;
 
 		for (auto c = text.begin(); c != text.end(); c++) {
 
@@ -94,7 +100,7 @@ namespace Rendering {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void Text2D::updatePos(glm::vec2 pos) {
+	void Text2D::updatePos(glm::vec3 pos) {
 		this->pos = pos;
 	}
 

@@ -62,6 +62,10 @@ namespace Networking {
 		tcpClient.sendPacket("settime:" + to_string(time));
 	}
 
+	vector<PlayerTime> getTimes() {
+		return times;
+	}
+
 	void tcpPacketReceived(string str) {
 		Protocol::Command cmd = Protocol::parseMessage(str);
 		string command = cmd.getCommand();
