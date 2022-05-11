@@ -745,8 +745,8 @@ namespace Game {
 						soundString[2] = '1';
 						for (int i = 0; i < 400; i++) {
 							glm::vec3 smokeOffset = glm::vec3(1 * vehicle->getOrientation().x, 1*vehicle->getOrientation().y + 0.23, 1 * vehicle->getOrientation().z);
-							blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset + glm::vec3(0, 0.05, 0), glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.05f, 0.05);
-							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.05f, 0.1);
+							blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset + glm::vec3(0, 0.05, 0), glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.075f, 0.05);
+							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.075f, 0.1);
 						}
 						pressedW = false;
 						backFireToggle = false;

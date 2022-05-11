@@ -84,7 +84,7 @@ void SoundSource::update(glm::vec3 positionVec3, glm::vec3 velPerFrame, float sp
 
 	engineStart(this->soundString[0] == '1', position);
 	terrain(this->soundString[0] == '2', speed, position, velMetersPerSecond, this->soundString[3]);
-	//engine(this->soundString[0] == '2', this->soundString[4], speed, position, velMetersPerSecond);
+	engine(this->soundString[0] == '2', this->soundString[4], speed, position, velMetersPerSecond);
 	engineOff(this->soundString[0] == '3', position);
 }
 
