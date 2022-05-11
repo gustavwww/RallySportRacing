@@ -11,7 +11,7 @@ using namespace std;
 
 namespace Networking {
 	
-	void setupNetwork(Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler);
+	void setupNetwork(string playerName, Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler);
 	void joinGame(string id, string name);
 	void sendTime(float time);
 	vector<PlayerTime> getTimes();

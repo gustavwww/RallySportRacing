@@ -32,6 +32,7 @@ namespace Networking {
 
 	bool inGame = false;
 
+	string name;
 	int clientID;
 
 	Audio* sound;
@@ -39,7 +40,8 @@ namespace Networking {
 	map<int, Player*> players;
 	vector<PlayerTime> times; // Player times, sorted with shortest time first.
 
-	void setupNetwork(Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler) {
+	void setupNetwork(string playerName, Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler) {
+		name = playerName;
 		vehicle = playerObj;
 		handler = windowHandler;
 
@@ -73,7 +75,7 @@ namespace Networking {
 		if (command == "connect") {
 			clientID = stoi(cmd.getArgs()[0]);
 			cout << "Client ID received from server: " << clientID << endl;
-			joinGame("hub", "Gustav");
+			joinGame("hub", name);
 
 		} else if (command == "error") {
 			cout << "Server Error: " << cmd.getArgs()[0] << endl;
