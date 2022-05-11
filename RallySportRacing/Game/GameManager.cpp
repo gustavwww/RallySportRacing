@@ -341,7 +341,7 @@ namespace Game {
 		initCheckPoints();
 
 		// Multiplayer setup
-		Networking::setupNetwork(vehicle, windowHandler);
+		Networking::setupNetwork("Gustav", vehicle, windowHandler);
 
 		// environment 1 test
 		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
@@ -511,6 +511,7 @@ namespace Game {
 						cout << roundf(raceTime) << endl;
 						// do something here, Like show the timer or put it in a leaderboard
 						// raceTime is the timer for the race
+						Networking::sendTime(raceTime);
 					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
