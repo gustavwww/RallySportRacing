@@ -421,13 +421,13 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)startButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = false; }
+				if (ImGui::ImageButton((void*)(intptr_t)startButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = false; leaderboardMenu = false; }
 
 				ImGui::Dummy(ImVec2(0, 50));
-				if (ImGui::ImageButton((void*)(intptr_t)settingsButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = true; }
+				if (ImGui::ImageButton((void*)(intptr_t)settingsButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = true; leaderboardMenu = false; }
 
 				ImGui::Dummy(ImVec2(0, 50));
-				if (ImGui::ImageButton((void*)(intptr_t)leaderboardButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; leaderboardMenu = true; }
+				if (ImGui::ImageButton((void*)(intptr_t)leaderboardButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = false; leaderboardMenu = true; }
 
 				ImGui::PopStyleColor(3);
 
