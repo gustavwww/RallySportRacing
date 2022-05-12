@@ -22,7 +22,7 @@ public:
 private:
 	void horn(bool x, irrklang::vec3df position, irrklang::vec3df velMetersPerSec);
 	void exhaust(bool x, irrklang::vec3df position);
-	void rain(bool x, irrklang::vec3df position);
+	void rain(irrklang::vec3df position);
 	void engineStart(bool x, irrklang::vec3df position);
 	void terrain(bool x, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec, char terrain);
 	void engine(bool engineOn, char WorSPressed, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec);

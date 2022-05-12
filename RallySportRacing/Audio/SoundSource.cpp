@@ -80,12 +80,14 @@ void SoundSource::update(glm::vec3 positionVec3, glm::vec3 velPerFrame, float sp
 
 	horn(this->soundString[1] == '1', position, velMetersPerSecond);
 	exhaust(this->soundString[2] == '1', position);
-	rain(playRain, position);
+	rain(position);
 
 	engineStart(this->soundString[0] == '1', position);
 	terrain(this->soundString[0] == '2', speed, position, velMetersPerSecond, this->soundString[3]);
-	//engine(this->soundString[0] == '2', this->soundString[4], speed, position, velMetersPerSecond);
+	engine(this->soundString[0] == '2', this->soundString[4], speed, position, velMetersPerSecond);
 	engineOff(this->soundString[0] == '3', position);
+
+	cout << this->playRain << endl;
 }
 
 // Function that plays horn sound
@@ -113,8 +115,8 @@ void SoundSource::exhaust(bool x, irrklang::vec3df position) {
 }
 
 // Function that controls rain
-void SoundSource::rain(bool x, irrklang::vec3df position) {
-	if(x) {
+void SoundSource::rain(irrklang::vec3df position) {
+	if(this->playRain) {
 		this->rainSound->setPosition(position);
 
 		if (rainFade < 1.0F) {
@@ -189,6 +191,7 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 // Function that plays engine sound
 void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
 
+	// Engine rumble
 	if (engineOn) {
 		//Update position and velocity
 		this->engineSound->setPosition(position);
@@ -201,6 +204,9 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 		if (this->engineSound->getIsPaused()) {
 			this->engineSound->setIsPaused(false);
 		}
+
+		// Change playback speed based on speed
+		this->engineSound->setPlaybackSpeed(1.0 + abs(speed) / 100);
 	}
 	else {
 		// Pause if playing
@@ -208,10 +214,8 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			this->engineSound->setIsPaused(true);
 		}
 	}
-	// Change playback speed based on speed
-	this->engineSound->setPlaybackSpeed(1.0 + abs(speed) / 100);
 
-
+	// Engine acceleration sound
 	if (engineOn && WorSPressed == '1') {
 		if (wPressed < 1000) {
 			wPressed++;
