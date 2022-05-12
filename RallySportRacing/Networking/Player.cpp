@@ -10,6 +10,9 @@ namespace Networking {
 
 		name = playerData.name;
 
+		label = new Rendering::Text2D(name, glm::vec3(0.5, 0.8f, 0.2f), playerData.pos);
+		windowHandler->addText(label);
+
 		Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
 		windowHandler->addModel(model);
 		obj = new Game::GameObject(model);
@@ -45,6 +48,7 @@ namespace Networking {
 	}
 
 	void Player::updateState(PlayerData data) {
+		label->updatePos(data.pos);
 		obj->setPosition(data.pos);
 		obj->setQuaternion(data.orientation);
 		frontLeft->setPosition(data.frontLeftPos);
@@ -58,6 +62,7 @@ namespace Networking {
 	}
 
 	Player::~Player() {
+		windowHandler->removeText(label);
 		windowHandler->removeModel(obj->getModel());
 		windowHandler->removeModel(frontLeft->getModel());
 		windowHandler->removeModel(frontRight->getModel());

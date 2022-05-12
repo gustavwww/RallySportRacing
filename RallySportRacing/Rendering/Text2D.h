@@ -2,28 +2,33 @@
 #define TEXT2D
 
 #include <glm/glm.hpp>
+#include <GL/glew.h>
+#include <string>
+#include <map>
 
 using namespace std;
 
 namespace Rendering {
 
-    struct Character {
-        unsigned int TextureID;  // ID handle of the glyph texture
-        glm::vec2   Size;       // Size of glyph
-        glm::vec2   Bearing;    // Offset from baseline to left/top of glyph
-        unsigned int Advance;    // Offset to advance to next glyph
-    };
+    void loadCharacters();
 
     class Text2D {
     public:
-	    Text2D();
-	    void render();
+	    Text2D(string text, glm::vec3 color, glm::vec3 pos);
+	    void render(GLint programID, glm::mat4 projection, glm::mat4 view);
 
-        static void loadCharacters();
+        void updatePos(glm::vec3 pos);
 
     private:
-        static map<char, Character> characters;
 
+        string text;
+        glm::vec3 color;
+        glm::vec3 pos;
+
+        bool isTextSetup = false;
+        void setupText();
+
+        unsigned int VAO, VBO;
     };
 
 

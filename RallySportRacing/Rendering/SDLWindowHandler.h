@@ -3,6 +3,7 @@
 
 #include "Model.h"
 #include "ParticleSystem.h"
+#include "Text2D.h"
 #include <SDL.h>
 #include <GL/glew.h>
 #include <SDL_opengl.h>
@@ -29,6 +30,9 @@ namespace Rendering {
 		void addParticleSystem(ParticleSystem* particleSystem);
 		void removeParticlesSystem(ParticleSystem* particleSystem);
 
+		void addText(Text2D* text);
+		void removeText(Text2D* text);
+
 		SDL_Window* getSDLWindow();
 		void Destroy();
 
@@ -49,6 +53,7 @@ namespace Rendering {
 		int height;
 		unordered_set<Model*> models;
 		unordered_set<ParticleSystem*> particleSystems;
+		unordered_set<Text2D*> texts;
 
 		GLint debugID;
 		glm::vec3 camPosition = glm::vec3(0, 0, 20);

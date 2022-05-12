@@ -56,6 +56,7 @@ namespace Game {
 	unsigned int explosionTexture;
 	unsigned int blueexplosionTexture;
 	unsigned int tireTrackTexture;
+	unsigned int tireTrack2Texture;
 	unsigned int dirtTexture;
 	unsigned int rainTexture;
 	unsigned int snowTexture;
@@ -74,6 +75,9 @@ namespace Game {
 
 	Rendering::ParticleSystem tireTrackParticlesObject;
 	Rendering::ParticleSystem* tireTrackParticlesPointer;
+
+	Rendering::ParticleSystem tireTrack2ParticlesObject;
+	Rendering::ParticleSystem* tireTrack2ParticlesPointer;
 
 	Rendering::ParticleSystem dirtParticlesObject;
 	Rendering::ParticleSystem* dirtParticlesPointer;
@@ -252,6 +256,12 @@ namespace Game {
 		tireTrackParticlesPointer = &tireTrackParticlesObject;
 		handler->addParticleSystem(tireTrackParticlesPointer);
 
+		//Load and add tireTrack to particle render list.
+		tireTrack2Texture = handler->loadTexture("../Textures/testTrack2.png");
+		tireTrack2ParticlesObject = Rendering::ParticleSystem(1000000, tireTrack2Texture);
+		tireTrack2ParticlesPointer = &tireTrack2ParticlesObject;
+		handler->addParticleSystem(tireTrack2ParticlesPointer);
+
 		//Load and add smokeParticles to particle render list.
 		smokeTexture = handler->loadTexture("../Textures/smokeTexture.png");
 		smokeParticlesObject = Rendering::ParticleSystem(1000000, smokeTexture);
@@ -341,7 +351,7 @@ namespace Game {
 		initCheckPoints();
 
 		// Multiplayer setup
-		Networking::setupNetwork(vehicle, windowHandler);
+		Networking::setupNetwork("Gustav", vehicle, windowHandler);
 
 		// environment 1 test
 		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
@@ -511,6 +521,7 @@ namespace Game {
 						cout << roundf(raceTime) << endl;
 						// do something here, Like show the timer or put it in a leaderboard
 						// raceTime is the timer for the race
+						Networking::sendTime(raceTime);
 					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
@@ -692,7 +703,7 @@ namespace Game {
 					terrainParticleObject2.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.3);
 					terrainParticleObject2.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.3);
 				}
-				if ((vehicle->getSpeed() <= -10 || vehicle->getSpeed() >= 10) && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == highwayFriction) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
+				if ((vehicle->getSpeed() <= -10 || vehicle->getSpeed() >= 10) && (vehicle->vehicle->getWheelInfo(2).m_frictionSlip == highwayFriction)) { // checks rearwheel if it is in contact with a model that has fricion values of dirtFriction
 					glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
 					glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
 
@@ -701,8 +712,6 @@ namespace Game {
 					terrainParticleObject2.emitParticle(rearWheel1Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.1);
 					terrainParticleObject2.emitParticle(rearWheel2Pos, glm::vec3(1 * random.Float(), 0 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 1, 0.1);
 				}
-
-
 
 				// Engine sound on
 				if (soundString[0] == '0') {
@@ -726,7 +735,7 @@ namespace Game {
 					vehicle->drive(-1);
 					soundString[4] = '2';
 				}
-				if (keyboard_state_array[SDL_SCANCODE_SPACE]) {
+				if (keyboard_state_array[SDL_SCANCODE_SPACE] && vehicle->vehicle->getWheelInfo(2).m_frictionSlip == highwayFriction) {
 					vehicle->handBrake();
 					if (vehicle->getSpeed() >= 30) {
 						glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
@@ -734,6 +743,16 @@ namespace Game {
 
 						tireTrackParticlesObject.emitParticle(rearWheel1Pos - glm::vec3(0, 0.3, 0), glm::vec3(0, -0.05, 0), 10, 0.2);
 						tireTrackParticlesObject.emitParticle(rearWheel2Pos - glm::vec3(0, 0.3, 0), glm::vec3(0, -0.05, 0), 10, 0.2);
+					}
+				}
+				if (keyboard_state_array[SDL_SCANCODE_SPACE] && (vehicle->vehicle->getWheelInfo(2).m_frictionSlip == dirtFriction || vehicle->vehicle->getWheelInfo(2).m_frictionSlip == terrainFriction)) {
+					vehicle->handBrake();
+					if (vehicle->getSpeed() >= 30) {
+						glm::vec3 rearWheel1Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(2).getOrigin());
+						glm::vec3 rearWheel2Pos = bulletToGlm(vehicle->vehicle->getWheelTransformWS(3).getOrigin());
+
+						tireTrack2ParticlesObject.emitParticle(rearWheel1Pos - glm::vec3(0, 0.3, 0), glm::vec3(0, -0.05, 0), 10, 0.2);
+						tireTrack2ParticlesObject.emitParticle(rearWheel2Pos - glm::vec3(0, 0.3, 0), glm::vec3(0, -0.05, 0), 10, 0.2);
 					}
 				}
 				if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
@@ -745,8 +764,8 @@ namespace Game {
 						soundString[2] = '1';
 						for (int i = 0; i < 400; i++) {
 							glm::vec3 smokeOffset = glm::vec3(1 * vehicle->getOrientation().x, 1*vehicle->getOrientation().y + 0.23, 1 * vehicle->getOrientation().z);
-							blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset + glm::vec3(0, 0.05, 0), glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.05f, 0.05);
-							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.05f, 0.1);
+							blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset + glm::vec3(0, 0.05, 0), glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.075f, 0.05);
+							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.075f, 0.1);
 						}
 						pressedW = false;
 						backFireToggle = false;

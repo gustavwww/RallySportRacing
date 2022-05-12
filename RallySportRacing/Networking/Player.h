@@ -9,6 +9,7 @@
 #include "Rendering/SDLWindowHandler.h"
 #include "Services/Protocol/Command.h"
 #include "Networking/PlayerData.h"
+#include "Rendering/Text2D.h"
 
 using namespace std;
 
@@ -20,11 +21,11 @@ namespace Networking {
 		~Player();
 		void updateState(PlayerData data);
 		string getName();
-		Rendering::Model* getModel();
 
 	private:
 		Rendering::SDLWindowHandler* windowHandler;
 		string name;
+		Rendering::Text2D* label;
 		Game::GameObject* obj;
 		Game::GameObject* frontLeft;
 		Game::GameObject* frontRight;

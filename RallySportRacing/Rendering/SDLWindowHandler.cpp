@@ -234,6 +234,10 @@ namespace Rendering {
 		GLint programID = loadShader("../RallySportRacing/Shaders/Shader.vert", "../RallySportRacing/Shaders/Shader.frag");
 		GLint particleProgramID = loadShader("../RallySportRacing/Shaders/Particle.vert", "../RallySportRacing/Shaders/Particle.frag");
 		GLint skyboxProgramID = loadShader("../RallySportRacing/Shaders/Skybox.vert", "../RallySportRacing/Shaders/Skybox.frag");
+
+		GLint hdrToCubemapID = loadShader("../RallySportRacing/Shaders/Cubemap.vert", "../RallySportRacing/Shaders/HdrToCubemap.frag");
+		GLint text2DProgramID = loadShader("../RallySportRacing/Shaders/2DText.vert", "../RallySportRacing/Shaders/2DText.frag");
+
 		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
 		GLint shadowMapID = loadShader("../RallySportRacing/Shaders/ShadowMap.vert", "../RallySportRacing/Shaders/ShadowMap.frag");
 
@@ -315,10 +319,14 @@ namespace Rendering {
 		bool mainMenu = false;
 		bool settingsMenu = false;
 
+		// Load character glyphs from font.
+		loadCharacters();
+
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LESS);
 
-		SDL_Event windowEvent;
+		SDL_Event windowEvent; 
+
 		while (true) {
 			// This needs to be the first thing checked for imgui to work well
 			if (SDL_PollEvent(&windowEvent)) {
@@ -590,6 +598,10 @@ namespace Rendering {
 				p->render(particleProgramID, projection, view, width, height);
 			}
 
+			for (Text2D* t : texts) {
+				t->render(text2DProgramID, projection, view);
+			}
+
 			Game::drawDebug();
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -613,6 +625,14 @@ namespace Rendering {
 	}
 	void SDLWindowHandler::removeParticlesSystem(ParticleSystem* particleSystem) {
 		particleSystems.erase(particleSystem);
+	}
+
+	void SDLWindowHandler::addText(Text2D* text) {
+		texts.insert(text);
+	}
+
+	void SDLWindowHandler::removeText(Text2D* text) {
+		texts.erase(text);
 	}
 
 	SDL_Window* SDLWindowHandler::getSDLWindow() {
