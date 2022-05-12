@@ -308,7 +308,7 @@ namespace Rendering {
 		glBindTexture(GL_TEXTURE_2D, reflectionMap);
 		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
-
+		glActiveTexture(GL_TEXTURE0);
 
 		//Environment uniforms.
 		glUseProgram(skyboxProgramID);
