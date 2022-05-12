@@ -255,6 +255,9 @@ namespace Rendering {
 		int checkpointFive = loadTexture("../IMGS/5.png");
 		int checkpointSix = loadTexture("../IMGS/6.png");
 		int checkpointSeven = loadTexture("../IMGS/7.png");
+		int leaderboardBackgroundTexture = loadTexture("../IMGS/leaderboard-background.png");
+		int leaderboardBackgrundFillTexture = loadTexture("../IMGS/leaderboard-fill.png");
+		int leaderboardTextTexture = loadTexture("../IMGS/leaderboard-text.png");
 
 		int testTexture = loadTexture("../IMGS/mvp.png");
 
@@ -331,8 +334,8 @@ namespace Rendering {
 			ImGui::End();
 
 			speed = Game::getVehicleSpeed();
-			if (648 + speed > 918) {
-				trackerPos = 918;
+			if (abs(speed) > 254) {
+				trackerPos = 1222;
 			}
 			else {
 				trackerPos = 648 + abs(speed*2.3);
@@ -433,8 +436,8 @@ namespace Rendering {
 
 
 			if (mainMenu) {
-				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
-				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::SetNextWindowSize(ImVec2(width+20, height+20), 0);
+				ImGui::SetNextWindowPos(ImVec2(-8, -8), 0);
 				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				//ImGui::BeginChildFrame('h', ImVec2(width, height));
@@ -466,12 +469,23 @@ namespace Rendering {
 				ImGui::End();
 			}
 			else if (settingsMenu) {
-				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
-				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::SetNextWindowSize(ImVec2(width+20, height+20), 0);
+				ImGui::SetNextWindowPos(ImVec2(-8, -8), 0);
 				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				//ImGui::BeginChildFrame('h', ImVec2(width, height));
 				ImGui::Image((void*)(intptr_t)settingsTexture, ImVec2(width, height));
+				//ImGui::EndChildFrame();
+
+				ImGui::End();
+
+				ImGui::SetNextWindowSize(ImVec2(200, 80), 0);
+				ImGui::SetNextWindowPos(ImVec2(800, 100), 0);
+				ImGui::Begin("Text input", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				//ImGui::BeginChildFrame('h', ImVec2(width, height));
+				static char str0[16] = "Username";
+				ImGui::InputText("", str0, IM_ARRAYSIZE(str0));
 				//ImGui::EndChildFrame();
 
 				ImGui::End();
@@ -489,7 +503,7 @@ namespace Rendering {
 				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume >= 5) { sound->volumeDown(); volume = volume - 5; } }
 				ImGui::SameLine();
 				ImGui::Indent(300);
-				ImGui::SetWindowFontScale(2);
+				ImGui::SetWindowFontScale(4);
 				std::string volString = std::to_string(volume) + "%%";
 				char const* volChar = volString.c_str();
 				ImGui::Text(volChar);
@@ -530,22 +544,31 @@ namespace Rendering {
 				ImGui::End();
 			}
 			else if (leaderboardMenu) {
-				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
-				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
-				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+				ImGui::SetNextWindowSize(ImVec2(width+20, height+20), 0);
+				ImGui::SetNextWindowPos(ImVec2(-8, -8), 0);
+				ImGui::Begin("Leaderboard Backfill", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				ImGui::Image((void*)(intptr_t)testTexture , ImVec2(width, height));
+				ImGui::Image((void*)(intptr_t)leaderboardBackgrundFillTexture, ImVec2(width, height));
+
+				ImGui::End();
+
+				ImGui::SetNextWindowSize(ImVec2(620, 820), 0);
+				ImGui::SetNextWindowPos(ImVec2(660, 200), 0);
+				ImGui::Begin("Leaderboard List", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::Image((void*)(intptr_t)leaderboardBackgroundTexture , ImVec2(600, 800));
 
 				ImGui::End();
 
-				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
-				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
-				ImGui::Begin("Inner Main Menu", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				ImGui::Dummy(ImVec2(0, 500));
-				ImGui::Text("Testttttttt");
+				ImGui::SetNextWindowSize(ImVec2(1300, 210), 0);
+				ImGui::SetNextWindowPos(ImVec2(321, 10), 0);
+				ImGui::Begin("Leaderboard Text", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::Image((void*)(intptr_t)leaderboardTextTexture, ImVec2(1278, 187));
 
 				ImGui::End();
+
 			}
 
 			countDownTime = Game::getCountDownTime();
@@ -584,7 +607,7 @@ namespace Rendering {
 				ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
 				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
 				ImGui::Begin("Race Timer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-				ImGui::SetWindowFontScale(2);
+				ImGui::SetWindowFontScale(4);
 				if (raceTime >= 60) {
 					while (raceTime > 60) {
 						raceTime = raceTime - 60;
