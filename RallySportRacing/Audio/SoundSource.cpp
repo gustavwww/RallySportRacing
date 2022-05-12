@@ -19,14 +19,15 @@ SoundSource::SoundSource(int ID, irrklang::vec3df position) {
 	startSoundTimer = 0;
 	
 	// Init looping sounds
-	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
+	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.wav", position, true, true, true);
 
 
-	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/EngineRumble.mp3",position,  true, true, true);
-	this->engineSoundHigh = Audio::SoundEngine->play3D("../RallySportRacing/Audio/EngineRumble.mp3", position, true, true, true);
+	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/low.wav",position,  true, true, true);
+	this->engineHighAcc = Audio::SoundEngine->play3D("../RallySportRacing/Audio/high ACC.wav", position, true, true, true);
+	this->engineHighDec = Audio::SoundEngine->play3D("../RallySportRacing/Audio/high Deacc.wav", position, true, true, true);
 
-	this->pavementSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainPavement2.mp3", position, true, true, true);
-	this->dirtSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainDirt.mp3", position, true, true, true);
+	this->pavementSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainPavement2.wav", position, true, true, true);
+	this->dirtSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainDirt.wav", position, true, true, true);
 }
 
 // Destructor of SoundSource
@@ -140,15 +141,12 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 
 // Function that plays engine sound
 void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
-	/*
+	
 	// Engine rumble
 	if (engineOn) {
 		//Update position and velocity
 		this->engineSound->setPosition(position);
 		this->engineSound->setVelocity(velMetersPerSec);
-
-		this->engineSoundHigh->setPosition(position);
-		this->engineSoundHigh->setVelocity(velMetersPerSec);
 
 		// Play if paused
 		if (this->engineSound->getIsPaused()) {
@@ -164,11 +162,11 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			this->engineSound->setIsPaused(true);
 		}
 	}
-	*/
+	
 	// Engine acceleration sound
 	if (engineOn) {
-		this->engineSound->setPosition(position);
-		this->engineSound->setVelocity(velMetersPerSec);
+		this->engineHighAcc->setPosition(position);
+		this->engineHighAcc->setVelocity(velMetersPerSec);
 
 		if (WorSPressed == '1') {
 			if (engineFade < 200) {
@@ -188,13 +186,13 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 				engineFade++;
 			}
 		}
-		cout << engineFade << endl;
-		this->engineSound->setPlaybackSpeed(1.0F + abs(engineFade) / 500.0F);
-		//this->engineSound->setVolume(1.0F + abs(engineFade) / 100.0F);
-		this->engineSound->setMinDistance(abs(engineFade) / 10.0F);
 
-		if (this->engineSound->getIsPaused()) {
-			this->engineSound->setIsPaused(false);
+		this->engineHighAcc->setPlaybackSpeed(1.0F + abs(engineFade) / 400.0F);
+		this->engineHighAcc->setVolume(abs(engineFade) / 10.0F);
+		this->engineHighAcc->setMinDistance(abs(engineFade) / 5.0F);
+
+		if (this->engineHighAcc->getIsPaused()) {
+			this->engineHighAcc->setIsPaused(false);
 		}
 	}
 	else {
@@ -202,7 +200,7 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			this->engineSound->setIsPaused(true);
 		}
 	}
-
+	
 }
 
 // Function that plays engine off sound

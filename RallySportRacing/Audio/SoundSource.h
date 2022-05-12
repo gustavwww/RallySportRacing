@@ -34,7 +34,8 @@ private:
 	irrklang::ISound* engineStartSound;
 	irrklang::ISound* engineOffSound;
 	irrklang::ISound* engineSound;
-	irrklang::ISound* engineSoundHigh;
+	irrklang::ISound* engineHighAcc;
+	irrklang::ISound* engineHighDec;
 	irrklang::ISound* dirtSound;
 	irrklang::ISound* pavementSound;
 };
