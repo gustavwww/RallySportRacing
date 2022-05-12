@@ -11,8 +11,6 @@ float rainFade;
 
 ISoundEngine* SoundEngine;
 
-int Audio::distanceScalar = 10;
-
 map<int, SoundSource*> sources;
 
 Audio* Audio::instance = nullptr;
@@ -30,6 +28,9 @@ ISoundEngine* Audio::SoundEngine = createIrrKlangDevice();
 
 // Constructor of audio
 Audio::Audio() {
+
+	// Declare distance scalar
+	distanceScalar = 10;
 
 	// Init master volume
 	masterVolume = 1.0F;
@@ -75,12 +76,12 @@ void Audio::volumeSet(float v) {
 
 // Function that creates sound source and adds to the map of sources with its key ID
 void Audio::createSoundSource(int ID, glm::vec3 positionVec3) {
-	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(ID, positionVec3)));
+	sources.insert(pair<int, SoundSource*>(ID, new SoundSource(ID, glmToirrklangVec(positionVec3, distanceScalar))));
 }
 
 // Function that updates sound source in map with key ID
-void Audio::updateSoundSource(int ID, glm::vec3 positionVec3, glm::vec3 velPerFrame, float speed, string soundString) {
-	sources.at(ID)->update(positionVec3, velPerFrame, speed, soundString);
+void Audio::updateSoundSource(int ID, glm::vec3 positionVec3, glm::vec3 velPerFrame, float speedKmPerh, string soundString) {
+	sources.at(ID)->update(glmToirrklangVec(positionVec3, distanceScalar), getVelMetersPerSec(velPerFrame, speedKmPerh), speedKmPerh, soundString);
 }
 
 void Audio::removeSoundSource(int ID) {
@@ -92,14 +93,14 @@ string Audio::getSoundString(int ID) {
 }
 
 // Function that updates the listeners position, orientation and velocity
-void Audio::setListenerParameters(glm::vec3 positionVec3, glm::vec3 direction, glm::vec3 velPerFrame, float speedKmPerh) {
+void Audio::setListenerParameters(glm::vec3 positionVec3, glm::vec3 directionVec3, glm::vec3 velPerFrame, float speedKmPerh) {
 
-	irrklang::vec3df position(positionVec3.x/distanceScalar, positionVec3.y/distanceScalar, positionVec3.z/distanceScalar);	// position of the listener
-	irrklang::vec3df lookDirection(direction.x, direction.y, direction.z); // the direction the listener looks into
-	irrklang::vec3df velPerSecond = getVelMetersPerSec(velPerFrame, speedKmPerh);   // only relevant for doppler effects
+	irrklang::vec3df position = glmToirrklangVec(positionVec3, distanceScalar);	// position of the listener
+	irrklang::vec3df direction = glmToirrklangVec(directionVec3); // the direction the listener looks into
+	irrklang::vec3df velMetersPerSec = getVelMetersPerSec(velPerFrame, speedKmPerh);   // only relevant for doppler effects
 	irrklang::vec3df upVector(0, 1, 0);        // where 'up' is in your 3D scene
 
-	SoundEngine->setListenerPosition(position, lookDirection, velPerSecond, upVector);
+	SoundEngine->setListenerPosition(position, direction, velMetersPerSec, upVector);
 }
 
 // Function that takes a tuple of the speed per frame in X,Y,Z directions and total speed in km/h and returns a tuple of the speed in m/s
@@ -160,7 +161,16 @@ void Audio::rain(glm::vec3 position) {
 	}
 }
 
+// Function that plays sound when button is pressed
+void Audio::playButtonPressSound() {
+	SoundEngine->play2D("../RallySportRacing/Audio/StartBeep2.wav");
+}
+
 // Function that converts glm::vec3 to irrklang::vec3df
+irrklang::vec3df Audio::glmToirrklangVec(glm::vec3 inVec) {
+	irrklang::vec3df outVec(inVec.x, inVec.y, inVec.z);
+	return outVec;
+}
 irrklang::vec3df Audio::glmToirrklangVec(glm::vec3 inVec, int scalar) {
 	irrklang::vec3df outVec(inVec.x/scalar, inVec.y/scalar, inVec.z/scalar);
 	return outVec;

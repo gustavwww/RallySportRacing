@@ -8,16 +8,12 @@ using namespace irrklang;
 
 float speed;
 
-int wPressed;
+int engineFade;
 int sPressed;
 
-SoundSource::SoundSource(int ID, glm::vec3 positionVec3)
-{
-	// Set inital position of sound source
-	irrklang::vec3df position(positionVec3.x/Audio::distanceScalar, positionVec3.y/ Audio::distanceScalar, positionVec3.z/ Audio::distanceScalar);
-	speed = 0.0F;
-
+SoundSource::SoundSource(int ID, irrklang::vec3df position) {
 	// Init engine sound
+	speed = 0.0F;
 
 	this->soundString = "00000";
 	startSoundTimer = 0;
@@ -58,11 +54,7 @@ SoundSource::~SoundSource()	{
 }
 
 // Function that updates source
-void SoundSource::update(glm::vec3 positionVec3, glm::vec3 velPerFrame, float speed, string soundString) {
-	irrklang::vec3df position(positionVec3.x/Audio::distanceScalar, positionVec3.y/Audio::distanceScalar, positionVec3.z/Audio::distanceScalar);
-
-	// Get velocity vector in m/s
-	irrklang::vec3df velMetersPerSecond = Audio::getVelMetersPerSec(velPerFrame, speed);
+void SoundSource::update(irrklang::vec3df position, irrklang::vec3df velMetersPerSecond, float speed, string soundString) {
 
 	this->soundString = soundString;
 
@@ -148,7 +140,7 @@ void SoundSource::terrain(bool x, float speed, irrklang::vec3df position, irrkla
 
 // Function that plays engine sound
 void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang::vec3df position, irrklang::vec3df velMetersPerSec) {
-
+	/*
 	// Engine rumble
 	if (engineOn) {
 		//Update position and velocity
@@ -172,27 +164,42 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			this->engineSound->setIsPaused(true);
 		}
 	}
-
+	*/
 	// Engine acceleration sound
-	if (engineOn && WorSPressed == '1') {
-		if (wPressed < 1000) {
-			wPressed++;
+	if (engineOn) {
+		this->engineSound->setPosition(position);
+		this->engineSound->setVelocity(velMetersPerSec);
+
+		if (WorSPressed == '1') {
+			if (engineFade < 200) {
+				engineFade++;
+			}
 		}
+		else if (WorSPressed == '2') {
+			if (engineFade > -200) {
+				engineFade--;
+			}
+		}
+		else {
+			if (engineFade > 0) {
+				engineFade--;
+			}
+			else if (engineFade < 0) {
+				engineFade++;
+			}
+		}
+		cout << engineFade << endl;
+		this->engineSound->setPlaybackSpeed(1.0F + abs(engineFade) / 500.0F);
+		//this->engineSound->setVolume(1.0F + abs(engineFade) / 100.0F);
+		this->engineSound->setMinDistance(abs(engineFade) / 10.0F);
 
-		this->engineSoundHigh->setPlaybackSpeed(2.0F + abs(wPressed) / 1000);
-		this->engineSoundHigh->setVolume(0.5F + abs(wPressed) / 1000);
-
-		if (this->engineSoundHigh->getIsPaused()) {
-			this->engineSoundHigh->setIsPaused(false);
+		if (this->engineSound->getIsPaused()) {
+			this->engineSound->setIsPaused(false);
 		}
 	}
 	else {
-		if (!this->engineSoundHigh->getIsPaused()) {
-			this->engineSoundHigh->setIsPaused(true);
-		}
-
-		if (wPressed > 0) {
-			wPressed--;
+		if (!this->engineSound->getIsPaused()) {
+			this->engineSound->setIsPaused(true);
 		}
 	}
 
