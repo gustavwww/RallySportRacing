@@ -24,6 +24,7 @@ namespace Game {
 	float getCountDownTime();
 	float getVehicleSpeed();
 	bool getCountDown();
+	int getCheckpointsReached();
 }
 
 #endif
