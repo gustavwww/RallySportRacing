@@ -8,8 +8,6 @@ using namespace irrklang;
 
 float speed;
 
-float rainFade;
-
 int wPressed;
 int sPressed;
 
@@ -23,9 +21,6 @@ SoundSource::SoundSource(int ID, glm::vec3 positionVec3)
 
 	this->soundString = "00000";
 	startSoundTimer = 0;
-
-	playRain = false;
-	rainFade = 0;
 	
 	// Init looping sounds
 	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.mp3", position, true, true, true);
@@ -34,8 +29,6 @@ SoundSource::SoundSource(int ID, glm::vec3 positionVec3)
 	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/EngineRumble.mp3",position,  true, true, true);
 	this->engineSoundHigh = Audio::SoundEngine->play3D("../RallySportRacing/Audio/EngineRumble.mp3", position, true, true, true);
 
-
-	this->rainSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/Rain.mp3", position, true, true, true);
 	this->pavementSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainPavement2.mp3", position, true, true, true);
 	this->dirtSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainDirt.mp3", position, true, true, true);
 }
@@ -46,11 +39,6 @@ SoundSource::~SoundSource()	{
 		this->hornSound->stop();
 		this->hornSound->drop();
 		this->hornSound = 0;
-	}
-	if (this->rainSound) {
-		this->rainSound->stop();
-		this->rainSound->drop();
-		this->rainSound = 0;
 	}
 	if (this->engineSound) {
 		this->engineSound->stop();
@@ -80,14 +68,11 @@ void SoundSource::update(glm::vec3 positionVec3, glm::vec3 velPerFrame, float sp
 
 	horn(this->soundString[1] == '1', position, velMetersPerSecond);
 	exhaust(this->soundString[2] == '1', position);
-	rain(position);
 
 	engineStart(this->soundString[0] == '1', position);
 	terrain(this->soundString[0] == '2', speed, position, velMetersPerSecond, this->soundString[3]);
 	engine(this->soundString[0] == '2', this->soundString[4], speed, position, velMetersPerSecond);
 	engineOff(this->soundString[0] == '3', position);
-
-	cout << this->playRain << endl;
 }
 
 // Function that plays horn sound
@@ -112,33 +97,6 @@ void SoundSource::exhaust(bool x, irrklang::vec3df position) {
 	if (x) {
 		Audio::SoundEngine->play3D("../RallySportRacing/Audio/Backfire2.wav", position);
 	}
-}
-
-// Function that controls rain
-void SoundSource::rain(irrklang::vec3df position) {
-	if(this->playRain) {
-		this->rainSound->setPosition(position);
-
-		if (rainFade < 1.0F) {
-			rainFade += 0.001F;
-
-			this->rainSound->setVolume(rainFade);
-
-			if (this->rainSound->getIsPaused()) {
-				this->rainSound->setIsPaused(false);
-			}
-		}
-	}
-	else if (rainFade > 0.0F) {
-		rainFade -= 0.001F;
-		this->rainSound->setPosition(position);
-
-		this->rainSound->setVolume(rainFade);
-	}
-	else if (rainFade == 0.0F) {
-		this->rainSound->setIsPaused(true);
-	}
-	
 }
 
 // Function that plays engine start sound
@@ -245,10 +203,6 @@ void SoundSource::engineOff(bool x, irrklang::vec3df position) {
 	if (x) {
 		Audio::SoundEngine->play3D("../RallySportRacing/Audio/engineOff.mp3", position);
 	}
-}
-
-void SoundSource::setPlayRain(bool playRain) {
-	this->playRain = playRain;
 }
 
 string SoundSource::getSoundString() {

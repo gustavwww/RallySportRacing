@@ -610,6 +610,8 @@ namespace Game {
 
 			raceCountDown = 3;
 			isCountingDown = true;
+
+			sound->playStartSound();
 		}
 		if (isCountingDown) {
 			vehicle->vehicle->getRigidBody()->setLinearVelocity(btVector3(0, 0, 0));
@@ -955,6 +957,7 @@ namespace Game {
 		// Update "self" sound source
 		sound->updateSoundSource(0, vehicle->getPosition(), vehicle->getVelocity(), vehicle->getSpeed(), soundString);
 		sound->setListenerParameters(camPosition, camDirection, vehicle->getVelocity(), vehicle->getSpeed());
+		sound->playSourcelessSounds(camPosition);
 		
 		// Reset sounds
 		soundString = "00000";

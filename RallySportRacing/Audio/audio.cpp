@@ -5,7 +5,9 @@ using namespace irrklang;
 
 #pragma comment(lib, "../../External/irrKlang/irrKlang.lib")
 
-float volume;
+float masterVolume;
+
+float rainFade;
 
 ISoundEngine* SoundEngine;
 
@@ -30,30 +32,45 @@ ISoundEngine* Audio::SoundEngine = createIrrKlangDevice();
 Audio::Audio() {
 
 	// Init master volume
-	volume = 1.0F;
-	SoundEngine->setSoundVolume(volume);
+	masterVolume = 1.0F;
+	SoundEngine->setSoundVolume(masterVolume);
+
+	// Init sourceless sounds
+	irrklang::vec3df position(0, 0, 0);
+	this->rainSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/Rain.mp3", position , true, true, true);
+	this->playRain = false;
+	rainFade = 0.0F;
+}
+
+// Destructor of audio
+Audio::~Audio() {
+	if (this->rainSound) {
+		this->rainSound->stop();
+		this->rainSound->drop();
+		this->rainSound = 0;
+	}
 }
 
 // Function that changes volume up by 5%
 void Audio::volumeUp() {
-	if (volume < 1.0F) {
-		volume = volume + 0.05F;
+	if (masterVolume < 1.0F) {
+		masterVolume = masterVolume + 0.05F;
 	}
-	SoundEngine->setSoundVolume(volume);
+	SoundEngine->setSoundVolume(masterVolume);
 }
 
 // Function that changes volume down by 5%
 void Audio::volumeDown() {
-	if (volume > 0.0F) {
-		volume = volume - 0.05F;
+	if (masterVolume > 0.0F) {
+		masterVolume = masterVolume - 0.05F;
 	}
-	SoundEngine->setSoundVolume(volume);
+	SoundEngine->setSoundVolume(masterVolume);
 }
 
 // Function that sets master volume to value v which should be a float between 0.0F and 1.0F
 void Audio::volumeSet(float v) {
-	volume = v;
-	SoundEngine->setSoundVolume(volume);
+	masterVolume = v;
+	SoundEngine->setSoundVolume(masterVolume);
 }
 
 // Function that creates sound source and adds to the map of sources with its key ID
@@ -102,12 +119,49 @@ irrklang::vec3df Audio::getVelMetersPerSec(glm::vec3 velPerFrame, float speedKmP
 	return velMetersPerSec;
 }
 
+// Function that plays audio not originating from a source
+void Audio::playSourcelessSounds(glm::vec3 positionVec3) {
+	rain(positionVec3);
+}
+
 // Function that plays start countdown
 void Audio::playStartSound() {
-	SoundEngine->play2D("../RallySportRacing/Audio/StartBeeping.mp3");
+	SoundEngine->play2D("../RallySportRacing/Audio/StartBeeping.wav");
 }
 
 // Function that sets rain sound to play or not
 void Audio::playRainSound(bool playRain) {
-	sources.at(0)->setPlayRain(playRain);
+	this->playRain = playRain;
+}
+
+// Function that controls rain
+void Audio::rain(glm::vec3 position) {
+	if (this->playRain) {
+		this->rainSound->setPosition(glmToirrklangVec(position, distanceScalar));
+
+		if (rainFade < 0.2F) {
+			rainFade += 0.004F;
+
+			this->rainSound->setVolume(rainFade);
+
+			if (this->rainSound->getIsPaused()) {
+				this->rainSound->setIsPaused(false);
+			}
+		}
+	}
+	else if (rainFade > 0.0F) {
+		rainFade -= 0.004F;
+		this->rainSound->setPosition(glmToirrklangVec(position, distanceScalar));
+
+		this->rainSound->setVolume(rainFade);
+	}
+	else if (rainFade == 0.0F) {
+		this->rainSound->setIsPaused(true);
+	}
+}
+
+// Function that converts glm::vec3 to irrklang::vec3df
+irrklang::vec3df Audio::glmToirrklangVec(glm::vec3 inVec, int scalar) {
+	irrklang::vec3df outVec(inVec.x/scalar, inVec.y/scalar, inVec.z/scalar);
+	return outVec;
 }
