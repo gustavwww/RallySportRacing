@@ -9,7 +9,6 @@ using namespace irrklang;
 float speed;
 
 int engineFade;
-int sPressed;
 
 SoundSource::SoundSource(int ID, irrklang::vec3df position) {
 	// Init engine sound
@@ -22,9 +21,9 @@ SoundSource::SoundSource(int ID, irrklang::vec3df position) {
 	this->hornSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/ES_Horn Honk Long - SFX Producer.wav", position, true, true, true);
 
 
-	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/low.wav",position,  true, true, true);
-	this->engineHighAcc = Audio::SoundEngine->play3D("../RallySportRacing/Audio/high ACC.wav", position, true, true, true);
-	this->engineHighDec = Audio::SoundEngine->play3D("../RallySportRacing/Audio/high Deacc.wav", position, true, true, true);
+	this->engineSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/rumble.wav",position,  true, true, true);
+	this->engineHighAcc = Audio::SoundEngine->play3D("../RallySportRacing/Audio/acceleration.wav", position, true, true, true);
+	this->engineHighDec = Audio::SoundEngine->play3D("../RallySportRacing/Audio/decceleration.wav", position, true, true, true);
 
 	this->pavementSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainPavement2.wav", position, true, true, true);
 	this->dirtSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/TerrainDirt.wav", position, true, true, true);
@@ -154,7 +153,7 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 		}
 
 		// Change playback speed based on speed
-		this->engineSound->setPlaybackSpeed(1.0 + abs(speed) / 100);
+		this->engineSound->setPlaybackSpeed(1.0 + abs(speed) / 400);
 	}
 	else {
 		// Pause if playing
@@ -165,19 +164,63 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 	
 	// Engine acceleration sound
 	if (engineOn) {
-		this->engineHighAcc->setPosition(position);
-		this->engineHighAcc->setVelocity(velMetersPerSec);
 
+		// If acceleration pressed
 		if (WorSPressed == '1') {
-			if (engineFade < 200) {
+			if (engineFade < 0) {
+				engineFade = 0;
+			}
+			if (engineFade < 100) {
 				engineFade++;
 			}
+
+			// If accelerating turn off decceleration sound
+			if (this->engineHighDec->getIsPaused()) {
+				this->engineHighDec->setIsPaused(true);
+			}
+
+			// If accelerating turn acceleration sound on and set parameters
+			this->engineHighAcc->setPosition(position);
+			this->engineHighAcc->setVelocity(velMetersPerSec);
+
+			if (this->engineHighAcc->getIsPaused()) {
+				this->engineHighAcc->setIsPaused(false);
+			}
+
+			// 
+			this->engineHighAcc->setPlaybackSpeed(1.0F + abs(speed) / 400.0F);
+			this->engineHighAcc->setVolume((abs(speed) / 100.0F) * abs(engineFade / 100.0F));
+			//this->engineHighAcc->setMinDistance(abs(speed) / 5.0F);
 		}
+
+		// If decceleration pressed
 		else if (WorSPressed == '2') {
-			if (engineFade > -200) {
+			if (engineFade > 0) {
+				engineFade = 0;
+			}
+			if (engineFade > -100) {
 				engineFade--;
 			}
+
+			// If deccelerating turn acceleration sound off
+			if (!this->engineHighAcc->getIsPaused()) {
+				this->engineHighAcc->setIsPaused(true);
+			}
+
+			// If deccelerating turn decceleration sound on and set parameters
+			this->engineHighDec->setPosition(position);
+			this->engineHighDec->setVelocity(velMetersPerSec);
+
+			if (this->engineHighDec->getIsPaused()) {
+				this->engineHighDec->setIsPaused(false);
+			}
+
+			//
+			this->engineHighDec->setPlaybackSpeed(1.0F + abs(speed) / 400.0F);
+			this->engineHighDec->setVolume((abs(speed) / 200.0F) * abs(engineFade/100.0F));
+			//this->engineHighDec->setMinDistance(abs(speed) / 5.0F);
 		}
+		// If neither activly accelerating or decellerating
 		else {
 			if (engineFade > 0) {
 				engineFade--;
@@ -185,19 +228,24 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			else if (engineFade < 0) {
 				engineFade++;
 			}
-		}
 
-		this->engineHighAcc->setPlaybackSpeed(1.0F + abs(engineFade) / 400.0F);
-		this->engineHighAcc->setVolume(abs(engineFade) / 10.0F);
-		this->engineHighAcc->setMinDistance(abs(engineFade) / 5.0F);
+			// If neither turn acceleration sound off
+			if (!this->engineHighAcc->getIsPaused()) {
+				this->engineHighAcc->setIsPaused(true);
+			}
 
-		if (this->engineHighAcc->getIsPaused()) {
-			this->engineHighAcc->setIsPaused(false);
-		}
-	}
-	else {
-		if (!this->engineSound->getIsPaused()) {
-			this->engineSound->setIsPaused(true);
+			// If neither turn decelleration sound on
+			this->engineHighDec->setPosition(position);
+			this->engineHighDec->setVelocity(velMetersPerSec);
+
+			if (this->engineHighDec->getIsPaused()) {
+				this->engineHighDec->setIsPaused(false);
+			}
+
+			//
+			this->engineHighDec->setPlaybackSpeed(1.0F + abs(speed) / 400.0F);
+			this->engineHighDec->setVolume((abs(speed) / 200.0F) * abs(engineFade/100.0F));
+			//this->engineHighDec->setMinDistance(abs(speed) / 5.0F);
 		}
 	}
 	
