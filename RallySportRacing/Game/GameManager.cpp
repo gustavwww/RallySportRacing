@@ -610,7 +610,7 @@ namespace Game {
 
 			raceCountDown = 3;
 			isCountingDown = true;
-
+			raceTime = 0;
 			sound->playStartSound();
 		}
 		if (isCountingDown) {
@@ -952,6 +952,14 @@ namespace Game {
 		if (keyboard_state_array[SDL_SCANCODE_L] && volumeButtonDelay == 0) {
 			sound->volumeDown();
 			volumeButtonDelay = 20;
+		}
+
+		if (keyboard_state_array[SDL_SCANCODE_8]) {
+			checkpointsReached = 8;
+		}
+
+		if (keyboard_state_array[SDL_SCANCODE_9]) {
+			checkpointsReached = 9;
 		}
 
 		// Update "self" sound source

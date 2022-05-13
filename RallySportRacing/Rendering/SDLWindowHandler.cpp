@@ -28,9 +28,9 @@ namespace Rendering {
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(-400.0f, 1000.0f, -1300.0f, 1.0f);
-	float lightIntensity = 3.0f;
+	float lightIntensity = 10.0f;
 	float envMultiplier = 1.5f;
-	
+
 	//Shadow maps.
 	FboInfo shadowMapFB;
 	int shadowMapResolution = 8000;
@@ -46,6 +46,8 @@ namespace Rendering {
 	int menuButtonHeight = 150;
 	int settingsButtonSize = 96;
 	int carColorCycleVariable = 0;
+	std::string leaderboardContentList[3] = { "Gustav", "Oscar", "Daniel" };
+	std::string leaderboardTimes[3] = { "1:28.32", "1:43.88", "1:55:72" };
 
 	//Speed
 	float trackerPos = 0.0f;
@@ -55,6 +57,7 @@ namespace Rendering {
 	int minutes = 0;
 	float raceTime = 0;
 	float countDownTime = 3.0f;
+	bool raceFinished = false;
 
 	float amplifier = 0.5f;
 
@@ -276,6 +279,10 @@ namespace Rendering {
 		int leaderboardBackgroundTexture = loadTexture("../IMGS/leaderboard-background.png");
 		int leaderboardBackgrundFillTexture = loadTexture("../IMGS/leaderboard-fill.png");
 		int leaderboardTextTexture = loadTexture("../IMGS/leaderboard-text.png");
+		int leaderboardBackButton = loadTexture("../IMGS/left-button.png");
+		int settingsBackButton = loadTexture("../IMGS/left-button.png");
+		int connectButton = loadTexture("../IMGS/connect-button.png");
+		int finished = loadTexture("../IMGS/finished.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, nearPlane, farPlane);
@@ -398,11 +405,11 @@ namespace Rendering {
 
 				ImGui::End();
 			}
-			
+
 
 			if (mainMenu) {
 				ImGui::SetNextWindowSize(ImVec2(width + 20, height + 20), 0);
-				ImGui::SetNextWindowPos(ImVec2(-8, -8), 0);
+				ImGui::SetNextWindowPos(ImVec2(-10, -10), 0);
 				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				//ImGui::BeginChildFrame('h', ImVec2(width, height));
@@ -435,33 +442,41 @@ namespace Rendering {
 			}
 			else if (settingsMenu) {
 				ImGui::SetNextWindowSize(ImVec2(width + 20, height + 20), 0);
-				ImGui::SetNextWindowPos(ImVec2(-8, -8), 0);
+				ImGui::SetNextWindowPos(ImVec2(-10, -10), 0);
 				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				//ImGui::BeginChildFrame('h', ImVec2(width, height));
 				ImGui::Image((void*)(intptr_t)settingsTexture, ImVec2(width, height));
-				//ImGui::EndChildFrame();
 
 				ImGui::End();
 
-				ImGui::SetNextWindowSize(ImVec2(200, 80), 0);
-				ImGui::SetNextWindowPos(ImVec2(800, 100), 0);
-				ImGui::Begin("Text input", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+				ImGui::SetNextWindowSize(ImVec2(220, 50), 0);
+				ImGui::SetNextWindowPos(ImVec2(880, 80), 0);
+				ImGui::Begin("Text input", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				//ImGui::BeginChildFrame('h', ImVec2(width, height));
-				static char str0[16] = "Username";
-				ImGui::InputText("", str0, IM_ARRAYSIZE(str0));
-				//ImGui::EndChildFrame();
+				static char username[16] = "Username";
+				ImGui::InputText("", username, IM_ARRAYSIZE(username));
 
 				ImGui::End();
 
-				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
-				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+				ImGui::SetNextWindowSize(ImVec2(menuButtonWidth, menuButtonHeight), 0);
+				ImGui::SetNextWindowPos(ImVec2(876, 120), 0);
+				ImGui::Begin("Connect Button", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
+				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth / 2 - 7, menuButtonHeight / 2 - 7))) {}
+				ImGui::PopStyleColor(3);
+
+				ImGui::End();
+
+				ImGui::SetNextWindowSize(ImVec2(width, 980), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 200), 0);
 				ImGui::Begin("Inner Main Menu", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				ImGui::Dummy(ImVec2(0, 250));
+				ImGui::Dummy(ImVec2(0, 100));
 
-				ImGui::Indent(width / 2 - menuButtonWidth / 2 - 200);
+				ImGui::Indent(width / 2 - menuButtonWidth / 2 - 210);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
@@ -480,7 +495,7 @@ namespace Rendering {
 
 				ImGui::Dummy(ImVec2(0, 300));
 
-				ImGui::Indent(-100 - settingsButtonSize * 2 - menuButtonWidth);
+				ImGui::Indent(-108 - settingsButtonSize * 2 - menuButtonWidth);
 				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
 					carColorCycleVariable--;
 					if (carColorCycleVariable < 0) { carColorCycleVariable = 2; }
@@ -489,37 +504,53 @@ namespace Rendering {
 				ImGui::SameLine();
 				ImGui::Indent(settingsButtonSize + 100);
 				if (carColorCycleVariable == 1) {
-					if (ImGui::ImageButton((void*)(intptr_t)pinkCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = false; }
+					if (ImGui::ImageButton((void*)(intptr_t)pinkCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) {}
 				}
 				else if (carColorCycleVariable == 2) {
-					if (ImGui::ImageButton((void*)(intptr_t)greenCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = false; }
+					if (ImGui::ImageButton((void*)(intptr_t)greenCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) {}
 				}
 				else {
-					if (ImGui::ImageButton((void*)(intptr_t)blueCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { settingsMenu = false; }
+					if (ImGui::ImageButton((void*)(intptr_t)blueCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) {}
 				}
 
 				ImGui::SameLine();
-				ImGui::Indent(settingsButtonSize + menuButtonWidth);
+				ImGui::Indent(settingsButtonSize + menuButtonWidth + 8);
 				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
+					//sound->playButtonPressSound();
 					carColorCycleVariable++;
 					if (carColorCycleVariable > 2) { carColorCycleVariable = 0; }
 				}
 				ImGui::PopStyleColor(3);
 
 				ImGui::End();
+
+				ImGui::SetNextWindowSize(ImVec2(menuButtonWidth + 20, menuButtonHeight + 20), 0);
+				ImGui::SetNextWindowPos(ImVec2(50, 50), 0);
+				ImGui::Begin("Settings Back-button", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
+				if (ImGui::ImageButton((void*)(intptr_t)settingsBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { settingsMenu = false; }
+				ImGui::PopStyleColor(3);
+
+				ImGui::End();
 			}
 			else if (leaderboardMenu) {
 				ImGui::SetNextWindowSize(ImVec2(width + 20, height + 20), 0);
-				ImGui::SetNextWindowPos(ImVec2(-8, -8), 0);
+				ImGui::SetNextWindowPos(ImVec2(-10, -10), 0);
 				ImGui::Begin("Leaderboard Backfill", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				ImGui::Image((void*)(intptr_t)leaderboardBackgrundFillTexture, ImVec2(width, height));
 
 				ImGui::End();
 
-				ImGui::SetNextWindowSize(ImVec2(620, 820), 0);
-				ImGui::SetNextWindowPos(ImVec2(660, 200), 0);
+				ImGui::SetNextWindowSize(ImVec2(width, height), 0);
+				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
 				ImGui::Begin("Leaderboard List", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::Dummy(ImVec2(0, 200));
+				ImGui::Indent(660);
 
 				ImGui::Image((void*)(intptr_t)leaderboardBackgroundTexture, ImVec2(600, 800));
 
@@ -534,6 +565,39 @@ namespace Rendering {
 
 				ImGui::End();
 
+				ImGui::SetNextWindowSize(ImVec2(660, 800), 0);
+				ImGui::SetNextWindowPos(ImVec2(660, 200), 0);
+				ImGui::Begin("Leaderboard Content", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::Dummy(ImVec2(0, 50));
+				ImGui::Indent(30);
+
+
+				ImGui::SetWindowFontScale(3);
+				ImGui::Text("Gustav");
+				ImGui::SameLine();
+				ImGui::Indent(375);
+				ImGui::Text("1:50.26");
+				ImGui::Dummy(ImVec2(0, 50));
+				ImGui::Indent(-375);
+				ImGui::Text("Oscar");
+				ImGui::SameLine();
+				ImGui::Indent(375);
+				ImGui::Text("1:57.83");
+
+				ImGui::End();
+
+				ImGui::SetNextWindowSize(ImVec2(menuButtonWidth + 20, menuButtonHeight + 20), 0);
+				ImGui::SetNextWindowPos(ImVec2(50, 50), 0);
+				ImGui::Begin("Leaderboard Back-button", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
+				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
+				if (ImGui::ImageButton((void*)(intptr_t)leaderboardBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { leaderboardMenu = false; }
+				ImGui::PopStyleColor(3);
+
+				ImGui::End();
 			}
 
 			countDownTime = Game::getCountDownTime();
@@ -556,7 +620,9 @@ namespace Rendering {
 				ImGui::End();
 			}
 
+
 			raceTime = Game::getRaceTime();
+
 
 			if (raceTime > 0 && raceTime < 1) {
 				ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
@@ -565,67 +631,72 @@ namespace Rendering {
 
 				ImGui::Image((void*)(intptr_t)countGo, ImVec2(607, 266));
 
-
 				ImGui::End();
+
+				raceFinished = false;
 			}
 			else if (raceTime > 1) {
-				ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
-				ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
-				ImGui::Begin("Race Timer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-				ImGui::SetWindowFontScale(4);
-				if (raceTime >= 60) {
-					while (raceTime > 60) {
-						raceTime = raceTime - 60;
-						minutes++;
-					}
-					std::string timerString = std::to_string(raceTime);
-					if (raceTime > 10) {
-						timerString = timerString.substr(0, 5);
+				if (raceFinished == false) {
+					ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
+					ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+					ImGui::Begin("Race Timer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+					ImGui::SetWindowFontScale(4);
+					if (raceTime >= 60) {
+						while (raceTime > 60) {
+							raceTime = raceTime - 60;
+							minutes++;
+						}
+						std::string timerString = std::to_string(raceTime);
+						if (raceTime > 10) {
+							timerString = timerString.substr(0, 5);
+						}
+						else {
+							timerString = timerString.substr(0, 4);
+							timerString = "0" + timerString;
+						}
+
+						std::string minutesString = std::to_string(minutes);
+						std::string finalString = minutesString + ":" + timerString;
+						char const* timerChar = finalString.c_str();
+						ImGui::Text(timerChar);
 					}
 					else {
-						timerString = timerString.substr(0, 4);
-						timerString = "0" + timerString;
+						std::string timerString = std::to_string(raceTime);
+						if (raceTime > 10) {
+							timerString = timerString.substr(0, 5);
+						}
+						else {
+							timerString = timerString.substr(0, 4);
+							timerString = "0" + timerString;
+						}
+						char const* timerChar = timerString.c_str();
+						ImGui::Text(timerChar);
 					}
 
-					std::string minutesString = std::to_string(minutes);
-					std::string finalString = minutesString + ":" + timerString;
-					char const* timerChar = finalString.c_str();
-					ImGui::Text(timerChar);
-				}
-				else {
-					std::string timerString = std::to_string(raceTime);
-					if (raceTime > 10) {
-						timerString = timerString.substr(0, 5);
-					}
-					else {
-						timerString = timerString.substr(0, 4);
-						timerString = "0" + timerString;
-					}
-					char const* timerChar = timerString.c_str();
-					ImGui::Text(timerChar);
+					ImGui::End();
+
+					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
+					ImGui::SetNextWindowPos(ImVec2(1550, 30), 0);
+					ImGui::Begin("Checkpoints", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+					ImGui::Image((void*)(intptr_t)checkpoint, ImVec2(636 * amplifier, 350 * amplifier));
+
+					ImGui::End();
 				}
 
 				minutes = 0;
 
-				ImGui::End();
-
-				ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
-				ImGui::SetNextWindowPos(ImVec2(1550, 30), 0);
-				ImGui::Begin("Checkpoints", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-				ImGui::Image((void*)(intptr_t)checkpoint, ImVec2(636 * amplifier, 350 * amplifier));
-
-				ImGui::End();
-
 				switch (Game::getCheckpointsReached()) {
 				case 0:
-					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-					ImGui::Begin("CheckpointZero", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+					if (raceTime > 1 && raceTime < 100) {
+						ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
+						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+						ImGui::Begin("CheckpointZero", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-					ImGui::Image((void*)(intptr_t)checkpointZero, ImVec2(224 * amplifier, 266 * amplifier));
+						ImGui::Image((void*)(intptr_t)checkpointZero, ImVec2(224 * amplifier, 266 * amplifier));
 
-					ImGui::End();
+						ImGui::End();
+					}
 					break;
 				case 1:
 					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
@@ -664,7 +735,7 @@ namespace Rendering {
 					ImGui::End();
 					break;
 				case 5:
-					ImGui::SetNextWindowSize(ImVec2(700, 450), 0);
+					ImGui::SetNextWindowSize(ImVec2(700, 470), 0);
 					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
 					ImGui::Begin("CheckpointsFive", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
@@ -689,6 +760,61 @@ namespace Rendering {
 					ImGui::Image((void*)(intptr_t)checkpointSeven, ImVec2(203 * amplifier, 256 * amplifier));
 
 					ImGui::End();
+					break;
+				case 8:
+					raceFinished = true;
+
+					ImGui::SetNextWindowSize(ImVec2(1000, 450), 0);
+					ImGui::SetNextWindowPos(ImVec2(712, 200), 0);
+					ImGui::Begin("Race Finished", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+					ImGui::SetWindowFontScale(10);
+
+					if (raceTime >= 60) {
+						while (raceTime > 60) {
+							raceTime = raceTime - 60;
+							minutes++;
+						}
+						std::string timerString = std::to_string(raceTime);
+						if (raceTime > 10) {
+							timerString = timerString.substr(0, 5);
+						}
+						else {
+							timerString = timerString.substr(0, 4);
+							timerString = "0" + timerString;
+						}
+
+						std::string minutesString = std::to_string(minutes);
+						std::string finalString = minutesString + ":" + timerString;
+						char const* timerChar = finalString.c_str();
+						ImGui::Text(timerChar);
+					}
+					else {
+						std::string timerString = std::to_string(raceTime);
+						if (raceTime > 10) {
+							timerString = timerString.substr(0, 5);
+						}
+						else {
+							timerString = timerString.substr(0, 4);
+							timerString = "0" + timerString;
+						}
+						char const* timerChar = timerString.c_str();
+						ImGui::Text(timerChar);
+					}
+
+					ImGui::End();
+
+					ImGui::SetNextWindowSize(ImVec2(1410, 230), 0);
+					ImGui::SetNextWindowPos(ImVec2(280, 380), 0);
+					ImGui::Begin("Finished", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+					ImGui::Image((void*)(intptr_t)finished, ImVec2(1396, 201));
+
+					ImGui::End();
+
+					break;
+				case 9:
+					raceTime = 0;
 					break;
 				}
 			}
