@@ -28,7 +28,7 @@ namespace Rendering {
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(-400.0f, 1000.0f, -1300.0f, 1.0f);
-	float lightIntensity = 10.0f;
+	float lightIntensity = 3.0f;
 	float envMultiplier = 1.5f;
 
 	//Shadow maps.
