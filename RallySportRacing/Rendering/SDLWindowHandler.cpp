@@ -308,6 +308,7 @@ namespace Rendering {
 		glBindTexture(GL_TEXTURE_2D, reflectionMap);
 		glActiveTexture(GL_TEXTURE9);
 		glBindTexture(GL_TEXTURE_2D, shadowMapFB.depthBuffer);
+		glActiveTexture(GL_TEXTURE0);
 
 
 		//Environment uniforms.
@@ -536,10 +537,11 @@ namespace Rendering {
 				ImGui::DragFloat("light intensity", &lightIntensity);
 				ImGui::DragFloat("polygon factor", &polygonFactor);
 				ImGui::DragFloat("polygon units", &polygonUnits);
+				ImGui::DragFloat("EnvMult", &envMultiplier);
 
 				glUseProgram(shadowMapID);
 				ImGui::Image((ImTextureID)shadowMapFB.colorTextureTarget, ImVec2(700, 700));
-
+				
 				ImGui::End();
 			}
 
@@ -559,7 +561,7 @@ namespace Rendering {
 
 			glEnable(GL_POLYGON_OFFSET_FILL);
 			glPolygonOffset(polygonFactor, polygonUnits);
-
+			glUseProgram(shadowMapID);
 			for (Model* m : models) {
 				m->render(lightProjMatrix, lightViewMatrix, shadowMapID);
 			}

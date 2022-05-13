@@ -4,6 +4,7 @@
 
 #include "Model.h"
 #include <glm/glm.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <GL/glew.h>
 #include <SDL.h>
@@ -19,9 +20,11 @@ using namespace tinygltf;
 
 namespace Rendering {
 
-	Model::Model(vector<Mesh> meshes, vector<Node> nodes) {
+	Model::Model(vector<Mesh> meshes, vector<Material> materials, bool isMovable, string modelName) {
 		this->meshes = meshes;
-		this->nodes = nodes;
+		this->materials = materials;
+		this->isMovable = isMovable;
+		this->modelName = modelName;
 	}
 
 	Model::~Model() {
@@ -29,6 +32,14 @@ namespace Rendering {
 		//glDeleteBuffers(1, &vertexBuffer);
 		//glDeleteBuffers(1, &colorBuffer);
 		//glDeleteVertexArrays(1, &vertexArrayID);
+	}
+
+	void Model::updateMaterial(const char* textureFilePath, string materialName) {
+		for each (Material material in materials) {
+			if (material.materialName == materialName) {
+				swapModelTexture(textureFilePath, GL_RGBA, material.baseColorTexture);
+			}
+		}
 	}
 
 	void Model::setTranslationMatrix(glm::mat4 translationMat) {
@@ -45,29 +56,37 @@ namespace Rendering {
 
 	void Model::render(glm::mat4 projection, glm::mat4 view, GLint programID) {
 
-		//Model matrix: TranslationMatrix * RotationMatrix * ScaleMatrix * OriginalVector
 		glm::mat4 model = translationMat * rotationMat * scaleMat;
 
-		glm::mat4 modelViewMatrix = view * model;
-		glm::mat4 mvp = projection * modelViewMatrix;
-		glm::mat4 normalMatrix = inverse(transpose(modelViewMatrix));
-		glm::mat4 viewInverse = inverse(view);
+		for each (Mesh m in meshes) {
+			m.renderMesh(programID, model, projection, view, isMovable);
+		}
+	}
 
-		//Send matrix to shader
-		GLuint matrixID = glGetUniformLocation(programID, "MVP");
-		glUniformMatrix4fv(matrixID, 1, GL_FALSE, &mvp[0][0]);
+	void Model::swapModelTexture(const char* filePath, GLint channels, unsigned int textureID) {
 
-		GLuint modelViewMatrixID = glGetUniformLocation(programID, "modelViewMatrix");
-		glUniformMatrix4fv(modelViewMatrixID, 1, GL_FALSE, &modelViewMatrix[0][0]);
-		
-		GLuint normalMatrixID = glGetUniformLocation(programID, "normalMatrix");
-		glUniformMatrix4fv(normalMatrixID, 1, GL_FALSE, &normalMatrix[0][0]);
+		ifstream textureStream(filePath, ios::in);
+		if (!textureStream.is_open()) {
+			printf("Could not open %s. Maybe in the wrong directory?\n", filePath);
+		}
+		else {
 
-		GLuint viewInverseMatrixID = glGetUniformLocation(programID, "viewInverse");
-		glUniformMatrix4fv(viewInverseMatrixID, 1, GL_FALSE, &viewInverse[0][0]);
+			int width, height, nrChannels;
+			unsigned char* image = stbi_load(filePath, &width, &height, &nrChannels, STBI_rgb_alpha);
 
-		for each (Node n in nodes) {
-			meshes[n.meshNumber].renderMesh(programID);
+			glBindTexture(GL_TEXTURE_2D, textureID);
+			glTexImage2D(GL_TEXTURE_2D, 0, channels, width, height, 0, channels, GL_UNSIGNED_BYTE, image);
+			free(image);
+
+			//Set wrapping type.
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+			//Mipmap and filtering.
+			glGenerateMipmap(GL_TEXTURE_2D);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
 		}
 	}
 	
@@ -111,7 +130,7 @@ namespace Rendering {
 
 	btTriangleMesh* meshInterface = new btTriangleMesh();
 
-	Model* Model::loadModel(const char* file, bool isTerrain) {
+	Model* Model::loadModel(const char* file, bool isTerrain, bool isMovable) {
 		maxX = 0;
 		maxY = 0;
 		maxZ = 0;
@@ -126,9 +145,10 @@ namespace Rendering {
 		std::string warn;
 
 		//Model data vector.
-		vector<Node> nodes;
 		vector<Rendering::Mesh> meshes;
 		vector<Material> materials;
+
+		unsigned int meshNumber = 0;
 		
 		bool res = loader.LoadASCIIFromFile(&gltfmodel, &err, &warn, file);
 
@@ -138,6 +158,9 @@ namespace Rendering {
 		//Load materials.
 		for each (tinygltf::Material gltfMaterial in gltfmodel.materials) {
 			Material material = Material();
+
+			material.materialName = gltfMaterial.name;
+
 			material.metallic = gltfMaterial.pbrMetallicRoughness.metallicFactor;
 			material.roughness = gltfMaterial.pbrMetallicRoughness.roughnessFactor;
 			material.albedo = glm::vec3(gltfMaterial.pbrMetallicRoughness.baseColorFactor[0], gltfMaterial.pbrMetallicRoughness.baseColorFactor[1], gltfMaterial.pbrMetallicRoughness.baseColorFactor[2]);
@@ -165,23 +188,32 @@ namespace Rendering {
 			
 			materials.push_back(material);
 		}
-		for each (tinygltf::Node gltfNode in gltfmodel.nodes) {
-			Node node = Node();
-			node.meshNumber = gltfNode.mesh;
-			if (size(gltfNode.translation) == 3) {
-				node.relativeTranslation = glm::vec3(gltfNode.translation[0], gltfNode.translation[1], gltfNode.translation[2]);
-			}
-			if (size(gltfNode.scale) == 3) {
-				node.scale = glm::vec3(gltfNode.scale[0], gltfNode.scale[1], gltfNode.scale[2]);
-			}
-			if (size(gltfNode.rotation) == 4) {
-				node.rotation = glm::vec4(gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2], gltfNode.rotation[3]);
-			}
-			nodes.push_back(node);
-		}
 
 		for each (tinygltf::Mesh gltfMesh in gltfmodel.meshes) {
 
+			vector<glm::mat4> instanceMatrices;
+			unsigned int instances = 0;
+
+			for each (tinygltf::Node gltfNode in gltfmodel.nodes) {
+
+				if (gltfNode.mesh == meshNumber) {
+					glm::mat4 relativeTranslation = glm::mat4(1.0f);
+					glm::mat4 scale = glm::mat4(1.0f);
+					glm::mat4 rotation = glm::mat4(1.0f);
+
+					if (size(gltfNode.translation) == 3) {
+						relativeTranslation = glm::translate(glm::mat4(1.0f), glm::vec3(gltfNode.translation[0], gltfNode.translation[1], gltfNode.translation[2]));
+					}
+					if (size(gltfNode.scale) == 3) {
+						scale = glm::scale(glm::mat4(1.0f), glm::vec3(gltfNode.scale[0], gltfNode.scale[1], gltfNode.scale[2]));
+					}
+					if (size(gltfNode.rotation) == 4) {
+						rotation = glm::toMat4(glm::quat(gltfNode.rotation[3], gltfNode.rotation[0], gltfNode.rotation[1], gltfNode.rotation[2]));
+					}
+					instances++;
+					instanceMatrices.push_back(relativeTranslation * rotation * scale);
+				}
+			}
 
 			//Mesh data vector.
 			vector<SubMesh*> subMeshes;
@@ -212,11 +244,23 @@ namespace Rendering {
 				const tinygltf::Buffer& bufferTexCoords = gltfmodel.buffers[bufferViewTexCoords.buffer];
 				const float* texCoords = reinterpret_cast<const float*>(&bufferTexCoords.data[bufferViewTexCoords.byteOffset + accessorTexCoords.byteOffset]);
 
+				const float* texCoords2;
+				if (gltfMesh.name == "tree.007" || gltfMesh.name == "tree.001") {
+					const tinygltf::Accessor& accessorTexCoords = gltfmodel.accessors[primitive.attributes["TEXCOORD_1"]];
+					const tinygltf::BufferView& bufferViewTexCoords = gltfmodel.bufferViews[accessorTexCoords.bufferView];
+					const tinygltf::Buffer& bufferTexCoords = gltfmodel.buffers[bufferViewTexCoords.buffer];
+					texCoords2 = reinterpret_cast<const float*>(&bufferTexCoords.data[bufferViewTexCoords.byteOffset + accessorTexCoords.byteOffset]);
+				}
+				else {
+					texCoords2 = texCoords;
+				}
+
 				//Contructing vertices.
 				for (size_t i = 0; i < accessorPositions.count; i++) {
 					vertex.position = glm::vec3(positions[i * 3 + 0], positions[i * 3 + 1], positions[i * 3 + 2]);
 					vertex.normal = glm::vec3(normals[i * 3 + 0], normals[i * 3 + 1], normals[i * 3 + 2]);
 					vertex.texCoord = glm::vec2(texCoords[i * 2 + 0], texCoords[i * 2 + 1]);
+					vertex.texCoord2 = glm::vec2(texCoords2[i * 2 + 0], texCoords2[i * 2 + 1]);
 					vertices.push_back(vertex);
 
 					if (maxX <= vertex.position.x) {
@@ -273,10 +317,10 @@ namespace Rendering {
 				subMeshes.push_back(new SubMesh(vertices, indices, materials[primitive.material]));
 			}
 			
-			meshes.push_back(Mesh(subMeshes, gltfMesh.name));
-
+			meshes.push_back(Mesh(subMeshes, gltfMesh.name, instances, instanceMatrices));
+			meshNumber++;
 		}
-		Model* model = new Model(meshes, nodes);
+		Model* model = new Model(meshes, materials, isMovable, file);
 
 		return model;
 	}

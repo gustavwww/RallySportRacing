@@ -16,19 +16,16 @@ namespace Rendering {
 
 	class Model {
 	public:
-		struct Node {
-			unsigned int meshNumber;
-			glm::vec3 relativeTranslation;
-			glm::vec3 scale;
-			glm::vec4 rotation;
-		};
 
 		vector<Mesh> meshes;
-		vector<Node> nodes;
+		vector<Material> materials;
+		bool isMovable = false;
+		string modelName;
 
-		Model(vector<Mesh> meshes, vector<Node> nodes);
+		Model(vector<Mesh> meshes, vector<Material> materials, bool isMovable, string modelName);
 		~Model();
 
+		void updateMaterial(const char* textureFilePath, string materialName);
 		void setTranslationMatrix(glm::mat4 translationMat);
 		void setScaleMatrix(glm::mat4 scaleMat);
 		void setRotationMatrix(glm::mat4 rotationMat);
@@ -38,8 +35,9 @@ namespace Rendering {
 		btVector3 Model::generateCollisionShape();
 		btVector3 Model::generateCollisionShapeOffset();
 
-		static Model* loadModel(const char* file, bool isTerrain);
+		static Model* loadModel(const char* file, bool isTerrain, bool isMovable);
 		static unsigned int loadModelTexture(const char* filePath, GLint channels);
+		static void swapModelTexture(const char* filePath, GLint channels, unsigned int textureID);
 
 		btTriangleMesh* getMeshInterface();
 
