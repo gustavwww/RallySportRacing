@@ -13,8 +13,9 @@
 
 namespace Game{
 
-	GameObject::GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : dynamicsWorld(dynamicsWorld) 
+	GameObject::GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld, string name) : dynamicsWorld(dynamicsWorld) 
 	{
+		this->name = name;
 		this->model = model;
 		position = glm::vec3(0.0f);
 		orientation = glm::vec3(0.0f);
@@ -182,6 +183,10 @@ namespace Game{
 
 	Rendering::Model* GameObject::getModel() {
 		return model;
+	}
+
+	string GameObject::getName() {
+		return name;
 	}
 
 

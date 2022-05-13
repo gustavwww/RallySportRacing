@@ -323,7 +323,7 @@ namespace Game {
 		// test wall
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/test.gltf", false, false);
 		windowHandler->addModel(wallModel);
-		wall = new GameObject(wallModel, physics->dynamicsWorld);
+		wall = new GameObject(wallModel, physics->dynamicsWorld, "WallModel");
 		gameObjects.push_back(wall);
 		wall->setInitialPosition(btVector3(-70, 0, 0));
 		//wall->setInitialRotation(btQuaternion(0,0,1,1));
@@ -331,7 +331,7 @@ namespace Game {
 		// test light
 		Rendering::Model* lightModel = Rendering::Model::loadModel("../Models/light.gltf", false, true);
 		windowHandler->addModel(lightModel);
-		light = new GameObject(lightModel, physics->dynamicsWorld);
+		light = new GameObject(lightModel, physics->dynamicsWorld, "LightModel");
 		gameObjects.push_back(light);
 		light->setInitialPosition(btVector3(-70, 4, 0));
 
@@ -370,7 +370,7 @@ namespace Game {
 		//Light Debugging Environment
 		/*Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false, false);
 		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
+		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld, "LightTestEnvironment");
 		gameObjects.push_back(debugEnvironment);
 		debugEnvironment->setInitialPosition(btVector3(-200, 10, 0));
 		*/
@@ -506,10 +506,15 @@ namespace Game {
 		return checkpointsReached;
 	}
 
-	void Game::setTextureIndex(int a) {
+	void Game::setTextureIndex(int colorIndex) {
 		for (int i = 0; i < gameObjects.size(); i++) {
-			//gameObjects[i]->getModel()->updateMaterial(a, "chassiColour");
+			if(gameObjects[i]->getName() == "ClientCar")
+			gameObjects[i]->getModel()->updateMaterial(colorIndex, "chassiColor");
 		}
+	}
+
+	void Game::turnOffEngine() {
+		isOn = false;
 	}
 
 	void checkCollisions() {
@@ -670,6 +675,8 @@ namespace Game {
 					engineOnOffToggle = false;
 					engineDelay = 0;
 					gasTimer = 0;
+					raceTime = 0;
+					checkpointsReached = 0;
 	
 					for (int i = 0; i < 100; i++) {
 						glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
