@@ -527,11 +527,12 @@ namespace Game {
 					if ((obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[0]->getWorldArrayIndex()) && (checkpointsReached == (checkpoints.size()-1)) && timingRace) {
 						timingRace = false;
 						checkpointsReached++;
-						cout << checkpointsReached << endl;
-						cout << roundf(raceTime) << endl;
+						//cout << checkpointsReached << endl;
+						//cout << roundf(raceTime) << endl;
 						// do something here, Like show the timer or put it in a leaderboard
 						// raceTime is the timer for the race
 						Networking::sendTime(raceTime);
+						// play sound here xxxxxxxxxx
 					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
@@ -540,7 +541,8 @@ namespace Game {
 								//cout << "Kollision med: " << checkpoints[i]->getWorldArrayIndex() << endl;
 								latestReachedCheckpoint = checkpoints[i];
 								checkpointsReached++;
-								cout << checkpointsReached << endl;
+								//cout << checkpointsReached << endl;
+								// play sound here xxxxxxxxxxxxx
 							}
 						}
 					}
