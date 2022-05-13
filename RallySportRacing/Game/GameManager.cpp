@@ -336,7 +336,7 @@ namespace Game {
 		light->setInitialPosition(btVector3(-70, 4, 0));
 
 		// player vehicle, use setInitialpos to change position when starting the game
-		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false, true);
+		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3.gltf", false, true);
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
