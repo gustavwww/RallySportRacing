@@ -9,7 +9,7 @@
 namespace Game {
 	class GameObject {
 	public:
-		GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld); // for objects not interatcting with physics (no friction)
+		GameObject(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld, string name); // for objects not interatcting with physics (no friction)
 		GameObject(Rendering::Model* model, bool isTerrain, float friction, btDiscreteDynamicsWorld* dynamicsWorld); // normal
 		GameObject(Rendering::Model* model); // for multiplayer
 
@@ -36,8 +36,10 @@ namespace Game {
 		glm::quat bulletToGlm(const btQuaternion& q);
 
 		Rendering::Model* getModel();
+		string getName();
 
 	protected:
+		string name;
 		Rendering::Model* model;
 		glm::vec3 position;
 		glm::vec3 orientation;

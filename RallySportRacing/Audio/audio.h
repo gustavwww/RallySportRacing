@@ -30,6 +30,7 @@ public:
 	string getSoundString(int ID);
 	void playSourcelessSounds(glm::vec3 positionVec3);
 	void playButtonPressSound();
+	void playCheckpointSound();
 	void playStartSound();
 	void playRainSound(bool playRain);
 

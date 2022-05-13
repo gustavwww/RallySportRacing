@@ -5,7 +5,7 @@
 namespace Game {
 
 
-	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, dynamicsWorld)
+	Vehicle::Vehicle(Rendering::Model* model, btDiscreteDynamicsWorld* dynamicsWorld) : GameObject(model, dynamicsWorld, "ClientCar")
 	{
 		Rendering::Model* wheel1Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		getHandler()->addModel(wheel1Model);
@@ -16,10 +16,10 @@ namespace Game {
 		Rendering::Model* wheel4Model = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		getHandler()->addModel(wheel4Model);
 
-		wheel1 = new GameObject(wheel1Model, dynamicsWorld);
-		wheel2 = new GameObject(wheel2Model, dynamicsWorld);
-		wheel3 = new GameObject(wheel3Model, dynamicsWorld);
-		wheel4 = new GameObject(wheel4Model, dynamicsWorld);
+		wheel1 = new GameObject(wheel1Model, dynamicsWorld, "wheel1");
+		wheel2 = new GameObject(wheel2Model, dynamicsWorld, "wheel2");
+		wheel3 = new GameObject(wheel3Model, dynamicsWorld, "wheel3");
+		wheel4 = new GameObject(wheel4Model, dynamicsWorld, "wheel4");
 
 		wheels.push_back(wheel1);
 		wheels.push_back(wheel2);

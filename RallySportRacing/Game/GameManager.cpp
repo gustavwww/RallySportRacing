@@ -323,7 +323,7 @@ namespace Game {
 		// test wall
 		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/test.gltf", false, false);
 		windowHandler->addModel(wallModel);
-		wall = new GameObject(wallModel, physics->dynamicsWorld);
+		wall = new GameObject(wallModel, physics->dynamicsWorld, "WallModel");
 		gameObjects.push_back(wall);
 		wall->setInitialPosition(btVector3(-70, 0, 0));
 		//wall->setInitialRotation(btQuaternion(0,0,1,1));
@@ -331,7 +331,7 @@ namespace Game {
 		// test light
 		Rendering::Model* lightModel = Rendering::Model::loadModel("../Models/light.gltf", false, true);
 		windowHandler->addModel(lightModel);
-		light = new GameObject(lightModel, physics->dynamicsWorld);
+		light = new GameObject(lightModel, physics->dynamicsWorld, "LightModel");
 		gameObjects.push_back(light);
 		light->setInitialPosition(btVector3(-70, 4, 0));
 
@@ -368,11 +368,12 @@ namespace Game {
 		environment2->setInitialPosition(btVector3(-50, 0, 0));*/
 
 		//Light Debugging Environment
-		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false, false); //
+		/*Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false, false);
 		windowHandler->addModel(debugEnvironmentModel);
-		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
+		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld, "LightTestEnvironment");
 		gameObjects.push_back(debugEnvironment);
 		debugEnvironment->setInitialPosition(btVector3(-200, 10, 0));
+		*/
 	}
 
 	bool toScreen = true;
@@ -505,9 +506,10 @@ namespace Game {
 		return checkpointsReached;
 	}
 
-	void Game::setTextureIndex(int a) {
+	void Game::setTextureIndex(int colorIndex) {
 		for (int i = 0; i < gameObjects.size(); i++) {
-			//gameObjects[i]->getModel()->updateMaterial(a, "chassiColour");
+			if(gameObjects[i]->getName() == "ClientCar")
+			gameObjects[i]->getModel()->updateMaterial(colorIndex, "chassiColor");
 		}
 	}
 
@@ -542,7 +544,7 @@ namespace Game {
 						// do something here, Like show the timer or put it in a leaderboard
 						// raceTime is the timer for the race
 						Networking::sendTime(raceTime);
-						// play sound here xxxxxxxxxx
+						sound->playCheckpointSound();
 					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
