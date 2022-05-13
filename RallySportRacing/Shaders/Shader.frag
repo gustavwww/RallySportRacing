@@ -60,6 +60,7 @@ uniform float lightIntensity;
 in vec3 vertexPosition_viewspace;
 in vec3 normal_viewspace;
 in vec2 texCoord;
+in vec2 texCoord2;
 in vec4 shadowMapCoord;
 
 ////////////////////////////////
@@ -110,12 +111,13 @@ void loadPBRValues(){
 		if(useBaseColorTexture == 0){
 			albedo = albedoValue;
 		}else{
-			vec4 albedoA = texture(baseColorTexture, texCoord);
-			if(albedoA.a < 0.1)
+			vec4 albedoA = texture(baseColorTexture, texCoord2);
+			if(albedoA.a < 0.12)
 				discard;
-			albedo = texture(baseColorTexture, texCoord).rgb;
+			albedo = texture(baseColorTexture, texCoord2).rgb;
 
 		}
+		albedo = mix(albedo * 1.0f, mix(vec3(0.5, 0.5, 0.5), albedo, 1.5f), 0.5);
 		
 		//Metallic
 		if(useMetallicTexture == 0){
@@ -239,7 +241,7 @@ void main(){
 	vec3 color =  Lo + ambient;
 
 	//HDR tonemapping.
-	color = color / (color + vec3(1.0));
+	//color = color / (color + vec3(1.0));
 	
 	//Gamma correction.
 	color = pow(color, vec3(1.0/2.2));
