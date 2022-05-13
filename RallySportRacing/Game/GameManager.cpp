@@ -622,6 +622,8 @@ namespace Game {
 			vehicle->vehicle->getRigidBody()->setLinearVelocity(btVector3(0, 0, 0));
 			raceCountDown -= gameTimer->getDeltaTime(); // variable to show on screen. Maybe cast to int or round it
 			//cout << roundf(raceCountDown) << endl; skipps 3 because it does not round. Better to use roundf i think
+			raceTime = 0;
+			timingRace = false;
 		}
 		if (raceCountDown <= 0) {
 			isCountingDown = false;

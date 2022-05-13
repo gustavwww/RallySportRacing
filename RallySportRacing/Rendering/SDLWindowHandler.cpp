@@ -504,13 +504,13 @@ namespace Rendering {
 				ImGui::SameLine();
 				ImGui::Indent(settingsButtonSize + 100);
 				if (carColorCycleVariable == 1) {
-					if (ImGui::ImageButton((void*)(intptr_t)pinkCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) {}
+					ImGui::Image((void*)(intptr_t)pinkCarTexture, ImVec2(menuButtonWidth, menuButtonHeight));
 				}
 				else if (carColorCycleVariable == 2) {
-					if (ImGui::ImageButton((void*)(intptr_t)greenCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) {}
+					ImGui::Image((void*)(intptr_t)greenCarTexture, ImVec2(menuButtonWidth, menuButtonHeight));
 				}
 				else {
-					if (ImGui::ImageButton((void*)(intptr_t)blueCarTexture, ImVec2(menuButtonWidth, menuButtonHeight))) {}
+					ImGui::Image((void*)(intptr_t)blueCarTexture, ImVec2(menuButtonWidth, menuButtonHeight));
 				}
 
 				ImGui::SameLine();
@@ -603,7 +603,7 @@ namespace Rendering {
 			countDownTime = Game::getCountDownTime();
 			if (countDownTime < 3.0f) {
 				ImGui::SetNextWindowSize(ImVec2(300, 300), 0);
-				ImGui::SetNextWindowPos(ImVec2(width / 2 - 100, height / 2 - 160), 0);
+				ImGui::SetNextWindowPos(ImVec2(width / 2 - 100 - 10, height / 2 - 160), 0);
 				ImGui::Begin("Count Down", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				if (countDownTime > 2) {
@@ -613,6 +613,7 @@ namespace Rendering {
 					ImGui::Image((void*)(intptr_t)countTwo, ImVec2(216, 261));
 				}
 				else if (countDownTime > 0) {
+					ImGui::Indent(30);
 					ImGui::Image((void*)(intptr_t)countOne, ImVec2(129, 256));
 				}
 
@@ -626,7 +627,7 @@ namespace Rendering {
 
 			if (raceTime > 0 && raceTime < 1) {
 				ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
-				ImGui::SetNextWindowPos(ImVec2(width / 2 - 607 / 2, height / 2 - 300 / 2), 0);
+				ImGui::SetNextWindowPos(ImVec2(width / 2 - 607 / 2, height / 2 - 300 / 2 - 30), 0);
 				ImGui::Begin("Count Go", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				ImGui::Image((void*)(intptr_t)countGo, ImVec2(607, 266));
