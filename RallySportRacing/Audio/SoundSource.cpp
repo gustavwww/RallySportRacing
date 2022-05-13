@@ -10,9 +10,12 @@ float speed;
 
 int engineFade;
 
+bool checkStart;
+
 SoundSource::SoundSource(int ID, irrklang::vec3df position) {
 	// Init engine sound
 	speed = 0.0F;
+	checkStart = false;
 
 	this->soundString = "00000";
 	startSoundTimer = 0;
@@ -188,18 +191,29 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			}
 
 			// 
-			this->engineHighAcc->setPlaybackSpeed(1.0F + abs(speed) / 400.0F);
-			this->engineHighAcc->setVolume((abs(speed) / 100.0F) * abs(engineFade / 100.0F));
-			//this->engineHighAcc->setMinDistance(abs(speed) / 5.0F);
+			if (speed < 10) {
+				checkStart = true;
+			}
+			if((5 * speed / 400.0F) > (engineFade / 200.0F) ) {
+				this->engineHighAcc->setPlaybackSpeed(1.0F + abs(speed) / 400.0F);
+				this->engineHighAcc->setVolume((abs(speed) / 100.0F) * engineFade / 100.0F);
+
+				checkStart = false;
+			}
+			else if (checkStart) {
+				this->engineHighAcc->setPlaybackSpeed(1.0F + engineFade / 200.0F);
+				this->engineHighAcc->setVolume(engineFade / 100.0F);
+			}
 		}
 
 		// If decceleration pressed
 		else if (WorSPressed == '2') {
-			if (engineFade > 0) {
+			
+			if (engineFade < 0) {
 				engineFade = 0;
 			}
-			if (engineFade > -100) {
-				engineFade--;
+			if (engineFade > 0) {
+				engineFade-=5;
 			}
 
 			// If deccelerating turn acceleration sound off
@@ -217,8 +231,7 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 
 			//
 			this->engineHighDec->setPlaybackSpeed(1.0F + abs(speed) / 400.0F);
-			this->engineHighDec->setVolume((abs(speed) / 200.0F) * abs(engineFade/100.0F));
-			//this->engineHighDec->setMinDistance(abs(speed) / 5.0F);
+			this->engineHighDec->setVolume((abs(speed) / 200.0F));
 		}
 		// If neither activly accelerating or decellerating
 		else {
@@ -244,8 +257,7 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 
 			//
 			this->engineHighDec->setPlaybackSpeed(1.0F + abs(speed) / 400.0F);
-			this->engineHighDec->setVolume((abs(speed) / 200.0F) * abs(engineFade/100.0F));
-			//this->engineHighDec->setMinDistance(abs(speed) / 5.0F);
+			this->engineHighDec->setVolume((abs(speed) / 200.0F));
 		}
 	}
 	
