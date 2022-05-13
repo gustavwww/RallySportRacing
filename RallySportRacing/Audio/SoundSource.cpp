@@ -178,7 +178,7 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			}
 
 			// If accelerating turn off decceleration sound
-			if (this->engineHighDec->getIsPaused()) {
+			if (!this->engineHighDec->getIsPaused()) {
 				this->engineHighDec->setIsPaused(true);
 			}
 
