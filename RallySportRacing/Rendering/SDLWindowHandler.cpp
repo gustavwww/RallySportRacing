@@ -292,16 +292,13 @@ namespace Rendering {
 		glm::mat4 view;
 
 
-		string backgroundFileName = "../Textures/Background/001";
+		string backgroundFileName = "../Textures/Background/kloppenheim_06_2k";
+		
 		vector<string>reflectionLevels{
-			backgroundFileName + "_dl_0.hdr",
-			backgroundFileName + "_dl_1.hdr",
-			backgroundFileName + "_dl_2.hdr",
-			backgroundFileName + "_dl_3.hdr",
-			backgroundFileName + "_dl_4.hdr",
-			backgroundFileName + "_dl_5.hdr",
-			backgroundFileName + "_dl_6.hdr",
-			backgroundFileName + "_dl_7.hdr"
+			backgroundFileName + "_0.hdr",
+			backgroundFileName + "_1.hdr",
+			backgroundFileName + "_2.hdr",
+			backgroundFileName + "_3.hdr"
 		};
 
 		//Create irrdiance and reflection files.

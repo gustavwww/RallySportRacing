@@ -222,7 +222,7 @@ void main(){
 	vec4 wiWorldSpace = normalize(viewInverse * vec4(-reflect(pos, normal), 0.0f));
 	vec4 woWorldSpace = normalize(viewInverse * vec4(pos, 0.0f));
 
-	const float MAX_REFLECTION_LOD = 4.0;
+	const float MAX_REFLECTION_LOD = 3.0;
 	
 	theta = acos(max(-1.0f, min(1.0f, wiWorldSpace.y)));
 	phi = atan(wiWorldSpace.z, wiWorldSpace.x);
