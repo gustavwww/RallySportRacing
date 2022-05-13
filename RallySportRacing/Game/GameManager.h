@@ -25,6 +25,7 @@ namespace Game {
 	float getVehicleSpeed();
 	bool getCountDown();
 	int getCheckpointsReached();
+	void setTextureIndex(int a);
 }
 
 #endif

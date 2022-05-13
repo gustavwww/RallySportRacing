@@ -505,6 +505,12 @@ namespace Game {
 		return checkpointsReached;
 	}
 
+	void Game::setTextureIndex(int a) {
+		for (int i = 0; i < gameObjects.size(); i++) {
+			//gameObjects[i]->getModel()->updateMaterial(a, "chassiColour");
+		}
+	}
+
 	void checkCollisions() {
 		// Collisionhandling between a pair of objects
 		// Bullet physics does not give a predefined check collision with method

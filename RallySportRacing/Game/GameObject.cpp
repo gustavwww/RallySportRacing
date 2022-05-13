@@ -41,6 +41,8 @@ namespace Game{
 		quaternion = glm::quat(0,0,0,0);
 	}
 
+
+
 	void GameObject::updateMatrices() {
 		position = bulletToGlm(transform.getOrigin());
 		model->setTranslationMatrix(glm::translate(glm::mat4(1.0f), bulletToGlm(transform.getOrigin())));
