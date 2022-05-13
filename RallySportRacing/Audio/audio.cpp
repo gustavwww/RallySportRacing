@@ -38,7 +38,7 @@ Audio::Audio() {
 
 	// Init sourceless sounds
 	irrklang::vec3df position(0, 0, 0);
-	this->rainSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/Rain.mp3", position , true, true, true);
+	this->rainSound = Audio::SoundEngine->play3D("../RallySportRacing/Audio/Rain.mp3", position, true, true, true);
 	this->playRain = false;
 	rainFade = 0.0F;
 }
@@ -108,15 +108,15 @@ irrklang::vec3df Audio::getVelMetersPerSec(glm::vec3 velPerFrame, float speedKmP
 	float x;
 	// Get speed in m/s
 	float speedMetersPerSec = speedKmPerh / 3.6;
-	
+
 	// Calculate x, the multiplier that turns the speed per frame to speed in m/s
 	// speedMeterPerSec = sqrt( (velPerFrame.X * x)^2 + (velPerFrame.Y * x)^2 + (velPerFrame.Z * x)^2 ) -> x
 
-	x = speedMetersPerSec * sqrt( pow(velPerFrame.x, 2) + pow(velPerFrame.y, 2) + pow(velPerFrame.z, 2) ) /
+	x = speedMetersPerSec * sqrt(pow(velPerFrame.x, 2) + pow(velPerFrame.y, 2) + pow(velPerFrame.z, 2)) /
 		(pow(velPerFrame.x, 2) + pow(velPerFrame.y, 2) + pow(velPerFrame.z, 2));
 
 	// Return vector of velocity in m/s
-	irrklang::vec3df velMetersPerSec( velPerFrame.x * x, velPerFrame.y * x,velPerFrame.z * x );
+	irrklang::vec3df velMetersPerSec(velPerFrame.x * x, velPerFrame.y * x, velPerFrame.z * x);
 	return velMetersPerSec;
 }
 
@@ -177,6 +177,6 @@ irrklang::vec3df Audio::glmToirrklangVec(glm::vec3 inVec) {
 	return outVec;
 }
 irrklang::vec3df Audio::glmToirrklangVec(glm::vec3 inVec, int scalar) {
-	irrklang::vec3df outVec(inVec.x/scalar, inVec.y/scalar, inVec.z/scalar);
+	irrklang::vec3df outVec(inVec.x / scalar, inVec.y / scalar, inVec.z / scalar);
 	return outVec;
 }

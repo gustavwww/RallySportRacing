@@ -513,6 +513,10 @@ namespace Game {
 		}
 	}
 
+	void Game::turnOffEngine() {
+		isOn = false;
+	}
+
 	void checkCollisions() {
 		// Collisionhandling between a pair of objects
 		// Bullet physics does not give a predefined check collision with method
@@ -671,6 +675,8 @@ namespace Game {
 					engineOnOffToggle = false;
 					engineDelay = 0;
 					gasTimer = 0;
+					raceTime = 0;
+					checkpointsReached = 0;
 	
 					for (int i = 0; i < 100; i++) {
 						glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);

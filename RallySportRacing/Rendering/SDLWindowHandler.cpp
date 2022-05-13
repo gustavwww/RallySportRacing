@@ -16,6 +16,7 @@
 #include "Game/GameManager.h"
 #include "Utils/HdrFileGenerator.h"
 #include "Audio/audio.h"
+#include "Networking/Networking.h"
 #include "FrameBufferObject.h"
 
 using namespace std;
@@ -463,7 +464,10 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth / 2 - 7, menuButtonHeight / 2 - 7))) { sound->playButtonPressSound(); }
+				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth / 2 - 7, menuButtonHeight / 2 - 7))) { 
+					sound->playButtonPressSound();
+					//Networking::joinGame(0, username);
+				}
 				ImGui::PopStyleColor(3);
 
 				ImGui::End();
@@ -573,6 +577,7 @@ namespace Rendering {
 				ImGui::Dummy(ImVec2(0, 50));
 				ImGui::Indent(30);
 
+				//vector<PlayerTime> = Networking::getTimes();
 
 				ImGui::SetWindowFontScale(3);
 				ImGui::Text("Gustav");
@@ -813,6 +818,8 @@ namespace Rendering {
 					ImGui::Image((void*)(intptr_t)finished, ImVec2(1396, 201));
 
 					ImGui::End();
+
+					Game::turnOffEngine();
 
 					break;
 				case 9:
