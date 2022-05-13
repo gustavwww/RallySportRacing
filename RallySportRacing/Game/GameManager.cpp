@@ -421,6 +421,11 @@ namespace Game {
 	bool engineOnOffToggle = true;
 	float engineDelay;
 
+	// test for multiple random backfires
+	bool temp1 = false;
+	float temp1delay;
+	bool temp1toggle = false;
+
 	// delay for turning the car back up
 	bool resetCarToggle = true;
 	float resetCarDelay;
@@ -733,6 +738,7 @@ namespace Game {
 				}
 				
 				// driving 
+
 				if (keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->drive(1);
 					pressedW = true;
@@ -765,25 +771,46 @@ namespace Game {
 				if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->notGasing();
 				
-					if (vehicle->getSpeed() >= 169 && pressedW == true && backFireToggle == true) {
+					if ((vehicle->getSpeed() >= 169 && pressedW == true && backFireToggle == true) || temp1) { // 169
 						// spela upp ljud explosion
-						
-						soundString[2] = '1';
-						for (int i = 0; i < 400; i++) {
-							glm::vec3 smokeOffset = glm::vec3(1 * vehicle->getOrientation().x, 1*vehicle->getOrientation().y + 0.23, 1 * vehicle->getOrientation().z);
-							blueexplosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset + glm::vec3(0, 0.05, 0), glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.075f, 0.05);
-							explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float() * vehicle->getOrientation().x, 100 * random.Float() * vehicle->getOrientation().y, 1 * random.Float() * vehicle->getOrientation().z), 0.075f, 0.1);
-						}
-						pressedW = false;
-						backFireToggle = false;
-						backFireDelay = 0;
-						soundString[2] = '1'; // sounds better with this added=)
+						temp1delay = 0;
+							soundString[2] = '1';
+							for (int i = 0; i < 400; i++) {
+								glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
+								explosionParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(0,0,0), 0.04f, 0.1);
+							}
+							for (int i = 0; i < 10; i++) {
+								glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
+								smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 0.5, 0.2);
+							}
+							pressedW = false;
+							backFireToggle = false;
+							backFireDelay = 0;
+
+							int xTimes = roundf(random.Float());
+							if (xTimes) {
+								temp1toggle = true;
+							}
+							temp1 = false;
 					}
 				}
+
+				if (temp1toggle) {
+					temp1delay += gameTimer->getDeltaTime();
+					if (temp1delay >= 0.2) {
+						temp1 = true;
+						temp1toggle = false;
+						temp1delay = 0;
+					}
+				}
+
 				backFireDelay += gameTimer->getDeltaTime();
 				if (backFireDelay >= 3) {
 					backFireToggle = true;
 				}
+
+				int xTimes = roundf(random.Float());
+
 
 				// steering
 				if (keyboard_state_array[SDL_SCANCODE_D]) {
