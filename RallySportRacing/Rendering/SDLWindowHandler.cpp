@@ -28,7 +28,7 @@ namespace Rendering {
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(-400.0f, 1000.0f, -1300.0f, 1.0f);
-	float lightIntensity = 10.0f;
+	float lightIntensity = 3.0f;
 	float envMultiplier = 1.5f;
 
 	//Shadow maps.
@@ -246,6 +246,7 @@ namespace Rendering {
 		GLint text2DProgramID = loadShader("../RallySportRacing/Shaders/2DText.vert", "../RallySportRacing/Shaders/2DText.frag");
 
 		GLint mapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/Environment.frag");
+		GLint refMapCreationID = loadShader("../RallySportRacing/Shaders/Environment.vert", "../RallySportRacing/Shaders/ReflectivityMap.frag");
 		GLint shadowMapID = loadShader("../RallySportRacing/Shaders/ShadowMap.vert", "../RallySportRacing/Shaders/ShadowMap.frag");
 
 		debugID = loadShader("../RallySportRacing/Shaders/Hitbox.vert", "../RallySportRacing/Shaders/Hitbox.frag");
@@ -303,7 +304,7 @@ namespace Rendering {
 
 		//Create irrdiance and reflection files.
 		//Utils::HdrFileGenerator::createIrradianceHDR(mapCreationID, backgroundFileName + ".hdr");
-		//Utils::HdrFileGenerator::createReflectionHDRs(mapCreationID, backgroundFileName + ".hdr");
+		//Utils::HdrFileGenerator::createReflectionHDRs(refMapCreationID, backgroundFileName + ".hdr");
 
 		//Load environment textures.
 		unsigned int skybox = Utils::HdrFileGenerator::loadHDRTexture(backgroundFileName + ".hdr");

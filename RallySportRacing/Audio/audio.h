@@ -29,6 +29,7 @@ public:
 	void setListenerParameters(glm::vec3 positionVec3, glm::vec3 direction, glm::vec3 velPerFrame, float speed);
 	string getSoundString(int ID);
 	void playSourcelessSounds(glm::vec3 positionVec3);
+	void playButtonPressSound();
 	void playStartSound();
 	void playRainSound(bool playRain);
 
@@ -38,7 +39,6 @@ private:
 	static Audio* instance;
 	irrklang::vec3df getVelMetersPerSec(glm::vec3 velPerFrame, float speedKmPerh);
 	void rain(glm::vec3 position);
-	void playButtonPressSound();
 	irrklang::vec3df glmToirrklangVec(glm::vec3 inVec);
 	irrklang::vec3df glmToirrklangVec(glm::vec3 inVec, int scalar);
 
