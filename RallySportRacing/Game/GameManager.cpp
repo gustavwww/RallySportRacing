@@ -368,11 +368,11 @@ namespace Game {
 		environment2->setInitialPosition(btVector3(-50, 0, 0));*/
 
 		//Light Debugging Environment
-		/*Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false); //
+		Rendering::Model* debugEnvironmentModel = Rendering::Model::loadModel("../Models/LightTestEnvironment.gltf", false, false); //
 		windowHandler->addModel(debugEnvironmentModel);
 		debugEnvironment = new GameObject(debugEnvironmentModel, physics->dynamicsWorld);
 		gameObjects.push_back(debugEnvironment);
-		debugEnvironment->setInitialPosition(btVector3(-200, 0, 0));*/
+		debugEnvironment->setInitialPosition(btVector3(-200, 10, 0));
 	}
 
 	bool toScreen = true;
