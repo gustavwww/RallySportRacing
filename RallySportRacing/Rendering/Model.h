@@ -25,7 +25,7 @@ namespace Rendering {
 		Model(vector<Mesh> meshes, vector<Material> materials, bool isMovable, string modelName);
 		~Model();
 
-		void updateMaterial(const char* textureFilePath, string materialName);
+		void updateMaterial(int colorIndex, string materialName);
 		void setTranslationMatrix(glm::mat4 translationMat);
 		void setScaleMatrix(glm::mat4 scaleMat);
 		void setRotationMatrix(glm::mat4 rotationMat);
@@ -45,6 +45,9 @@ namespace Rendering {
 		glm::mat4 translationMat = glm::mat4(1.0f);
 		glm::mat4 scaleMat = glm::mat4(1.0f);
 		glm::mat4 rotationMat = glm::mat4(1.0f);
+		vector<const char*> colors {"../Models/Textures/Blue.png", "../Models/Textures/Red.png", "../Models/Textures/Green.png", 
+			"../Models/Textures/Orange.png", "../Models/Textures/Purple.png", "../Models/Textures/Grey.jpg"
+		};
 	};
 }
 

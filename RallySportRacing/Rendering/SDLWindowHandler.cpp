@@ -497,7 +497,7 @@ namespace Rendering {
 				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
 					sound->playButtonPressSound();
 					carColorCycleVariable--;
-					if (carColorCycleVariable < 0) { carColorCycleVariable = 2; }
+					if (carColorCycleVariable < 0) { carColorCycleVariable = 5; }
 					Game::setTextureIndex(carColorCycleVariable);
 				}
 
@@ -518,7 +518,7 @@ namespace Rendering {
 				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
 					sound->playButtonPressSound();
 					carColorCycleVariable++;
-					if (carColorCycleVariable > 2) { carColorCycleVariable = 0; }
+					if (carColorCycleVariable > 5) { carColorCycleVariable = 0; }
 					Game::setTextureIndex(carColorCycleVariable);
 				}
 				ImGui::PopStyleColor(3);

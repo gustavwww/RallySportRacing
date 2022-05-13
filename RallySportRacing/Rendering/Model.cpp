@@ -34,10 +34,10 @@ namespace Rendering {
 		//glDeleteVertexArrays(1, &vertexArrayID);
 	}
 
-	void Model::updateMaterial(const char* textureFilePath, string materialName) {
+	void Model::updateMaterial(int colorIndex, string materialName) {
 		for each (Material material in materials) {
 			if (material.materialName == materialName) {
-				swapModelTexture(textureFilePath, GL_RGBA, material.baseColorTexture);
+				swapModelTexture(colors[colorIndex], GL_RGBA, material.baseColorTexture);
 			}
 		}
 	}
