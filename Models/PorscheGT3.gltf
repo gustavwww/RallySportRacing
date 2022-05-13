@@ -51,7 +51,7 @@
     "materials" : [
         {
             "doubleSided" : true,
-            "name" : "Material.001",
+            "name" : "chassiColor",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 0
@@ -280,8 +280,8 @@
     "images" : [
         {
             "mimeType" : "image/jpeg",
-            "name" : "Metal033_1K_Color",
-            "uri" : "Textures/Metal033_1K_Color.jpg"
+            "name" : "Blue.png",
+            "uri" : "Textures/Blue.png"
         },
         {
             "mimeType" : "image/png",
