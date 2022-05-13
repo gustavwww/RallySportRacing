@@ -8,20 +8,23 @@ namespace Rendering {
 		this->material = material;
 	}
 
-	void SubMesh::setupSubMesh() {
+	void SubMesh::setupSubMesh(vector<glm::mat4> instanceWorldMatrices, bool isMovable) {
 
 		vector<glm::vec3> normals;
 		vector<glm::vec3> positions;
 		vector<glm::vec2> texCoords;
+		vector<glm::vec2> texCoords2;
 
 		for each (Vertex vertex in vertices) {
 			normals.push_back(vertex.normal);
 			positions.push_back(vertex.position);
 			texCoords.push_back(vertex.texCoord);
+			texCoords2.push_back(vertex.texCoord2);
 		}
 		
 		glGenVertexArrays(1, &VAO);
 		glGenBuffers(1, &VBO);
+		glGenBuffers(1, &instanceVBO);
 		glGenBuffers(1, &EBO);
 
 		glBindVertexArray(VAO);
@@ -47,11 +50,43 @@ namespace Rendering {
 		glEnableVertexAttribArray(2);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord));
+
+		glEnableVertexAttribArray(3);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glVertexAttribPointer(3, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, texCoord2));
+
+		//Instancing
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+		glBufferData(GL_ARRAY_BUFFER, instanceWorldMatrices.size() * sizeof(glm::mat4), nullptr, GL_STATIC_DRAW);
+		setTransformMatrices(instanceWorldMatrices);
+	}
+
+	void SubMesh::setTransformMatrices(vector<glm::mat4> instanceWorldMatrices) {
+
+		glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, instanceWorldMatrices.size() * sizeof(glm::mat4), instanceWorldMatrices.data());
+
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+
+		glEnableVertexAttribArray(5);
+		glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)));
+
+		glEnableVertexAttribArray(6);
+		glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+
+		glEnableVertexAttribArray(7);
+		glVertexAttribPointer(7, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+		glVertexAttribDivisor(4, 1);
+		glVertexAttribDivisor(5, 1);
+		glVertexAttribDivisor(6, 1);
+		glVertexAttribDivisor(7, 1);
 	}
 	
-	void SubMesh::renderSubMesh(GLint programID) {
+	void SubMesh::renderSubMesh(GLint programID, unsigned int instances, vector<glm::mat4> instanceWorldMatrices, bool isMovable) {
 		if (!isMeshSetup) {
-			setupSubMesh();
+			setupSubMesh(instanceWorldMatrices, isMovable);
 			isMeshSetup = true;
 		}
 		//Textures
@@ -87,7 +122,7 @@ namespace Rendering {
 		//Material Values.
 		GLuint roughnessID = glGetUniformLocation(programID, "roughnessValue");
 		glUniform1fv(roughnessID, 1, &material.roughness);
-		
+
 		GLuint metallicID = glGetUniformLocation(programID, "metallicValue");
 		glUniform1fv(metallicID, 1, &material.metallic);
 
@@ -95,6 +130,17 @@ namespace Rendering {
 		glUniform3fv(albedoID, 1, &material.albedo[0]);
 
 		glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
+
+		if (isMovable == true) {
+			setTransformMatrices(instanceWorldMatrices);
+		}
+
+		if (instances == 1) {
+
+			glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0);
+		}
+		else {
+			glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, instances);
+		}
 	}
 }

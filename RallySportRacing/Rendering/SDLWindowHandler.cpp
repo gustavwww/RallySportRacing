@@ -28,7 +28,7 @@ namespace Rendering {
 	//Light
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(-400.0f, 1000.0f, -1300.0f, 1.0f);
-	float lightIntensity = 10.0f;
+	float lightIntensity = 3.0f;
 	float envMultiplier = 1.5f;
 	
 	//Shadow maps.
@@ -702,7 +702,14 @@ namespace Rendering {
 				//Set slider to change in scene.
 				ImGui::DragFloat3("light pos", &lightPos.x);
 				ImGui::DragFloat3("light color", &lightColor.x);
+				ImGui::DragFloat("light intensity", &lightIntensity);
+				ImGui::DragFloat("polygon factor", &polygonFactor);
+				ImGui::DragFloat("polygon units", &polygonUnits);
+				ImGui::DragFloat("EnvMult", &envMultiplier);
 
+				glUseProgram(shadowMapID);
+				ImGui::Image((ImTextureID)shadowMapFB.colorTextureTarget, ImVec2(700, 700));
+				
 				ImGui::End();
 			}
 
@@ -722,7 +729,7 @@ namespace Rendering {
 
 			glEnable(GL_POLYGON_OFFSET_FILL);
 			glPolygonOffset(polygonFactor, polygonUnits);
-
+			glUseProgram(shadowMapID);
 			for (Model* m : models) {
 				m->render(lightProjMatrix, lightViewMatrix, shadowMapID);
 			}

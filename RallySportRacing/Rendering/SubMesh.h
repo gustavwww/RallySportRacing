@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 #include <vector>
+#include <string>
 
 using namespace std;
 
@@ -13,11 +14,13 @@ namespace Rendering {
 		glm::vec3 position;
 		glm::vec3 normal;
 		glm::vec2 texCoord;
+		glm::vec2 texCoord2;
 	};
 
 	struct Material {
 
 		//ToDo remove old values.
+		string materialName;
 		glm::vec3 albedo;
 		float metallic;
 		float roughness;
@@ -30,17 +33,18 @@ namespace Rendering {
 	class SubMesh {
 	public:
 		SubMesh(vector<Vertex> vertices, vector<unsigned int> indices, Material material);
-		void renderSubMesh(GLint programID);
+		void renderSubMesh(GLint programID, unsigned int instances, vector<glm::mat4> instanceWorldMatrices, bool isMovable);
+		void setTransformMatrices(vector<glm::mat4> instanceWorldMatrices);
 	private:
 		vector<Vertex> vertices;
 		vector<unsigned int> indices;
 
 		Material material;
 		
-		unsigned int VAO, VBO, EBO;
+		unsigned int VAO, VBO, instanceVBO, EBO;
 
 		bool isMeshSetup = false;
-		void setupSubMesh();
+		void setupSubMesh(vector<glm::mat4> instanceWorldMatrices, bool isMovable);
 	
 	};
 }

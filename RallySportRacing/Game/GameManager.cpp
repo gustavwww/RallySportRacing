@@ -297,7 +297,7 @@ namespace Game {
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// test environment finished track
-		Rendering::Model* test = Rendering::Model::loadModel("../Models/EnvironmentRallyTrack.gltf", true);
+		Rendering::Model* test = Rendering::Model::loadModel("../Models/EnvironmentRallyTrack.gltf", true, false);
 		windowHandler->addModel(test);
 		test1 = new GameObject(test, true, terrainFriction, physics->dynamicsWorld); // test
 		gameObjects.push_back(test1);
@@ -305,14 +305,14 @@ namespace Game {
 
 		
 		// test environment finished track
-		Rendering::Model* test2 = Rendering::Model::loadModel("../Models/HighwayModel.gltf", true);
+		Rendering::Model* test2 = Rendering::Model::loadModel("../Models/HighwayModel.gltf", true, false);
 		windowHandler->addModel(test2);
 		test21 = new GameObject(test2, true, highwayFriction, physics->dynamicsWorld); // test
 		gameObjects.push_back(test21);
 		test21->setInitialPosition(btVector3(-700, -90, 0));
 
 		// test environment finished track
-		Rendering::Model* test3 = Rendering::Model::loadModel("../Models/DirtRoadModel.gltf", true);
+		Rendering::Model* test3 = Rendering::Model::loadModel("../Models/DirtRoadModel.gltf", true, false);
 		windowHandler->addModel(test3);
 		test31 = new GameObject(test3, true, dirtFriction, physics->dynamicsWorld); // test
 		gameObjects.push_back(test31);
@@ -321,7 +321,7 @@ namespace Game {
 		//////////////////////////////////////////////////////////////////////////////////////////////////////
 
 		// test wall
-		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/test.gltf", false);
+		Rendering::Model* wallModel = Rendering::Model::loadModel("../Models/test.gltf", false, false);
 		windowHandler->addModel(wallModel);
 		wall = new GameObject(wallModel, physics->dynamicsWorld);
 		gameObjects.push_back(wall);
@@ -329,14 +329,14 @@ namespace Game {
 		//wall->setInitialRotation(btQuaternion(0,0,1,1));
 
 		// test light
-		Rendering::Model* lightModel = Rendering::Model::loadModel("../Models/light.gltf", false);
+		Rendering::Model* lightModel = Rendering::Model::loadModel("../Models/light.gltf", false, true);
 		windowHandler->addModel(lightModel);
 		light = new GameObject(lightModel, physics->dynamicsWorld);
 		gameObjects.push_back(light);
 		light->setInitialPosition(btVector3(-70, 4, 0));
 
 		// player vehicle, use setInitialpos to change position when starting the game
-		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
+		Rendering::Model* carModel1 = Rendering::Model::loadModel("../Models/PorscheGT3.gltf", false, true);
 		windowHandler->addModel(carModel1);
 		vehicle = new Vehicle(carModel1, physics->dynamicsWorld);
 		gameObjects.push_back(vehicle);
