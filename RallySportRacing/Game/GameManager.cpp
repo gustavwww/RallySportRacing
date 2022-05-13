@@ -771,7 +771,7 @@ namespace Game {
 				if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->notGasing();
 				
-					if ((vehicle->getSpeed() >= 169 && pressedW == true && backFireToggle == true) || temp1) { // 169
+					if ((vehicle->getSpeed() >= 100 && pressedW == true && backFireToggle == true) || temp1) { // 169
 						// spela upp ljud explosion
 						temp1delay = 0;
 							soundString[2] = '1';
@@ -787,8 +787,8 @@ namespace Game {
 							backFireToggle = false;
 							backFireDelay = 0;
 
-							int xTimes = roundf(random.Float());
-							if (xTimes) {
+							double xTimes = random.Float();
+							if (xTimes <= 0.33) {
 								temp1toggle = true;
 							}
 							temp1 = false;
@@ -805,7 +805,7 @@ namespace Game {
 				}
 
 				backFireDelay += gameTimer->getDeltaTime();
-				if (backFireDelay >= 3) {
+				if (backFireDelay >= 4) {
 					backFireToggle = true;
 				}
 
