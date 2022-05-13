@@ -31,6 +31,7 @@ public:
 	void playSourcelessSounds(glm::vec3 positionVec3);
 	void playButtonPressSound();
 	void playCheckpointSound();
+	void playFinishSound();
 	void playStartSound();
 	void playRainSound(bool playRain);
 

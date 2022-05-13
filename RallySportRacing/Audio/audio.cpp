@@ -171,6 +171,11 @@ void Audio::playCheckpointSound() {
 	SoundEngine->play2D("../RallySportRacing/Audio/StartBeep.mp3");
 }
 
+// Function that plays finish line reached sound
+void Audio::playFinishSound() {
+	SoundEngine->play2D("../RallySportRacing/Audio/StartBeep2.mp3");
+}
+
 // Function that converts glm::vec3 to irrklang::vec3df
 irrklang::vec3df Audio::glmToirrklangVec(glm::vec3 inVec) {
 	irrklang::vec3df outVec(inVec.x, inVec.y, inVec.z);
