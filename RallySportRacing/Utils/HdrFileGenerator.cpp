@@ -9,8 +9,7 @@ namespace Utils {
 
 	//Framebuffers
 	unsigned int hdrIrraFBO;
-	unsigned int mipmapFBO;
-	unsigned int shadowMapFBO;
+	unsigned int hdrRefFBO;
 
 	//VertexArrayObjects
 	unsigned int renderVAO;
@@ -22,19 +21,21 @@ namespace Utils {
 	//Width and height
 	unsigned int irrTexWidth = 822, irrTexHeight = 411;
 
+	//Change depending on level.
+	unsigned int refTexWidth = 410, refTexHeight = 204;
+
 	//Texture
 	unsigned int irraTexture;
-	unsigned int texture;
-	unsigned int shadowMap;
+	unsigned int refTexture;
 
 	/// <param name="filePath">File path to which hdr image the irradiance hdr should be based on.</param>
 	void HdrFileGenerator::createIrradianceHDR(GLuint programID, string filePath) {
 		static unsigned int envTexture = 0;
-		if ( envTexture == 0 )
+		if (envTexture == 0)
 		{
-			envTexture = loadHDRTexture( filePath );
+			envTexture = loadHDRTexture(filePath);
 		}
-		setUpFrameBuffer();
+		setUpFrameBufferIrradiance();
 
 		glUseProgram(programID);
 
@@ -58,7 +59,7 @@ namespace Utils {
 
 		//Take data from texture and store in HDR file.
 		stbi_flip_vertically_on_write(1);
-		stbi_write_hdr("../Textures/Background/irradiance.hdr", lwidth, lheight, 4, &data[0]);
+		stbi_write_hdr("../Textures/Background/irradianceTest.hdr", lwidth, lheight, 4, &data[0]);
 
 	}
 
@@ -69,25 +70,34 @@ namespace Utils {
 		{
 			envTexture = loadHDRTexture(filePath);
 		}
-		setUpFrameBuffers();
+		setUpFrameBufferReflection();
 
 		glUseProgram(programID);
 
 		glActiveTexture(GL_TEXTURE16);
 		glBindTexture(GL_TEXTURE_2D, envTexture);
 
-		glBindFramebuffer(GL_FRAMEBUFFER, mipmapFBO);
+		//Change based on level.
+		float roughness = 0.3;
+		float max_envmap_value = 1.5f;
+		glm::vec3 env_map_multiplier = glm::vec3(1.0f, 1.0f, 1.0f);
+
+		glUniform1fv(glGetUniformLocation(programID, "roughness"), 1, &roughness);
+		glUniform1fv(glGetUniformLocation(programID, "max_envmap_value"), 1, &max_envmap_value);
+		glUniform3fv(glGetUniformLocation(programID, "env_map_multiplier"), 1, &env_map_multiplier[0]);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, hdrRefFBO);
 
 		GLint lwidth, lheight;
-		glGetTextureLevelParameteriv(mipmapFBO, 1, GL_TEXTURE_WIDTH, &lwidth);
-		glGetTextureLevelParameteriv(mipmapFBO, 1, GL_TEXTURE_HEIGHT, &lheight);
-		glViewport(0, 0, 1643, 821);
+		glGetTextureLevelParameteriv(refTexture, 0, GL_TEXTURE_WIDTH, &lwidth);
+		glGetTextureLevelParameteriv(refTexture, 0, GL_TEXTURE_HEIGHT, &lheight);
+		glViewport(0, 0, refTexWidth, refTexHeight);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		drawScreenQuad();
 		std::vector<float> data;
 		data.resize(size_t(lwidth) * lheight * 4);
-		glGetTextureSubImage(irraTexture, 1, 0, 0, 0, lwidth, lheight, 1, GL_RGBA, GL_FLOAT, data.size() * sizeof(float), data.data());
+		glGetTextureSubImage(refTexture, 0, 0, 0, 0, lwidth, lheight, 1, GL_RGBA, GL_FLOAT, data.size() * sizeof(float), data.data());
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -138,7 +148,7 @@ namespace Utils {
 	}
 
 	//ToDo make sure this works.
-	void HdrFileGenerator::setUpFrameBuffer() {
+	void HdrFileGenerator::setUpFrameBufferIrradiance() {
 
 		if ( hdrIrraFBO != 0 )
 		{
@@ -172,29 +182,29 @@ namespace Utils {
 	}
 
 	//ToDo finish writing this function and change width and height.
-	void HdrFileGenerator::setUpFrameBuffers() {
+	void HdrFileGenerator::setUpFrameBufferReflection() {
 
-		if (mipmapFBO != 0)
+		if (hdrRefFBO != 0)
 		{
 			return;
 		}
 		//Generate buffer.
-		glGenFramebuffers(1, &mipmapFBO);
+		glGenFramebuffers(1, &hdrRefFBO);
 
 		//Bind buffer.
-		glBindFramebuffer(GL_FRAMEBUFFER, mipmapFBO);
+		glBindFramebuffer(GL_FRAMEBUFFER, hdrRefFBO);
 
-		glGenTextures(1, &texture);
-		glBindTexture(GL_TEXTURE_2D, texture);
+		glGenTextures(1, &refTexture);
+		glBindTexture(GL_TEXTURE_2D, refTexture);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 1643, 821, 0, GL_RGBA, GL_FLOAT, nullptr);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, refTexWidth, refTexHeight, 0, GL_RGBA, GL_FLOAT, nullptr);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, refTexture, 0);
 		GLenum attachments[] = { GL_COLOR_ATTACHMENT0 };
 		glDrawBuffers(1, attachments);
 

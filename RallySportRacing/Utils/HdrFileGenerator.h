@@ -46,8 +46,8 @@ namespace Utils {
 		static void drawScreenQuad();
 
 	private:
-		static void setUpFrameBuffer();
-		static void setUpFrameBuffers();
+		static void setUpFrameBufferIrradiance();
+		static void setUpFrameBufferReflection();
 	};
 
 }
