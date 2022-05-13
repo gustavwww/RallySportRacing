@@ -13,31 +13,31 @@ namespace Networking {
 		label = new Rendering::Text2D(name, glm::vec3(0.5, 0.8f, 0.2f), playerData.pos);
 		windowHandler->addText(label);
 
-		Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false);
+		Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3_wWheels.gltf", false, true);
 		windowHandler->addModel(model);
 		obj = new Game::GameObject(model);
 		obj->setPosition(playerData.pos);
 		obj->setQuaternion(playerData.orientation);
 		
-		Rendering::Model* frontLeftModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
+		Rendering::Model* frontLeftModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		windowHandler->addModel(frontLeftModel);
 		frontLeft = new Game::GameObject(frontLeftModel);
 		frontLeft->setPosition(playerData.frontLeftPos);
 		frontLeft->setQuaternion(playerData.frontLeftOr);
 
-		Rendering::Model* frontRightModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
+		Rendering::Model* frontRightModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		windowHandler->addModel(frontRightModel);
 		frontRight = new Game::GameObject(frontRightModel);
 		frontRight->setPosition(playerData.frontRightPos);
 		frontRight->setQuaternion(playerData.frontRightOr);
 
-		Rendering::Model* backLeftModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
+		Rendering::Model* backLeftModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		windowHandler->addModel(backLeftModel);
 		backLeft = new Game::GameObject(backLeftModel);
 		backLeft->setPosition(playerData.backLeftPos);
 		backLeft->setQuaternion(playerData.backLeftOr);
 
-		Rendering::Model* backRightModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false);
+		Rendering::Model* backRightModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		windowHandler->addModel(backRightModel);
 		backRight = new Game::GameObject(backRightModel);
 		backRight->setPosition(playerData.backRightPos);
