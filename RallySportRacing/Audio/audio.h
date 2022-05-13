@@ -8,7 +8,6 @@
 #include <glm/glm.hpp>
 #include <map>
 #include "SoundSource.h"
-#include <optional>
 
 using namespace std;
 using namespace irrklang;
