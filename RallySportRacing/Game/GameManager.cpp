@@ -527,11 +527,12 @@ namespace Game {
 					if ((obA->getWorldArrayIndex() == vehicle->vehicle->getRigidBody()->getWorldArrayIndex() && obB->getWorldArrayIndex() == checkpoints[0]->getWorldArrayIndex()) && (checkpointsReached == (checkpoints.size()-1)) && timingRace) {
 						timingRace = false;
 						checkpointsReached++;
-						cout << checkpointsReached << endl;
-						cout << roundf(raceTime) << endl;
+						//cout << checkpointsReached << endl;
+						//cout << roundf(raceTime) << endl;
 						// do something here, Like show the timer or put it in a leaderboard
 						// raceTime is the timer for the race
 						Networking::sendTime(raceTime);
+						// play sound here xxxxxxxxxx
 					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
@@ -540,7 +541,8 @@ namespace Game {
 								//cout << "Kollision med: " << checkpoints[i]->getWorldArrayIndex() << endl;
 								latestReachedCheckpoint = checkpoints[i];
 								checkpointsReached++;
-								cout << checkpointsReached << endl;
+								//cout << checkpointsReached << endl;
+								// play sound here xxxxxxxxxxxxx
 							}
 						}
 					}
@@ -773,7 +775,7 @@ namespace Game {
 				if (!keyboard_state_array[SDL_SCANCODE_W] && !keyboard_state_array[SDL_SCANCODE_S] && !keyboard_state_array[SDL_SCANCODE_SPACE]) {
 					vehicle->notGasing();
 				
-					if ((vehicle->getSpeed() >= 169 && pressedW == true && backFireToggle == true) || temp1) { // 169
+					if ((vehicle->getSpeed() >= 100 && pressedW == true && backFireToggle == true) || temp1) { // 169
 						// spela upp ljud explosion
 						temp1delay = 0;
 							soundString[2] = '1';
@@ -789,8 +791,8 @@ namespace Game {
 							backFireToggle = false;
 							backFireDelay = 0;
 
-							int xTimes = roundf(random.Float());
-							if (xTimes) {
+							double xTimes = random.Float();
+							if (xTimes <= 0.33) {
 								temp1toggle = true;
 							}
 							temp1 = false;
@@ -807,7 +809,7 @@ namespace Game {
 				}
 
 				backFireDelay += gameTimer->getDeltaTime();
-				if (backFireDelay >= 3) {
+				if (backFireDelay >= 4) {
 					backFireToggle = true;
 				}
 
