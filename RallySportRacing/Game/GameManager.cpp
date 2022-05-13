@@ -538,7 +538,7 @@ namespace Game {
 						// do something here, Like show the timer or put it in a leaderboard
 						// raceTime is the timer for the race
 						Networking::sendTime(raceTime);
-						// play sound here xxxxxxxxxx
+						sound->playCheckpointSound();
 					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
