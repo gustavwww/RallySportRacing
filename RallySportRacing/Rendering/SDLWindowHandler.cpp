@@ -425,13 +425,13 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)startButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = false; leaderboardMenu = false; }
+				if (ImGui::ImageButton((void*)(intptr_t)startButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = false; leaderboardMenu = false; sound->playButtonPressSound();}
 
 				ImGui::Dummy(ImVec2(0, 50));
-				if (ImGui::ImageButton((void*)(intptr_t)settingsButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = true; leaderboardMenu = false; }
+				if (ImGui::ImageButton((void*)(intptr_t)settingsButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = true; leaderboardMenu = false; sound->playButtonPressSound();}
 
 				ImGui::Dummy(ImVec2(0, 50));
-				if (ImGui::ImageButton((void*)(intptr_t)leaderboardButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = false; leaderboardMenu = true; }
+				if (ImGui::ImageButton((void*)(intptr_t)leaderboardButtonTexture, ImVec2(menuButtonWidth, menuButtonHeight))) { mainMenu = false; settingsMenu = false; leaderboardMenu = true; sound->playButtonPressSound();}
 
 				ImGui::PopStyleColor(3);
 
@@ -462,7 +462,7 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth / 2 - 7, menuButtonHeight / 2 - 7))) {}
+				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth / 2 - 7, menuButtonHeight / 2 - 7))) { sound->playButtonPressSound(); }
 				ImGui::PopStyleColor(3);
 
 				ImGui::End();
@@ -477,7 +477,7 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume >= 5) { sound->volumeDown(); volume = volume - 5; } }
+				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume >= 5) { sound->volumeDown(); volume = volume - 5; sound->playButtonPressSound();} }
 				ImGui::SameLine();
 				ImGui::Indent(300);
 				ImGui::SetWindowFontScale(4);
@@ -486,7 +486,7 @@ namespace Rendering {
 				ImGui::Text(volChar);
 				ImGui::SameLine();
 				ImGui::Indent(300);
-				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume <= 95) { sound->volumeUp(); volume = volume + 5; } }
+				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume <= 95) { sound->volumeUp(); volume = volume + 5; sound->playButtonPressSound();} }
 
 
 
@@ -494,6 +494,7 @@ namespace Rendering {
 
 				ImGui::Indent(-108 - settingsButtonSize * 2 - menuButtonWidth);
 				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
+					sound->playButtonPressSound();
 					carColorCycleVariable--;
 					if (carColorCycleVariable < 0) { carColorCycleVariable = 2; }
 					Game::setTextureIndex(carColorCycleVariable);
@@ -514,7 +515,7 @@ namespace Rendering {
 				ImGui::SameLine();
 				ImGui::Indent(settingsButtonSize + menuButtonWidth + 8);
 				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
-					//sound->playButtonPressSound();
+					sound->playButtonPressSound();
 					carColorCycleVariable++;
 					if (carColorCycleVariable > 2) { carColorCycleVariable = 0; }
 					Game::setTextureIndex(carColorCycleVariable);
@@ -530,7 +531,7 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)settingsBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { settingsMenu = false; }
+				if (ImGui::ImageButton((void*)(intptr_t)settingsBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { settingsMenu = false; sound->playButtonPressSound();}
 				ImGui::PopStyleColor(3);
 
 				ImGui::End();
@@ -593,7 +594,7 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)leaderboardBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { leaderboardMenu = false; }
+				if (ImGui::ImageButton((void*)(intptr_t)leaderboardBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { leaderboardMenu = false; sound->playButtonPressSound();}
 				ImGui::PopStyleColor(3);
 
 				ImGui::End();
