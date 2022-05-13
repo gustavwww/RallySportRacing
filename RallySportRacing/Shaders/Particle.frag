@@ -1,5 +1,7 @@
 #version 420 compatibility
 
+precision highp float;
+
 in float life;
 uniform sampler2D textureIn;
 

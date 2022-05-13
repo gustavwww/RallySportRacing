@@ -1,5 +1,7 @@
 #version 420
 
+precision highp float;
+
 precision mediump float;
 
 out vec4 fragmentColor;
