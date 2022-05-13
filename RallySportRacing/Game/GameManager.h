@@ -26,6 +26,7 @@ namespace Game {
 	bool getCountDown();
 	int getCheckpointsReached();
 	void setTextureIndex(int a);
+	void turnOffEngine();
 }
 
 #endif
