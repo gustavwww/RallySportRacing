@@ -12,6 +12,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <btBulletDynamicsCommon.h>
 #include "Vehicle.h"
+#include <queue>
+#include <functional>
 
 #include "Debugging/DebugDraw.h"
 
@@ -569,6 +571,12 @@ namespace Game {
 		}
 	}
 
+	queue<std::function<void()>*> buffer;
+
+	void addAction(std::function<void()>* method) {
+		buffer.push(method);
+	}
+
 	void update() {
 
 		// Update online players positions
@@ -593,6 +601,10 @@ namespace Game {
 			gameObjects[i]->updateTransform();
 		}
 
+		while (!buffer.empty()) {
+			std::function<void()>* method = buffer.front();
+			(* method)();
+		}
 
 		// Calculate deltaTime
 		if (firstTime) {
