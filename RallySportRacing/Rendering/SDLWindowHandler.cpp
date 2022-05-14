@@ -18,6 +18,7 @@
 #include "Audio/audio.h"
 #include "Networking/Networking.h"
 #include "FrameBufferObject.h"
+//#include "Fonts/eras-bold.otf"
 
 using namespace std;
 
@@ -61,6 +62,7 @@ namespace Rendering {
 	bool raceFinished = false;
 
 	float amplifier = 0.5f;
+	double colorAmp = 0.5;
 
 	glm::vec3 SDLWindowHandler::getLightPosition() {
 		return glm::vec3(lightPos);
@@ -265,7 +267,10 @@ namespace Rendering {
 		int rightButtonTexture2 = loadTexture("../IMGS/right-button.png");
 		int blueCarTexture = loadTexture("../IMGS/blue-car.png");
 		int greenCarTexture = loadTexture("../IMGS/green-car.png");
-		int pinkCarTexture = loadTexture("../IMGS/pink-car.png");
+		int purpleCarTexture = loadTexture("../IMGS/pink-car.png");
+		int greyCarTexture = loadTexture("../IMGS/grey-car.png");
+		int orangeCarTexture = loadTexture("../IMGS/orange-car.png");
+		int redCarTexture = loadTexture("../IMGS/red-car.png");
 		int countOne = loadTexture("../IMGS/1.png");
 		int countTwo = loadTexture("../IMGS/2.png");
 		int countThree = loadTexture("../IMGS/3.png");
@@ -342,6 +347,9 @@ namespace Rendering {
 		bool settingsMenu = false;
 		bool leaderboardMenu = false;
 		bool speedometerActive = true;
+
+		ImGuiIO& io = ImGui::GetIO();
+		ImFont* font1 = io.Fonts->AddFontFromFileTTF("../Fonts\\Eras.ttf", 96);
 
 		// Load character glyphs from font.
 		loadCharacters();
@@ -448,23 +456,24 @@ namespace Rendering {
 
 				ImGui::End();
 
-				ImGui::SetNextWindowSize(ImVec2(220, 50), 0);
-				ImGui::SetNextWindowPos(ImVec2(880, 80), 0);
+				ImGui::SetNextWindowSize(ImVec2(400, 100), 0);
+				ImGui::SetNextWindowPos(ImVec2(822, 50), 0);
 				ImGui::Begin("Text input", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
+				ImGui::SetWindowFontScale(0.5);
 				static char username[16] = "Username";
 				ImGui::InputText("", username, IM_ARRAYSIZE(username));
 
 				ImGui::End();
 
 				ImGui::SetNextWindowSize(ImVec2(menuButtonWidth, menuButtonHeight), 0);
-				ImGui::SetNextWindowPos(ImVec2(876, 120), 0);
+				ImGui::SetNextWindowPos(ImVec2(858, 120), 0);
 				ImGui::Begin("Connect Button", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth / 2 - 7, menuButtonHeight / 2 - 7))) { 
+				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth *0.6, menuButtonHeight*0.6))) { 
 					sound->playButtonPressSound();
 					//Networking::joinGame(0, username);
 				}
@@ -478,26 +487,26 @@ namespace Rendering {
 
 				ImGui::Dummy(ImVec2(0, 100));
 
-				ImGui::Indent(width / 2 - menuButtonWidth / 2 - 210);
+				ImGui::Indent(width / 2 - menuButtonWidth / 2 - 280);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
 				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume >= 5) { sound->volumeDown(); volume = volume - 5; sound->playButtonPressSound();} }
 				ImGui::SameLine();
-				ImGui::Indent(300);
-				ImGui::SetWindowFontScale(4);
-				std::string volString = std::to_string(volume) + "%%";
+				ImGui::Indent(150);
+				ImGui::SetWindowFontScale(1);
+				std::string volString = "Volume: " + std::to_string(volume) + "%%";
 				char const* volChar = volString.c_str();
 				ImGui::Text(volChar);
 				ImGui::SameLine();
-				ImGui::Indent(300);
+				ImGui::Indent(600);
 				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture1, ImVec2(settingsButtonSize, settingsButtonSize))) { if (volume <= 95) { sound->volumeUp(); volume = volume + 5; sound->playButtonPressSound();} }
 
 
 
-				ImGui::Dummy(ImVec2(0, 300));
+				ImGui::Dummy(ImVec2(0, 200));
 
-				ImGui::Indent(-108 - settingsButtonSize * 2 - menuButtonWidth);
+				ImGui::Indent(26 -284 - settingsButtonSize * 2 - menuButtonWidth);
 				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
 					sound->playButtonPressSound();
 					carColorCycleVariable--;
@@ -506,19 +515,28 @@ namespace Rendering {
 				}
 
 				ImGui::SameLine();
-				ImGui::Indent(settingsButtonSize + 100);
+				ImGui::Indent(settingsButtonSize + 69);
 				if (carColorCycleVariable == 1) {
-					ImGui::Image((void*)(intptr_t)pinkCarTexture, ImVec2(menuButtonWidth, menuButtonHeight));
+					ImGui::Image((void*)(intptr_t)redCarTexture, ImVec2(1051 * colorAmp, 829 * colorAmp));
 				}
 				else if (carColorCycleVariable == 2) {
-					ImGui::Image((void*)(intptr_t)greenCarTexture, ImVec2(menuButtonWidth, menuButtonHeight));
+					ImGui::Image((void*)(intptr_t)greenCarTexture, ImVec2(1051 * colorAmp, 829 * colorAmp));
+				}
+				else if (carColorCycleVariable == 3) {
+					ImGui::Image((void*)(intptr_t)orangeCarTexture, ImVec2(1051 * colorAmp, 829 * colorAmp));
+				}
+				else if (carColorCycleVariable == 4) {
+					ImGui::Image((void*)(intptr_t)purpleCarTexture, ImVec2(1051 * colorAmp, 829 * colorAmp));
+				}
+				else if (carColorCycleVariable == 5) {
+					ImGui::Image((void*)(intptr_t)greyCarTexture, ImVec2(1051 * colorAmp, 829 * colorAmp));
 				}
 				else {
-					ImGui::Image((void*)(intptr_t)blueCarTexture, ImVec2(menuButtonWidth, menuButtonHeight));
+					ImGui::Image((void*)(intptr_t)blueCarTexture, ImVec2(1051 * colorAmp, 829 * colorAmp));
 				}
 
 				ImGui::SameLine();
-				ImGui::Indent(settingsButtonSize + menuButtonWidth + 8);
+				ImGui::Indent(settingsButtonSize + menuButtonWidth + 189);
 				if (ImGui::ImageButton((void*)(intptr_t)rightButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
 					sound->playButtonPressSound();
 					carColorCycleVariable++;
@@ -579,7 +597,7 @@ namespace Rendering {
 
 				//vector<PlayerTime> = Networking::getTimes();
 
-				ImGui::SetWindowFontScale(3);
+				ImGui::SetWindowFontScale(0.7);
 				ImGui::Text("Gustav");
 				ImGui::SameLine();
 				ImGui::Indent(375);
@@ -647,7 +665,8 @@ namespace Rendering {
 					ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
 					ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
 					ImGui::Begin("Race Timer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-					ImGui::SetWindowFontScale(4);
+					ImGui::SetWindowFontScale(1.5);
+					ImGui::PushFont(font1);
 					if (raceTime >= 60) {
 						while (raceTime > 60) {
 							raceTime = raceTime - 60;
@@ -679,7 +698,7 @@ namespace Rendering {
 						char const* timerChar = timerString.c_str();
 						ImGui::Text(timerChar);
 					}
-
+					ImGui::PopFont();
 					ImGui::End();
 
 					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
@@ -775,7 +794,7 @@ namespace Rendering {
 					ImGui::SetNextWindowPos(ImVec2(712, 200), 0);
 					ImGui::Begin("Race Finished", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-					ImGui::SetWindowFontScale(10);
+					ImGui::SetWindowFontScale(2);
 
 					if (raceTime >= 60) {
 						while (raceTime > 60) {
