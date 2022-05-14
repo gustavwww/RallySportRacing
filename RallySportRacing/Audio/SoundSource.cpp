@@ -44,6 +44,16 @@ SoundSource::~SoundSource()	{
 		this->engineSound->drop();
 		this->engineSound = 0;
 	}
+	if (this->engineHighAcc) {
+		this->engineHighAcc->stop();
+		this->engineHighAcc->drop();
+		this->engineHighAcc = 0;
+	}
+	if (this->engineHighDec) {
+		this->engineHighDec->stop();
+		this->engineHighDec->drop();
+		this->engineHighDec = 0;
+	}
 	if (this->dirtSound) {
 		this->dirtSound->stop();
 		this->dirtSound->drop();
@@ -178,7 +188,7 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			}
 
 			// If accelerating turn off decceleration sound
-			if (this->engineHighDec->getIsPaused()) {
+			if (!this->engineHighDec->getIsPaused()) {
 				this->engineHighDec->setIsPaused(true);
 			}
 

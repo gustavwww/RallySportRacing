@@ -1,5 +1,7 @@
 #version 420
 
+precision highp float;
+
 layout(binding = 6) uniform sampler2D skybox;
 
 //Inputs

@@ -163,12 +163,17 @@ void Audio::rain(glm::vec3 position) {
 
 // Function that plays sound when button is pressed
 void Audio::playButtonPressSound() {
-	SoundEngine->play2D("../RallySportRacing/Audio/ButtonPress.mp3");
+	SoundEngine->play2D("../RallySportRacing/Audio/ButtonPress.wav");
 }
 
 // Function that plays checkpoint reached sound
 void Audio::playCheckpointSound() {
-	SoundEngine->play2D("../RallySportRacing/Audio/StartBeep.mp3");
+	SoundEngine->play2D("../RallySportRacing/Audio/StartBeep1.mp3");
+}
+
+// Function that plays finish line reached sound
+void Audio::playFinishSound() {
+	SoundEngine->play2D("../RallySportRacing/Audio/StartBeep2.mp3");
 }
 
 // Function that converts glm::vec3 to irrklang::vec3df

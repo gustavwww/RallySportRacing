@@ -1,6 +1,8 @@
 //Source code https://gitlab.com/ror3d/spherical-gaussian-lightfields/-/blob/main/Project/sg_renderer.glsl 
-
 #version 450 compatibility
+
+precision highp float;
+
 	const float PI = 3.14159265359;
 
 	in vec2 pos;

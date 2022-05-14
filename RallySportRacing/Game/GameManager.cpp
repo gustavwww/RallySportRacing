@@ -544,7 +544,7 @@ namespace Game {
 						// do something here, Like show the timer or put it in a leaderboard
 						// raceTime is the timer for the race
 						Networking::sendTime(raceTime);
-						sound->playCheckpointSound();
+						sound->playFinishSound();
 					}
 
 					for (int i = 0; i < checkpoints.size(); i++) { // checks for collision between any checkpoint and the vehicle
@@ -554,7 +554,7 @@ namespace Game {
 								latestReachedCheckpoint = checkpoints[i];
 								checkpointsReached++;
 								//cout << checkpointsReached << endl;
-								// play sound here xxxxxxxxxxxxx
+								sound->playCheckpointSound();
 							}
 						}
 					}
