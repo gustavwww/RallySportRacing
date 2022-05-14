@@ -64,6 +64,10 @@ namespace Networking {
 		tcpClient.sendPacket("settime:" + to_string(time));
 	}
 
+	void setColor(int index) {
+		tcpClient.sendPacket("setcolor:" + to_string(index));
+	}
+
 	vector<PlayerTime> getTimes() {
 		return times;
 	}
@@ -109,7 +113,7 @@ namespace Networking {
 		
 		if (command == "game") {
 
-			if (cmd.getArgsSize() % 43 != 0) {
+			if (cmd.getArgsSize() % 44 != 0) {
 				// Skip corrupt UDP packets.
 				return;
 			}
@@ -120,7 +124,7 @@ namespace Networking {
 				playersInGame.push_back(el.first);
 			
 			for (int i = 0; i < cmd.getArgsSize(); i++) {
-				if (cmd.getArgs()[i] == "player" && (i+42) <= cmd.getArgsSize()) {
+				if (cmd.getArgs()[i] == "player" && (i+43) <= cmd.getArgsSize()) {
 					i++;
 
 					int id = stoi(cmd.getArgs()[i]);
@@ -162,8 +166,6 @@ namespace Networking {
 					Player* p = el->second;
 					players.erase(el);
 					cout << "A player has left the game: " << p->getName() << endl;
-					// TODO: Fix player deletion, currently kills the game..
-					//delete p;
 
 					// Remove sound source
 					sound->removeSoundSource(id);

@@ -13,6 +13,7 @@ namespace Networking {
 	public:
 		PlayerData(Protocol::Command cmd, int index);
 		string name;
+		string color;
 		glm::vec3 pos;
 		glm::quat orientation;
 		float speed;

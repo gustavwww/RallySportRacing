@@ -25,6 +25,7 @@ namespace Networking {
 	private:
 		Rendering::SDLWindowHandler* windowHandler;
 		string name;
+		string color;
 		Rendering::Text2D* label;
 		Game::GameObject* obj;
 		Game::GameObject* frontLeft;

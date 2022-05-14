@@ -9,12 +9,15 @@ namespace Networking {
 		this->windowHandler = windowHandler;
 
 		name = playerData.name;
+		color = playerData.color;
 
 		label = new Rendering::Text2D(name, glm::vec3(0.5, 0.8f, 0.2f), playerData.pos);
 		windowHandler->addText(label);
 
 		Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3.gltf", false, true);
+		model->updateMaterial(stoi(playerData.color), "chassiColor");
 		windowHandler->addModel(model);
+
 		obj = new Game::GameObject(model);
 		obj->setPosition(playerData.pos);
 		obj->setQuaternion(playerData.orientation);
@@ -42,12 +45,11 @@ namespace Networking {
 		backRight = new Game::GameObject(backRightModel);
 		backRight->setPosition(playerData.backRightPos);
 		backRight->setQuaternion(playerData.backRightOr);
-		
-		
 
 	}
 
 	void Player::updateState(PlayerData data) {
+		obj->getModel()->updateMaterial(stoi(data.color), "chassiColor");
 		label->updatePos(data.pos);
 		obj->setPosition(data.pos);
 		obj->setQuaternion(data.orientation);

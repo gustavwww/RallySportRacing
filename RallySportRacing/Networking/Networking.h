@@ -14,6 +14,7 @@ namespace Networking {
 	void setupNetwork(string playerName, Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler);
 	void joinGame(string id, string name);
 	void sendTime(float time);
+	void setColor(int index);
 	vector<PlayerTime> getTimes();
 	void tcpPacketReceived(string str);
 	void udpPacketReceived(string str);
