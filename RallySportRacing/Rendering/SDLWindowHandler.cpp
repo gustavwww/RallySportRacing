@@ -291,6 +291,8 @@ namespace Rendering {
 		int settingsBackButton = loadTexture("../IMGS/left-button.png");
 		int connectButton = loadTexture("../IMGS/connect-button.png");
 		int finished = loadTexture("../IMGS/finished.png");
+		int newMainMenu = loadTexture("../IMGS/new-main-menu2.png");
+		int newSettingsMenu = loadTexture("../IMGS/new-settings-menu2.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, nearPlane, farPlane);
@@ -421,7 +423,7 @@ namespace Rendering {
 				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				//ImGui::BeginChildFrame('h', ImVec2(width, height));
-				ImGui::Image((void*)(intptr_t)mainMenuTexture, ImVec2(width, height));
+				ImGui::Image((void*)(intptr_t)newMainMenu, ImVec2(width, height));
 				//ImGui::EndChildFrame();
 
 				ImGui::End();
@@ -453,7 +455,7 @@ namespace Rendering {
 				ImGui::SetNextWindowPos(ImVec2(-9, -8), 0);
 				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				ImGui::Image((void*)(intptr_t)settingsTexture, ImVec2(width, height));
+				ImGui::Image((void*)(intptr_t)newSettingsMenu, ImVec2(width, height));
 
 				ImGui::End();
 
@@ -489,7 +491,7 @@ namespace Rendering {
 				ImGui::SetNextWindowPos(ImVec2(0, 200), 0);
 				ImGui::Begin("Inner Main Menu", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				ImGui::Dummy(ImVec2(0, 100));
+				ImGui::Dummy(ImVec2(0, 200));
 
 				ImGui::Indent(width / 2 - menuButtonWidth / 2 - 280);
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
@@ -508,7 +510,7 @@ namespace Rendering {
 
 
 
-				ImGui::Dummy(ImVec2(0, 200));
+				ImGui::Dummy(ImVec2(0, 100));
 
 				ImGui::Indent(26 -284 - settingsButtonSize * 2 - menuButtonWidth);
 				if (ImGui::ImageButton((void*)(intptr_t)leftButtonTexture2, ImVec2(settingsButtonSize, settingsButtonSize))) {
