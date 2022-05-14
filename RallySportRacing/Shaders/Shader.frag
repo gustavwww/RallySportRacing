@@ -36,11 +36,12 @@ float roughness;
 ////////////////////////////////
 layout(binding = 7) uniform sampler2D irradianceMap;
 layout(binding = 8) uniform sampler2D reflectionMap;
-layout(binding = 9) uniform sampler2DShadow shadowMap;
+
 uniform float envMultiplier;
 ////////////////////////////////
 //Shadow
 ////////////////////////////////
+layout(binding = 9) uniform sampler2DShadow shadowMap;
 
 ////////////////////////////////
 // Light source
@@ -48,6 +49,12 @@ uniform float envMultiplier;
 uniform vec3 viewSpaceLightPos;
 uniform vec3 lightColor;
 uniform float lightIntensity;
+
+////////////////////////////////
+// Settings
+////////////////////////////////
+uniform float brightness;
+uniform float contrast;
 
 ////////////////////////////////
 // Constants
@@ -117,7 +124,7 @@ void loadPBRValues(){
 			albedo = texture(baseColorTexture, texCoord2).rgb;
 
 		}
-		albedo = mix(albedo * 1.0f, mix(vec3(0.5, 0.5, 0.5), albedo, 1.5f), 0.5);
+		albedo = mix(albedo * brightness, mix(vec3(0.5, 0.5, 0.5), albedo, contrast), 0.5);
 		
 		//Metallic
 		if(useMetallicTexture == 0){
