@@ -2,10 +2,12 @@
 #define NETWORKING
 
 #include <string>
+#include <map>
 
 #include "Game/Vehicle.h"
 #include "Rendering/SDLWindowHandler.h"
 #include "Networking/PlayerTime.h"
+#include "Networking/Player.h"
 
 using namespace std;
 
@@ -16,6 +18,7 @@ namespace Networking {
 	void sendTime(float time);
 	void setColor(int index);
 	vector<PlayerTime> getTimes();
+	map<int, Player*> getPlayers();
 	void tcpPacketReceived(string str);
 	void udpPacketReceived(string str);
 	void sendStatusPacket();

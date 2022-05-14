@@ -10,6 +10,7 @@ namespace Networking {
 
 		name = playerData.name;
 		color = playerData.color;
+		velocity = playerData.velocity;
 
 		label = new Rendering::Text2D(name, glm::vec3(0.5, 0.8f, 0.2f), playerData.pos);
 		windowHandler->addText(label);
@@ -49,6 +50,7 @@ namespace Networking {
 	}
 
 	void Player::updateState(PlayerData data) {
+		velocity = data.velocity;
 		obj->getModel()->updateMaterial(stoi(data.color), "chassiColor");
 		label->updatePos(data.pos);
 		obj->setPosition(data.pos);
@@ -61,6 +63,17 @@ namespace Networking {
 		backLeft->setQuaternion(data.backLeftOr);
 		backRight->setPosition(data.backRightPos);
 		backRight->setQuaternion(data.backRightOr);
+	}
+
+	void Player::subUpdate(float deltaTime) {
+		glm::vec3 oldPos = obj->getPosition();
+		glm::vec3 newPos = oldPos + velocity * deltaTime;
+		obj->setPosition(newPos);
+
+		frontLeft->setPosition(frontLeft->getPosition() + velocity * deltaTime);
+		frontRight->setPosition(frontRight->getPosition() + velocity * deltaTime);
+		backLeft->setPosition(backLeft->getPosition() + velocity * deltaTime);
+		backRight->setPosition(backRight->getPosition() + velocity * deltaTime);
 	}
 
 	Player::~Player() {
