@@ -65,8 +65,15 @@ namespace Rendering {
 		glm::vec3 normalizedDeviceCoordinates = glm::vec3(clipSpacePos.x, clipSpacePos.y, clipSpacePos.z) / clipSpacePos.w;
 		glm::vec2 windowSpacePos = ((glm::vec2(normalizedDeviceCoordinates.x, normalizedDeviceCoordinates.y) + 1.0f) / 2.0f) * glm::vec2(1920.0f, 1080.0f);
 
-		float x = windowSpacePos.x;
-		float y = windowSpacePos.y;
+		float textLength = 0;
+		for (auto c = text.begin(); c != text.end(); c++) {
+			Character ch = characters[*c];
+
+			textLength += ch.Advance/100;
+		}
+
+		float x = windowSpacePos.x - textLength/2 - 15;
+		float y = windowSpacePos.y + 10;
 
 		for (auto c = text.begin(); c != text.end(); c++) {
 
