@@ -226,7 +226,7 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 				}*/
 
 				// Acceleration sound set states
-				this->engineHighAcc->setPlaybackSpeed( (1.0F + engineFade / 200.0F) * revv);
+				this->engineHighAcc->setPlaybackSpeed( 1.0F + engineFade / 200.0F);
 				this->engineHighAcc->setVolume(engineFade / 100.0F);
 			}
 		}
