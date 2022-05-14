@@ -77,8 +77,6 @@ namespace Server {
 
 		int result = sendto(sock, str, strlen(str), 0, (SOCKADDR*) &serverAddress, sizeof(serverAddress));
 		if (result == SOCKET_ERROR) {
-			closesocket(sock);
-			WSACleanup();
 			cout << "Error sending UDP message, " << WSAGetLastError() << endl;
 		}
 	}

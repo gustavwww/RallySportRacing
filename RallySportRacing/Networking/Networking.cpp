@@ -33,6 +33,7 @@ namespace Networking {
 	bool inGame = false;
 
 	string name;
+	int initialColorIndex;
 	int clientID;
 
 	Audio* sound;
@@ -40,9 +41,10 @@ namespace Networking {
 	map<int, Player*> players;
 	vector<PlayerTime> times; // Player times, sorted with shortest time first.
 
-	void setupNetwork(string playerName, Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler) {
+	void setupNetwork(string playerName, Game::Vehicle* playerObj, int playerColorIndex, Rendering::SDLWindowHandler* windowHandler) {
 		name = playerName;
 		vehicle = playerObj;
+		initialColorIndex = playerColorIndex;
 		handler = windowHandler;
 
 		tcpClient.addCallback(Networking::tcpPacketReceived);
@@ -89,6 +91,7 @@ namespace Networking {
 				cout << "Successfully joined game." << endl;
 				inGame = true;
 				sendThread = thread(&Networking::sendStatusPacket);
+				setColor(initialColorIndex);
 				tcpClient.sendPacket("get:times");
 			} else if (cmd.getArgs()[0] == "timeset") {
 				tcpClient.sendPacket("get:times");
