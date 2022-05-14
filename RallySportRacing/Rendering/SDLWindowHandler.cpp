@@ -51,8 +51,7 @@ namespace Rendering {
 	int menuButtonHeight = 150;
 	int settingsButtonSize = 96;
 	int carColorCycleVariable = 0;
-	std::string leaderboardContentList[3] = { "Gustav", "Oscar", "Daniel" };
-	std::string leaderboardTimes[3] = { "1:28.32", "1:43.88", "1:55:72" };
+	bool isConnected = false;
 
 	//Speed
 	float trackerPos = 0.0f;
@@ -418,7 +417,7 @@ namespace Rendering {
 
 			if (mainMenu) {
 				ImGui::SetNextWindowSize(ImVec2(width + 20, height + 20), 0);
-				ImGui::SetNextWindowPos(ImVec2(-10, -10), 0);
+				ImGui::SetNextWindowPos(ImVec2(-9, -8), 0);
 				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				//ImGui::BeginChildFrame('h', ImVec2(width, height));
@@ -451,7 +450,7 @@ namespace Rendering {
 			}
 			else if (settingsMenu) {
 				ImGui::SetNextWindowSize(ImVec2(width + 20, height + 20), 0);
-				ImGui::SetNextWindowPos(ImVec2(-10, -10), 0);
+				ImGui::SetNextWindowPos(ImVec2(-9, -8), 0);
 				ImGui::Begin("Main Menu", 0, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				ImGui::Image((void*)(intptr_t)settingsTexture, ImVec2(width, height));
@@ -477,7 +476,10 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
 				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth *0.6, menuButtonHeight*0.6))) { 
 					sound->playButtonPressSound();
-					Game::networkInitialization(username);
+					if (!isConnected) {
+						Game::networkInitialization(username);
+						isConnected = true;
+					}
 				}
 				ImGui::PopStyleColor(3);
 
@@ -565,7 +567,7 @@ namespace Rendering {
 			}
 			else if (leaderboardMenu) {
 				ImGui::SetNextWindowSize(ImVec2(width + 20, height + 20), 0);
-				ImGui::SetNextWindowPos(ImVec2(-10, -10), 0);
+				ImGui::SetNextWindowPos(ImVec2(-8, -8), 0);
 				ImGui::Begin("Leaderboard Backfill", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
 				ImGui::Image((void*)(intptr_t)leaderboardBackgrundFillTexture, ImVec2(width, height));
@@ -601,14 +603,15 @@ namespace Rendering {
 
 				vector<Networking::PlayerTime> playerTimes = Networking::getTimes();
 
-				ImGui::SetWindowFontScale(0.7);
+				ImGui::SetWindowFontScale(0.65);
 				for (int i = 0; i < playerTimes.size(); i++) {
 					Networking::PlayerTime player = playerTimes[i];
-					string temp = player.getName();
+					string position = to_string(1+i);
+					string temp = position + ". " + player.getName();
 					char const* textCharArray = temp.c_str();
 					ImGui::Text(textCharArray);
 					ImGui::SameLine();
-					ImGui::Indent(375);
+					ImGui::Indent(380);
 					float playerTime = player.getTime();
 					if (playerTime >= 60) {
 						int playerTimeMinutes = 0;
@@ -619,16 +622,11 @@ namespace Rendering {
 						string playerMinutesString = to_string(playerTimeMinutes);
 						string playerTimeSecondsString = to_string(playerTime);
 						playerTimeSecondsString = playerTimeSecondsString.substr(0, 4);
-						cout << playerTimeSecondsString;
-						cout << "\n";
 						string finalPlayerString = playerMinutesString + ":" + playerTimeSecondsString;
-						cout << finalPlayerString;
-						cout << "\n";
-
 						char const* timerChar = finalPlayerString.c_str();
 						ImGui::Text(timerChar);
 					}
-					ImGui::Indent(-375);
+					ImGui::Indent(-380);
 					ImGui::Dummy(ImVec2(0, 50));
 				}
 
