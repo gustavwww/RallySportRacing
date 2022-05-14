@@ -70,6 +70,10 @@ namespace Networking {
 		tcpClient.sendPacket("setcolor:" + to_string(index));
 	}
 
+	map<int, Player*> getPlayers() {
+		return players;
+	}
+
 	vector<PlayerTime> getTimes() {
 		return times;
 	}

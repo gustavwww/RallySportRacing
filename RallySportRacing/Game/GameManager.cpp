@@ -20,6 +20,7 @@
 #include "Services/Protocol/ProtocolParser.h"
 #include "Services/Protocol/Command.h"
 #include "Networking/Networking.h"
+#include "Networking/Player.h"
 #include "Utils/GameTimer.h"
 #include "Rendering/ParticleSystem.h"
 
@@ -569,6 +570,13 @@ namespace Game {
 	}
 
 	void update() {
+
+		// Update online players positions
+		map<int, Networking::Player*> players = Networking::getPlayers();
+		for (auto i = players.begin(); i != players.end(); i++) {
+			Networking::Player* p = i->second;
+			p->subUpdate(gameTimer->getDeltaTime());
+		}
 
 		// debug drawing, takes a lot of performance
 		/*physics->dynamicsWorld->setDebugDrawer(debugDrawer);

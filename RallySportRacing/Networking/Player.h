@@ -20,12 +20,14 @@ namespace Networking {
 		Player(Rendering::SDLWindowHandler* windowHandler, Networking::PlayerData playerData);
 		~Player();
 		void updateState(PlayerData data);
+		void subUpdate(float deltaTime);
 		string getName();
 
 	private:
 		Rendering::SDLWindowHandler* windowHandler;
 		string name;
 		string color;
+		glm::vec3 velocity;
 		Rendering::Text2D* label;
 		Game::GameObject* obj;
 		Game::GameObject* frontLeft;
