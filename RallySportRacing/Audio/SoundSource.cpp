@@ -199,19 +199,34 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 			if (this->engineHighAcc->getIsPaused()) {
 				this->engineHighAcc->setIsPaused(false);
 			}
-
-			// 
+			
 			if (speed < 10) {
 				checkStart = true;
 			}
+			// Acceleration sound at high speeds
 			if((5 * speed / 400.0F) > (engineFade / 200.0F) ) {
 				this->engineHighAcc->setPlaybackSpeed(1.0F + abs(speed) / 400.0F);
 				this->engineHighAcc->setVolume((abs(speed) / 100.0F) * engineFade / 100.0F);
 
 				checkStart = false;
 			}
+			// Acceleration sound at low speeds
 			else if (checkStart) {
-				this->engineHighAcc->setPlaybackSpeed(1.0F + engineFade / 200.0F);
+				/*
+				float revv = 1.0F;
+
+				// Revv functionality
+				if (engineFade > 90) {
+					if (revv == 1.0F) {
+						revv = 0.5F;
+					}
+					else {
+						revv += 0.001F;
+					}
+				}*/
+
+				// Acceleration sound set states
+				this->engineHighAcc->setPlaybackSpeed( 1.0F + engineFade / 200.0F);
 				this->engineHighAcc->setVolume(engineFade / 100.0F);
 			}
 		}

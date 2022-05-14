@@ -43,7 +43,7 @@ namespace Rendering {
 
 	//Audio
 	Audio* sound;
-	int volume = 50;
+	int volume = 100;
 
 	//Menu
 	bool startMenu = true;
