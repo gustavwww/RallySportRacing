@@ -18,6 +18,7 @@
 #include "Audio/audio.h"
 #include "Networking/Networking.h"
 #include "FrameBufferObject.h"
+#include "Networking/PlayerTime.h"
 //#include "Fonts/eras-bold.otf"
 
 using namespace std;
@@ -32,6 +33,8 @@ namespace Rendering {
 	glm::vec4 lightPos = glm::vec4(-400.0f, 1000.0f, -1300.0f, 1.0f);
 	float lightIntensity = 3.0f;
 	float envMultiplier = 1.5f;
+	float contrast = 1.5f;
+	float brightness = 1.0f;
 
 	//Shadow maps.
 	FboInfo shadowMapFB;
@@ -474,7 +477,7 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
 				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth *0.6, menuButtonHeight*0.6))) { 
 					sound->playButtonPressSound();
-					//Networking::joinGame(0, username);
+					Game::networkInitialization(username);
 				}
 				ImGui::PopStyleColor(3);
 
@@ -587,16 +590,49 @@ namespace Rendering {
 
 				ImGui::End();
 
-				ImGui::SetNextWindowSize(ImVec2(660, 800), 0);
-				ImGui::SetNextWindowPos(ImVec2(660, 200), 0);
+				ImGui::SetNextWindowSize(ImVec2(589, 762), 0);
+				ImGui::SetNextWindowPos(ImVec2(660, 230), 0);
 				ImGui::Begin("Leaderboard Content", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				ImGui::Dummy(ImVec2(0, 50));
+				ImGui::Dummy(ImVec2(0, 20));
 				ImGui::Indent(30);
 
-				//vector<PlayerTime> = Networking::getTimes();
+				vector<Networking::PlayerTime> playerTimes = Networking::getTimes();
 
 				ImGui::SetWindowFontScale(0.7);
+				for (int i = 0; i < playerTimes.size(); i++) {
+					Networking::PlayerTime player = playerTimes[i];
+					string temp = player.getName();
+					char const* textCharArray = temp.c_str();
+					ImGui::Text(textCharArray);
+					ImGui::SameLine();
+					ImGui::Indent(375);
+					float playerTime = player.getTime();
+					if (playerTime >= 60) {
+						int playerTimeMinutes = 0;
+						while (playerTime > 60) {
+							playerTime = playerTime - 60;
+							playerTimeMinutes++;
+						}
+						string playerMinutesString = to_string(playerTimeMinutes);
+						string playerTimeSecondsString = to_string(playerTime);
+						playerTimeSecondsString = playerTimeSecondsString.substr(0, 4);
+						cout << playerTimeSecondsString;
+						cout << "\n";
+						string finalPlayerString = playerMinutesString + ":" + playerTimeSecondsString;
+						cout << finalPlayerString;
+						cout << "\n";
+
+						char const* timerChar = finalPlayerString.c_str();
+						ImGui::Text(timerChar);
+					}
+					ImGui::Indent(-375);
+					ImGui::Dummy(ImVec2(0, 50));
+				}
+
+				
+
+				/*
 				ImGui::Text("Gustav");
 				ImGui::SameLine();
 				ImGui::Indent(375);
@@ -607,6 +643,7 @@ namespace Rendering {
 				ImGui::SameLine();
 				ImGui::Indent(375);
 				ImGui::Text("1:57.83");
+				*/
 
 				ImGui::End();
 
@@ -848,10 +885,10 @@ namespace Rendering {
 
 
 			if (showDebugGUI) {
-				ImGui::SetNextWindowSize(ImVec2(300, 300), 0);
-				ImGui::SetNextWindowPos(ImVec2(300, 300), 0);
+				ImGui::SetNextWindowSize(ImVec2(500, 500), 0);
+				ImGui::SetNextWindowPos(ImVec2(500, 500), 0);
 				ImGui::Begin("Options", 0, 0);
-
+				ImGui::SetWindowFontScale(0.2);
 				//Set slider to change in scene.
 				ImGui::DragFloat3("light pos", &lightPos.x);
 				ImGui::DragFloat3("light color", &lightColor.x);
@@ -859,6 +896,9 @@ namespace Rendering {
 				ImGui::DragFloat("polygon factor", &polygonFactor);
 				ImGui::DragFloat("polygon units", &polygonUnits);
 				ImGui::DragFloat("EnvMult", &envMultiplier);
+				ImGui::DragFloat("contrast", &contrast);
+				ImGui::DragFloat("brightness", &brightness);
+				
 
 				glUseProgram(shadowMapID);
 				ImGui::Image((ImTextureID)shadowMapFB.colorTextureTarget, ImVec2(700, 700));
@@ -911,6 +951,8 @@ namespace Rendering {
 			glUniform1fv(glGetUniformLocation(programID, "lightIntensity"), 1, &lightIntensity);
 			glUniform1fv(glGetUniformLocation(programID, "envMultiplier"), 1, &envMultiplier);
 			glUniformMatrix4fv(glGetUniformLocation(programID, "lightMatrix"), 1, GL_FALSE, &lightMatrix[0][0]);
+			glUniform1fv(glGetUniformLocation(programID, "contrast"), 1, &contrast);
+			glUniform1fv(glGetUniformLocation(programID, "brightness"), 1, &brightness);
 
 
 			for (Model* m : models) {

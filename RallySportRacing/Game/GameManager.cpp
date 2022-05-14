@@ -351,7 +351,7 @@ namespace Game {
 		initCheckPoints();
 
 		// Multiplayer setup
-		Networking::setupNetwork("Gustav", vehicle, windowHandler);
+		//Networking::setupNetwork("Gustav", vehicle, windowHandler);
 
 		// environment 1 test
 		/*Rendering::Model* environmentModel = Rendering::Model::loadModel("../Models/SimpleEnvironment.gltf", true); // use false if not terrain
@@ -504,6 +504,11 @@ namespace Game {
 	int Game::getCheckpointsReached()
 	{
 		return checkpointsReached;
+	}
+
+	void Game::networkInitialization(std::string name)
+	{
+		Networking::setupNetwork(name, vehicle, handler);
 	}
 
 	void Game::setTextureIndex(int colorIndex) {
