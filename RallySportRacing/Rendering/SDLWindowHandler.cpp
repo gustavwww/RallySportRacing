@@ -516,7 +516,9 @@ namespace Rendering {
 					carColorCycleVariable--;
 					if (carColorCycleVariable < 0) { carColorCycleVariable = 5; }
 					Game::setTextureIndex(carColorCycleVariable);
-					Networking::setColor(carColorCycleVariable);
+					if (isConnected) {
+						Networking::setColor(carColorCycleVariable);
+					}
 				}
 
 				ImGui::SameLine();
@@ -547,7 +549,9 @@ namespace Rendering {
 					carColorCycleVariable++;
 					if (carColorCycleVariable > 5) { carColorCycleVariable = 0; }
 					Game::setTextureIndex(carColorCycleVariable);
-					Networking::setColor(carColorCycleVariable);
+					if (isConnected) {
+						Networking::setColor(carColorCycleVariable);
+					}
 				}
 				ImGui::PopStyleColor(3);
 
