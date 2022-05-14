@@ -506,9 +506,9 @@ namespace Game {
 		return checkpointsReached;
 	}
 
-	void Game::networkInitialization(std::string name)
+	void Game::networkInitialization(std::string name, int colorIndex)
 	{
-		Networking::setupNetwork(name, vehicle, handler);
+		Networking::setupNetwork(name, vehicle, colorIndex, handler);
 	}
 
 	void Game::setTextureIndex(int colorIndex) {

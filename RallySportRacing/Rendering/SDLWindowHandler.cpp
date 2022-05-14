@@ -477,7 +477,7 @@ namespace Rendering {
 				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth *0.6, menuButtonHeight*0.6))) { 
 					sound->playButtonPressSound();
 					if (!isConnected) {
-						Game::networkInitialization(username);
+						Game::networkInitialization(username, carColorCycleVariable);
 						isConnected = true;
 					}
 				}

@@ -27,7 +27,7 @@ namespace Game {
 	int getCheckpointsReached();
 	void setTextureIndex(int a);
 	void turnOffEngine();
-	void networkInitialization(std::string name);
+	void networkInitialization(std::string name, int colorIndex);
 }
 
 #endif

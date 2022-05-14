@@ -11,7 +11,7 @@ using namespace std;
 
 namespace Networking {
 	
-	void setupNetwork(string playerName, Game::Vehicle* playerObj, Rendering::SDLWindowHandler* windowHandler);
+	void setupNetwork(string playerName, Game::Vehicle* playerObj, int playerColorIndex, Rendering::SDLWindowHandler* windowHandler);
 	void joinGame(string id, string name);
 	void sendTime(float time);
 	void setColor(int index);

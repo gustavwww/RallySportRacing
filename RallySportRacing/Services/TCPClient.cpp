@@ -92,8 +92,6 @@ namespace Server {
 
 		int result = send(connectSocket, str, (int) strlen(str), 0);
 		if (result == SOCKET_ERROR) {
-			closesocket(connectSocket);
-			WSACleanup();
 			cout << "Error sending TCP message, " << WSAGetLastError() << endl;
 		}
 	}
