@@ -32,6 +32,8 @@ namespace Rendering {
 	glm::vec4 lightPos = glm::vec4(-400.0f, 1000.0f, -1300.0f, 1.0f);
 	float lightIntensity = 3.0f;
 	float envMultiplier = 1.5f;
+	float contrast = 1.5f;
+	float brightness = 1.0f;
 
 	//Shadow maps.
 	FboInfo shadowMapFB;
@@ -848,10 +850,10 @@ namespace Rendering {
 
 
 			if (showDebugGUI) {
-				ImGui::SetNextWindowSize(ImVec2(300, 300), 0);
-				ImGui::SetNextWindowPos(ImVec2(300, 300), 0);
+				ImGui::SetNextWindowSize(ImVec2(500, 500), 0);
+				ImGui::SetNextWindowPos(ImVec2(500, 500), 0);
 				ImGui::Begin("Options", 0, 0);
-
+				ImGui::SetWindowFontScale(0.2);
 				//Set slider to change in scene.
 				ImGui::DragFloat3("light pos", &lightPos.x);
 				ImGui::DragFloat3("light color", &lightColor.x);
@@ -859,6 +861,9 @@ namespace Rendering {
 				ImGui::DragFloat("polygon factor", &polygonFactor);
 				ImGui::DragFloat("polygon units", &polygonUnits);
 				ImGui::DragFloat("EnvMult", &envMultiplier);
+				ImGui::DragFloat("contrast", &contrast);
+				ImGui::DragFloat("brightness", &brightness);
+				
 
 				glUseProgram(shadowMapID);
 				ImGui::Image((ImTextureID)shadowMapFB.colorTextureTarget, ImVec2(700, 700));
@@ -911,6 +916,8 @@ namespace Rendering {
 			glUniform1fv(glGetUniformLocation(programID, "lightIntensity"), 1, &lightIntensity);
 			glUniform1fv(glGetUniformLocation(programID, "envMultiplier"), 1, &envMultiplier);
 			glUniformMatrix4fv(glGetUniformLocation(programID, "lightMatrix"), 1, GL_FALSE, &lightMatrix[0][0]);
+			glUniform1fv(glGetUniformLocation(programID, "contrast"), 1, &contrast);
+			glUniform1fv(glGetUniformLocation(programID, "brightness"), 1, &brightness);
 
 
 			for (Model* m : models) {
