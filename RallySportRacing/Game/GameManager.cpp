@@ -571,10 +571,10 @@ namespace Game {
 		}
 	}
 
-	queue<std::function<void()>*> buffer;
+	queue<Networking::Player*> playerColorUpdateBuffer;
 
-	void addAction(std::function<void()>* method) {
-		buffer.push(method);
+	void addPlayerColorUpdate(Networking::Player* p) {
+		playerColorUpdateBuffer.push(p);
 	}
 
 	void update() {
@@ -601,9 +601,10 @@ namespace Game {
 			gameObjects[i]->updateTransform();
 		}
 
-		while (!buffer.empty()) {
-			std::function<void()>* method = buffer.front();
-			(* method)();
+		while (!playerColorUpdateBuffer.empty()) {
+			Networking::Player* p = playerColorUpdateBuffer.front();
+			playerColorUpdateBuffer.pop();
+			p->updateColor();
 		}
 
 		// Calculate deltaTime

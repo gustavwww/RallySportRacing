@@ -10,6 +10,7 @@
 #include "Services/Protocol/Command.h"
 #include "Services/Protocol/ProtocolParser.h"
 #include "Game/GameObject.h"
+#include "Game/GameManager.h"
 #include "Player.h"
 #include "Rendering/SDLWindowHandler.h"
 #include <glm/gtx/quaternion.hpp>
@@ -81,7 +82,7 @@ namespace Networking {
 	void tcpPacketReceived(string str) {
 		Protocol::Command cmd = Protocol::parseMessage(str);
 		string command = cmd.getCommand();
-
+		
 		if (command == "connect") {
 			clientID = stoi(cmd.getArgs()[0]);
 			cout << "Client ID received from server: " << clientID << endl;
@@ -110,6 +111,79 @@ namespace Networking {
 
 				times.push_back(PlayerTime(name, time));
 			}
+
+		} else if (command == "players") {
+			cout << "Retrieving players from server..." << endl;
+
+			for (int i = 0; i < cmd.getArgsSize(); i += 3) {
+
+				int id = stoi(cmd.getArgs()[i]);
+				if (id == clientID) {
+					continue;
+				}
+
+				string name = cmd.getArgs()[1];
+				int colorIndex = stoi(cmd.getArgs()[2]);
+
+				Player* p = new Player(handler, name, colorIndex);
+				players.insert(pair<int, Player*>(id, p));
+
+				// Create sound source
+				sound->createSoundSource(id, glm::vec3(0.0f));
+
+				cout << name << " ";
+			}
+			cout << " - " << players.size() << " Players retrieved." << endl;
+
+		} else if (command == "joined") {
+
+			int id = stoi(cmd.getArgs()[0]);
+			if (id == clientID) {
+				return;
+			}
+
+			string name = cmd.getArgs()[1];
+			int colorIndex = stoi(cmd.getArgs()[2]);
+
+			Player* p = new Player(handler, name, colorIndex);
+			players.insert(pair<int, Player*>(id, p));
+
+			// Create sound source
+			sound->createSoundSource(id, glm::vec3(0.0f));
+
+			cout << "A player has joined the game: " << p->getName() << endl;
+
+		} else if (command == "left") {
+
+			int id = stoi(cmd.getArgs()[0]);
+			auto el = players.find(id);
+			if (el != players.end()) {
+
+				Player* p = el->second;
+				players.erase(el);
+
+				// Remove sound source
+				sound->removeSoundSource(id);
+
+				cout << "A player has left the game: " << p->getName() << endl;
+				delete p;
+			}
+
+		} else if (command == "update") {
+
+			int id = stoi(cmd.getArgs()[0]);
+			auto el = players.find(id);
+			if (el != players.end()) {
+
+				string name = cmd.getArgs()[1];
+				int colorIndex = stoi(cmd.getArgs()[2]);
+
+				Player* p = el->second;
+				p->setName(name);
+				p->setColor(colorIndex);
+				Game::addPlayerColorUpdate(p);
+			}
+
 		}
 
 	}
@@ -120,18 +194,13 @@ namespace Networking {
 		
 		if (command == "game") {
 
-			if (cmd.getArgsSize() % 44 != 0) {
+			if (cmd.getArgsSize() % 42 != 0) {
 				// Skip corrupt UDP packets.
 				return;
 			}
-
-			// Store players already in game to eventuelly remove them.
-			vector<int> playersInGame;
-			for (auto el : players)
-				playersInGame.push_back(el.first);
 			
 			for (int i = 0; i < cmd.getArgsSize(); i++) {
-				if (cmd.getArgs()[i] == "player" && (i+43) <= cmd.getArgsSize()) {
+				if (cmd.getArgs()[i] == "player" && (i+41) <= cmd.getArgsSize()) {
 					i++;
 
 					int id = stoi(cmd.getArgs()[i]);
@@ -139,24 +208,14 @@ namespace Networking {
 						continue;
 					}
 
-					PlayerData data(cmd, i);
-
 					auto el = players.find(id);
-					if (el == players.end()) {
-						// Player not initialized, creating player...
-					
-						Player* p = new Player(handler, data);
-						players.insert(pair<int, Player*>(id, p));
-						cout << "A player has joined the game: " << p->getName() << endl;
+					if (el != players.end()) {
 
-						// Create sound source
-						sound->createSoundSource(id, data.pos);
-					}
-					else {
-						// Player already created, updating position...
+						PlayerData data(cmd, i);
+
+						// Updating player state
 						Player* p = el->second;
 						p->updateState(data);
-						playersInGame.erase(find(playersInGame.begin(), playersInGame.end(), id));
 
 						// Update sound source
 						sound->updateSoundSource(id, data.pos, data.velocity, data.speed, data.soundString);
@@ -164,20 +223,6 @@ namespace Networking {
 
 				}
 
-			}
-
-			// Remove players no longer in game.
-			for (int id : playersInGame) {
-				auto el = players.find(id);
-				if (el != players.end()) {
-					Player* p = el->second;
-					players.erase(el);
-					cout << "A player has left the game: " << p->getName() << endl;
-
-					// Remove sound source
-					sound->removeSoundSource(id);
-					delete p;
-				}
 			}
 
 		}

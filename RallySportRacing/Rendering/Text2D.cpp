@@ -111,6 +111,10 @@ namespace Rendering {
 		this->pos = pos;
 	}
 
+	void Text2D::setText(string text) {
+		this->text = text;
+	}
+
 	void loadCharacters() {
 		FT_Library ft;
 		if (FT_Init_FreeType(&ft)) {

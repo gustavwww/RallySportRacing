@@ -18,6 +18,7 @@ namespace Rendering {
 	    void render(GLint programID, glm::mat4 projection, glm::mat4 view);
 
         void updatePos(glm::vec3 pos);
+        void setText(string text);
 
     private:
 

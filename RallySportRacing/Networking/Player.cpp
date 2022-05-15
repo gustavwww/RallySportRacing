@@ -1,57 +1,69 @@
 #include "Player.h"
+#include "Game/GameManager.h"
 #include <glm/glm.hpp>
 
 using namespace std;
 
 namespace Networking {
 
-	Player::Player(Rendering::SDLWindowHandler* windowHandler, Networking::PlayerData playerData) {
+	Player::Player(Rendering::SDLWindowHandler* windowHandler, string name, int color) {
 		this->windowHandler = windowHandler;
+		this->name = name;
+		this->color = color;
 
-		name = playerData.name;
-		color = playerData.color;
-		velocity = playerData.velocity;
+		velocity = glm::vec3(0.0f);
+	}
 
-		label = new Rendering::Text2D(name, glm::vec3(0.5, 0.8f, 0.2f), playerData.pos);
+	void Player::initPlayer(PlayerData data) {
+
+		label = new Rendering::Text2D(name, glm::vec3(0.5, 0.8f, 0.2f), data.pos);
 		windowHandler->addText(label);
 
 		Rendering::Model* model = Rendering::Model::loadModel("../Models/PorscheGT3.gltf", false, true);
-		model->updateMaterial(stoi(playerData.color), "chassiColor");
 		windowHandler->addModel(model);
 
 		obj = new Game::GameObject(model);
-		obj->setPosition(playerData.pos);
-		obj->setQuaternion(playerData.orientation);
-		
+		obj->setPosition(data.pos);
+		obj->setQuaternion(data.orientation);
+
 		Rendering::Model* frontLeftModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		windowHandler->addModel(frontLeftModel);
 		frontLeft = new Game::GameObject(frontLeftModel);
-		frontLeft->setPosition(playerData.frontLeftPos);
-		frontLeft->setQuaternion(playerData.frontLeftOr);
+		frontLeft->setPosition(data.frontLeftPos);
+		frontLeft->setQuaternion(data.frontLeftOr);
 
 		Rendering::Model* frontRightModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		windowHandler->addModel(frontRightModel);
 		frontRight = new Game::GameObject(frontRightModel);
-		frontRight->setPosition(playerData.frontRightPos);
-		frontRight->setQuaternion(playerData.frontRightOr);
+		frontRight->setPosition(data.frontRightPos);
+		frontRight->setQuaternion(data.frontRightOr);
 
 		Rendering::Model* backLeftModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		windowHandler->addModel(backLeftModel);
 		backLeft = new Game::GameObject(backLeftModel);
-		backLeft->setPosition(playerData.backLeftPos);
-		backLeft->setQuaternion(playerData.backLeftOr);
+		backLeft->setPosition(data.backLeftPos);
+		backLeft->setQuaternion(data.backLeftOr);
 
 		Rendering::Model* backRightModel = Rendering::Model::loadModel("../Models/TwoSidedWheel.gltf", false, true);
 		windowHandler->addModel(backRightModel);
 		backRight = new Game::GameObject(backRightModel);
-		backRight->setPosition(playerData.backRightPos);
-		backRight->setQuaternion(playerData.backRightOr);
+		backRight->setPosition(data.backRightPos);
+		backRight->setQuaternion(data.backRightOr);
 
+		Game::addPlayerColorUpdate(this);
+
+		isInitialized = true;
 	}
 
 	void Player::updateState(PlayerData data) {
+		if (!isInitialized) {
+			initPlayer(data);
+			return;
+		}
+
+		//label->setText(name);
+
 		velocity = data.velocity;
-		obj->getModel()->updateMaterial(stoi(data.color), "chassiColor");
 		label->updatePos(data.pos);
 		obj->setPosition(data.pos);
 		obj->setQuaternion(data.orientation);
@@ -66,6 +78,10 @@ namespace Networking {
 	}
 
 	void Player::subUpdate(float deltaTime) {
+		if (!isInitialized) {
+			return;
+		}
+
 		glm::vec3 oldPos = obj->getPosition();
 		glm::vec3 newPos = oldPos + velocity * deltaTime;
 		obj->setPosition(newPos);
@@ -92,8 +108,28 @@ namespace Networking {
 		*/
 	}
 
+	void Player::setName(string name) {
+		this->name = name;
+	}
+
+	void Player::updateColor() {
+		if (!isInitialized) {
+			return;
+		}
+
+		obj->getModel()->updateMaterial(color, "chassiColor");
+	}
+
+	void Player::setColor(int color) {
+		this->color = color;
+	}
+
 	string Player::getName() {
 		return name;
+	}
+
+	int Player::getColor() {
+		return color;
 	}
 
 }

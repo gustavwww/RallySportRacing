@@ -17,16 +17,24 @@ namespace Networking {
 
 	class Player {
 	public:
-		Player(Rendering::SDLWindowHandler* windowHandler, Networking::PlayerData playerData);
+		Player(Rendering::SDLWindowHandler* windowHandler, string name, int color);
 		~Player();
 		void updateState(PlayerData data);
 		void subUpdate(float deltaTime);
+		void setName(string name);
+		void updateColor();
+		void setColor(int color);
 		string getName();
+		int getColor();
 
 	private:
+		bool isInitialized = false;
+		void initPlayer(PlayerData data);
+
 		Rendering::SDLWindowHandler* windowHandler;
 		string name;
-		string color;
+		int color;
+
 		glm::vec3 velocity;
 		Rendering::Text2D* label;
 		Game::GameObject* obj;

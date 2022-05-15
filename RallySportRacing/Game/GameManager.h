@@ -4,12 +4,14 @@
 #include <string>
 #include "GameObject.h"
 #include "Rendering/SDLWindowHandler.h"
+#include "Networking/Player.h"
 
 namespace Game {
 	void activateSnow();
 	void activateRain();
 	void initCheckPoints();
 	void setupGame(Rendering::SDLWindowHandler* windowHandler);
+	void addPlayerColorUpdate(Networking::Player* p);
 	void update();
 	void adjustCamPosition();
 	btVector3 glmToBullet(const glm::vec3& vec);
