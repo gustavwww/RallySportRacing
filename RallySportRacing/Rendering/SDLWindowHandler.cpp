@@ -32,7 +32,7 @@ namespace Rendering {
 	glm::vec3 lightColor = glm::vec3(1.f, 1.f, 1.f);
 	glm::vec4 lightPos = glm::vec4(-400.0f, 1000.0f, -1300.0f, 1.0f);
 	float lightIntensity = 3.0f;
-	float envMultiplier = 1.5f;
+	float envMultiplier = 0.5f;
 	float contrast = 1.5f;
 	float brightness = 1.0f;
 
@@ -296,7 +296,7 @@ namespace Rendering {
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, nearPlane, farPlane);
-		glm::mat4 lightProjMatrix = glm::ortho(-50.f, 50.f, -50.f, 50.f, nearPlane, farPlane);
+		glm::mat4 lightProjMatrix = glm::ortho(-70.f, 70.f, -70.f, 70.f, nearPlane, farPlane);
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
