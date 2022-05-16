@@ -346,7 +346,7 @@ namespace Rendering {
 
 		//GUI bool
 		bool showDebugGUI = false;
-		bool mainMenu = false;
+		bool mainMenu = true;
 		bool settingsMenu = false;
 		bool leaderboardMenu = false;
 		bool speedometerActive = true;
@@ -566,7 +566,7 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)settingsBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { settingsMenu = false; sound->playButtonPressSound();}
+				if (ImGui::ImageButton((void*)(intptr_t)settingsBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { mainMenu = true; settingsMenu = false; sound->playButtonPressSound(); }
 				ImGui::PopStyleColor(3);
 
 				ImGui::End();
@@ -660,7 +660,7 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)leaderboardBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { leaderboardMenu = false; sound->playButtonPressSound();}
+				if (ImGui::ImageButton((void*)(intptr_t)leaderboardBackButton, ImVec2(settingsButtonSize, settingsButtonSize))) { mainMenu = true; leaderboardMenu = false; sound->playButtonPressSound(); }
 				ImGui::PopStyleColor(3);
 
 				ImGui::End();
