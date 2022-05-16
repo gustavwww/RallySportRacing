@@ -293,6 +293,7 @@ namespace Rendering {
 		int finished = loadTexture("../IMGS/finished.png");
 		int newMainMenu = loadTexture("../IMGS/new-main-menu2.png");
 		int newSettingsMenu = loadTexture("../IMGS/new-settings-menu2.png");
+		int connectedGreyButton = loadTexture("../IMGS/connected-grey-button.png");
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, nearPlane, farPlane);
@@ -349,7 +350,7 @@ namespace Rendering {
 		bool mainMenu = true;
 		bool settingsMenu = false;
 		bool leaderboardMenu = false;
-		bool speedometerActive = true;
+		bool hudActive = true;
 
 		ImGuiIO& io = ImGui::GetIO();
 		ImFont* font1 = io.Fonts->AddFontFromFileTTF("../Fonts\\Eras.ttf", 96);
@@ -388,10 +389,10 @@ namespace Rendering {
 			}
 
 			if (windowEvent.type == SDL_KEYUP && windowEvent.key.keysym.sym == SDLK_6) {
-				speedometerActive = !speedometerActive;
+				hudActive = !hudActive;
 			}
 
-			if (speedometerActive) {
+			if (hudActive) {
 				ImGui::SetNextWindowSize(ImVec2(750, 200), 0);
 				ImGui::SetNextWindowPos(ImVec2(627, 920), 0);
 				ImGui::Begin("Speedometer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
@@ -476,13 +477,20 @@ namespace Rendering {
 				ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.f, 0.f, 0.f, 0.f));
 				ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.f, 0.f, 0.f, 0.f));
-				if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth *0.6, menuButtonHeight*0.6))) { 
-					sound->playButtonPressSound();
-					if (!isConnected) {
-						Game::networkInitialization(username, carColorCycleVariable);
-						isConnected = true;
+				if (!isConnected) {
+					if (ImGui::ImageButton((void*)(intptr_t)connectButton, ImVec2(menuButtonWidth * 0.6, menuButtonHeight * 0.6))) {
+						sound->playButtonPressSound();
+						if (!isConnected) {
+							Game::networkInitialization(username, carColorCycleVariable);
+							isConnected = true;
+						}
 					}
 				}
+				else {
+					if (ImGui::ImageButton((void*)(intptr_t)connectedGreyButton, ImVec2(menuButtonWidth * 0.6, menuButtonHeight * 0.6))) {
+					}
+				}
+				
 				ImGui::PopStyleColor(3);
 
 				ImGui::End();
@@ -666,228 +674,231 @@ namespace Rendering {
 				ImGui::End();
 			}
 
-			countDownTime = Game::getCountDownTime();
-			if (countDownTime < 3.0f) {
-				ImGui::SetNextWindowSize(ImVec2(300, 300), 0);
-				ImGui::SetNextWindowPos(ImVec2(width / 2 - 100 - 10, height / 2 - 160), 0);
-				ImGui::Begin("Count Down", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+			if (hudActive) {
+				countDownTime = Game::getCountDownTime();
+				if (countDownTime < 3.0f) {
+					ImGui::SetNextWindowSize(ImVec2(300, 300), 0);
+					ImGui::SetNextWindowPos(ImVec2(width / 2 - 100 - 10, height / 2 - 160), 0);
+					ImGui::Begin("Count Down", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-				if (countDownTime > 2) {
-					ImGui::Image((void*)(intptr_t)countThree, ImVec2(209, 266));
+					if (countDownTime > 2) {
+						ImGui::Image((void*)(intptr_t)countThree, ImVec2(209, 266));
+					}
+					else if (countDownTime > 1) {
+						ImGui::Image((void*)(intptr_t)countTwo, ImVec2(216, 261));
+					}
+					else if (countDownTime > 0) {
+						ImGui::Indent(30);
+						ImGui::Image((void*)(intptr_t)countOne, ImVec2(129, 256));
+					}
+
+
+					ImGui::End();
 				}
-				else if (countDownTime > 1) {
-					ImGui::Image((void*)(intptr_t)countTwo, ImVec2(216, 261));
-				}
-				else if (countDownTime > 0) {
-					ImGui::Indent(30);
-					ImGui::Image((void*)(intptr_t)countOne, ImVec2(129, 256));
-				}
 
 
-				ImGui::End();
-			}
+				raceTime = Game::getRaceTime();
 
 
-			raceTime = Game::getRaceTime();
-
-
-			if (raceTime > 0 && raceTime < 1) {
-				ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
-				ImGui::SetNextWindowPos(ImVec2(width / 2 - 607 / 2, height / 2 - 300 / 2 - 30), 0);
-				ImGui::Begin("Count Go", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-				ImGui::Image((void*)(intptr_t)countGo, ImVec2(607, 266));
-
-				ImGui::End();
-
-				raceFinished = false;
-			}
-			else if (raceTime > 1) {
-				if (raceFinished == false) {
+				if (raceTime > 0 && raceTime < 1) {
 					ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
-					ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
-					ImGui::Begin("Race Timer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-					ImGui::SetWindowFontScale(1.5);
-					ImGui::PushFont(font1);
-					if (raceTime >= 60) {
-						while (raceTime > 60) {
-							raceTime = raceTime - 60;
-							minutes++;
-						}
-						std::string timerString = std::to_string(raceTime);
-						if (raceTime > 10) {
-							timerString = timerString.substr(0, 5);
-						}
-						else {
-							timerString = timerString.substr(0, 4);
-							timerString = "0" + timerString;
-						}
+					ImGui::SetNextWindowPos(ImVec2(width / 2 - 607 / 2, height / 2 - 300 / 2 - 30), 0);
+					ImGui::Begin("Count Go", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-						std::string minutesString = std::to_string(minutes);
-						std::string finalString = minutesString + ":" + timerString;
-						char const* timerChar = finalString.c_str();
-						ImGui::Text(timerChar);
-					}
-					else {
-						std::string timerString = std::to_string(raceTime);
-						if (raceTime > 10) {
-							timerString = timerString.substr(0, 5);
-						}
-						else {
-							timerString = timerString.substr(0, 4);
-							timerString = "0" + timerString;
-						}
-						char const* timerChar = timerString.c_str();
-						ImGui::Text(timerChar);
-					}
-					ImGui::PopFont();
-					ImGui::End();
-
-					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 30), 0);
-					ImGui::Begin("Checkpoints", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-					ImGui::Image((void*)(intptr_t)checkpoint, ImVec2(636 * amplifier, 350 * amplifier));
+					ImGui::Image((void*)(intptr_t)countGo, ImVec2(607, 266));
 
 					ImGui::End();
+
+					raceFinished = false;
 				}
+				else if (raceTime > 1) {
+					if (raceFinished == false) {
+						ImGui::SetNextWindowSize(ImVec2(700, 300), 0);
+						ImGui::SetNextWindowPos(ImVec2(0, 0), 0);
+						ImGui::Begin("Race Timer", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+						ImGui::SetWindowFontScale(1.5);
+						ImGui::PushFont(font1);
+						if (raceTime >= 60) {
+							while (raceTime > 60) {
+								raceTime = raceTime - 60;
+								minutes++;
+							}
+							std::string timerString = std::to_string(raceTime);
+							if (raceTime > 10) {
+								timerString = timerString.substr(0, 5);
+							}
+							else {
+								timerString = timerString.substr(0, 4);
+								timerString = "0" + timerString;
+							}
 
-				minutes = 0;
+							std::string minutesString = std::to_string(minutes);
+							std::string finalString = minutesString + ":" + timerString;
+							char const* timerChar = finalString.c_str();
+							ImGui::Text(timerChar);
+						}
+						else {
+							std::string timerString = std::to_string(raceTime);
+							if (raceTime > 10) {
+								timerString = timerString.substr(0, 5);
+							}
+							else {
+								timerString = timerString.substr(0, 4);
+								timerString = "0" + timerString;
+							}
+							char const* timerChar = timerString.c_str();
+							ImGui::Text(timerChar);
+						}
+						ImGui::PopFont();
+						ImGui::End();
 
-				switch (Game::getCheckpointsReached()) {
-				case 0:
-					if (raceTime > 1 && raceTime < 100) {
 						ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
-						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-						ImGui::Begin("CheckpointZero", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+						ImGui::SetNextWindowPos(ImVec2(1550, 30), 0);
+						ImGui::Begin("Checkpoints", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-						ImGui::Image((void*)(intptr_t)checkpointZero, ImVec2(224 * amplifier, 266 * amplifier));
+						ImGui::Image((void*)(intptr_t)checkpoint, ImVec2(636 * amplifier, 350 * amplifier));
 
 						ImGui::End();
 					}
-					break;
-				case 1:
-					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-					ImGui::Begin("CheckpointsOne", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-					ImGui::Image((void*)(intptr_t)checkpointOne, ImVec2(129 * amplifier, 256 * amplifier));
+					minutes = 0;
 
-					ImGui::End();
-					break;
-				case 2:
-					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-					ImGui::Begin("CheckpointsTwo", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+					switch (Game::getCheckpointsReached()) {
+					case 0:
+						if (raceTime > 1 && raceTime < 100) {
+							ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
+							ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+							ImGui::Begin("CheckpointZero", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 
-					ImGui::Image((void*)(intptr_t)checkpointTwo, ImVec2(216 * amplifier, 261 * amplifier));
+							ImGui::Image((void*)(intptr_t)checkpointZero, ImVec2(224 * amplifier, 266 * amplifier));
 
-					ImGui::End();
-					break;
-				case 3:
-					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-					ImGui::Begin("CheckpointsThree", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-					ImGui::Image((void*)(intptr_t)checkpointThree, ImVec2(209 * amplifier, 266 * amplifier));
-
-					ImGui::End();
-					break;
-				case 4:
-					ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-					ImGui::Begin("CheckpointsFour", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-					ImGui::Image((void*)(intptr_t)checkpointFour, ImVec2(224 * amplifier, 256 * amplifier));
-
-					ImGui::End();
-					break;
-				case 5:
-					ImGui::SetNextWindowSize(ImVec2(700, 470), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-					ImGui::Begin("CheckpointsFive", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-					ImGui::Image((void*)(intptr_t)checkpointFive, ImVec2(204 * amplifier, 277 * amplifier));
-
-					ImGui::End();
-					break;
-				case 6:
-					ImGui::SetNextWindowSize(ImVec2(700, 450), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-					ImGui::Begin("CheckpointsSix", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-					ImGui::Image((void*)(intptr_t)checkpointSix, ImVec2(221 * amplifier, 258 * amplifier));
-
-					ImGui::End();
-					break;
-				case 7:
-					ImGui::SetNextWindowSize(ImVec2(700, 450), 0);
-					ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
-					ImGui::Begin("CheckpointsSeven", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-					ImGui::Image((void*)(intptr_t)checkpointSeven, ImVec2(203 * amplifier, 256 * amplifier));
-
-					ImGui::End();
-					break;
-				case 8:
-					raceFinished = true;
-
-					ImGui::SetNextWindowSize(ImVec2(1000, 450), 0);
-					ImGui::SetNextWindowPos(ImVec2(712, 200), 0);
-					ImGui::Begin("Race Finished", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-					ImGui::SetWindowFontScale(2);
-
-					if (raceTime >= 60) {
-						while (raceTime > 60) {
-							raceTime = raceTime - 60;
-							minutes++;
+							ImGui::End();
 						}
-						std::string timerString = std::to_string(raceTime);
-						if (raceTime > 10) {
-							timerString = timerString.substr(0, 5);
+						break;
+					case 1:
+						ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
+						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+						ImGui::Begin("CheckpointsOne", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::Image((void*)(intptr_t)checkpointOne, ImVec2(129 * amplifier, 256 * amplifier));
+
+						ImGui::End();
+						break;
+					case 2:
+						ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
+						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+						ImGui::Begin("CheckpointsTwo", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::Image((void*)(intptr_t)checkpointTwo, ImVec2(216 * amplifier, 261 * amplifier));
+
+						ImGui::End();
+						break;
+					case 3:
+						ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
+						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+						ImGui::Begin("CheckpointsThree", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::Image((void*)(intptr_t)checkpointThree, ImVec2(209 * amplifier, 266 * amplifier));
+
+						ImGui::End();
+						break;
+					case 4:
+						ImGui::SetNextWindowSize(ImVec2(700, 400), 0);
+						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+						ImGui::Begin("CheckpointsFour", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::Image((void*)(intptr_t)checkpointFour, ImVec2(224 * amplifier, 256 * amplifier));
+
+						ImGui::End();
+						break;
+					case 5:
+						ImGui::SetNextWindowSize(ImVec2(700, 470), 0);
+						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+						ImGui::Begin("CheckpointsFive", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::Image((void*)(intptr_t)checkpointFive, ImVec2(204 * amplifier, 277 * amplifier));
+
+						ImGui::End();
+						break;
+					case 6:
+						ImGui::SetNextWindowSize(ImVec2(700, 450), 0);
+						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+						ImGui::Begin("CheckpointsSix", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::Image((void*)(intptr_t)checkpointSix, ImVec2(221 * amplifier, 258 * amplifier));
+
+						ImGui::End();
+						break;
+					case 7:
+						ImGui::SetNextWindowSize(ImVec2(700, 450), 0);
+						ImGui::SetNextWindowPos(ImVec2(1550, 33), 0);
+						ImGui::Begin("CheckpointsSeven", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::Image((void*)(intptr_t)checkpointSeven, ImVec2(203 * amplifier, 256 * amplifier));
+
+						ImGui::End();
+						break;
+					case 8:
+						raceFinished = true;
+
+						ImGui::SetNextWindowSize(ImVec2(1000, 450), 0);
+						ImGui::SetNextWindowPos(ImVec2(712, 200), 0);
+						ImGui::Begin("Race Finished", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::SetWindowFontScale(2);
+
+						if (raceTime >= 60) {
+							while (raceTime > 60) {
+								raceTime = raceTime - 60;
+								minutes++;
+							}
+							std::string timerString = std::to_string(raceTime);
+							if (raceTime > 10) {
+								timerString = timerString.substr(0, 5);
+							}
+							else {
+								timerString = timerString.substr(0, 4);
+								timerString = "0" + timerString;
+							}
+
+							std::string minutesString = std::to_string(minutes);
+							std::string finalString = minutesString + ":" + timerString;
+							char const* timerChar = finalString.c_str();
+							ImGui::Text(timerChar);
 						}
 						else {
-							timerString = timerString.substr(0, 4);
-							timerString = "0" + timerString;
+							std::string timerString = std::to_string(raceTime);
+							if (raceTime > 10) {
+								timerString = timerString.substr(0, 5);
+							}
+							else {
+								timerString = timerString.substr(0, 4);
+								timerString = "0" + timerString;
+							}
+							char const* timerChar = timerString.c_str();
+							ImGui::Text(timerChar);
 						}
 
-						std::string minutesString = std::to_string(minutes);
-						std::string finalString = minutesString + ":" + timerString;
-						char const* timerChar = finalString.c_str();
-						ImGui::Text(timerChar);
+						ImGui::End();
+
+						ImGui::SetNextWindowSize(ImVec2(1410, 230), 0);
+						ImGui::SetNextWindowPos(ImVec2(280, 380), 0);
+						ImGui::Begin("Finished", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
+
+						ImGui::Image((void*)(intptr_t)finished, ImVec2(1396, 201));
+
+						ImGui::End();
+
+						Game::turnOffEngine();
+
+						break;
+					case 9:
+						raceTime = 0;
+						break;
 					}
-					else {
-						std::string timerString = std::to_string(raceTime);
-						if (raceTime > 10) {
-							timerString = timerString.substr(0, 5);
-						}
-						else {
-							timerString = timerString.substr(0, 4);
-							timerString = "0" + timerString;
-						}
-						char const* timerChar = timerString.c_str();
-						ImGui::Text(timerChar);
-					}
-
-					ImGui::End();
-
-					ImGui::SetNextWindowSize(ImVec2(1410, 230), 0);
-					ImGui::SetNextWindowPos(ImVec2(280, 380), 0);
-					ImGui::Begin("Finished", 0, ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
-
-					ImGui::Image((void*)(intptr_t)finished, ImVec2(1396, 201));
-
-					ImGui::End();
-
-					Game::turnOffEngine();
-
-					break;
-				case 9:
-					raceTime = 0;
-					break;
 				}
 			}
+			
 
 
 			if (showDebugGUI) {
