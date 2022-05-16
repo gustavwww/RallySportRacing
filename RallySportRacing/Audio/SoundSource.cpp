@@ -9,12 +9,18 @@ using namespace irrklang;
 float speed;
 
 int engineFade;
+float revv;
+float revvPitch;
+float revvMult;
 
 bool checkStart;
 
 SoundSource::SoundSource(int ID, irrklang::vec3df position) {
 	// Init engine sound
 	speed = 0.0F;
+	revv = 1.0F;
+	revvPitch = 0.0F;
+	revvMult = 1.0F;
 	checkStart = false;
 
 	this->soundString = "00000";
@@ -209,25 +215,29 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 				this->engineHighAcc->setVolume((abs(speed) / 100.0F) * engineFade / 100.0F);
 
 				checkStart = false;
+				revv = 1.0F;
 			}
 			// Acceleration sound at low speeds
 			else if (checkStart) {
-				/*
-				float revv = 1.0F;
-
+				
 				// Revv functionality
 				if (engineFade > 90) {
-					if (revv == 1.0F) {
+					if (revvPitch < 2.0F) {
+						revvPitch += 0.3F;
+					}
+					if (revv > 1.8F) {
 						revv = 0.5F;
+						revvMult = 1.0F;
 					}
 					else {
-						revv += 0.001F;
+						revv = revvMult * revv;
+							revvMult += 0.01;
 					}
-				}*/
+				}
 
 				// Acceleration sound set states
-				this->engineHighAcc->setPlaybackSpeed( 1.0F + engineFade / 200.0F);
-				this->engineHighAcc->setVolume(engineFade / 100.0F);
+				this->engineHighAcc->setPlaybackSpeed( (1.0F + engineFade / 200.0F) * revvPitch);
+				this->engineHighAcc->setVolume( (engineFade / 100.0F) * revv);
 			}
 		}
 
