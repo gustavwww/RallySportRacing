@@ -227,11 +227,12 @@ void SoundSource::engine(bool engineOn, char WorSPressed, float speed, irrklang:
 					}
 					if (revv > 1.8F) {
 						revv = 0.5F;
-						revvMult = 1.0F;
+						//revvMult = 1.0F;
 					}
 					else {
-						revv = revvMult * revv;
-							revvMult += 0.01;
+						//revv = revvMult * revv;
+						//revvMult += 0.01;
+						revv += 0.2;
 					}
 				}
 
