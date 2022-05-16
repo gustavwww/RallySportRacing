@@ -703,7 +703,8 @@ namespace Game {
 					gasTimer = 0;
 					raceTime = 0;
 					checkpointsReached = 0;
-	
+					resetCarToggle = true;
+					timingRace = false;
 					for (int i = 0; i < 100; i++) {
 						glm::vec3 smokeOffset = glm::vec3(2 * vehicle->getOrientation().x, vehicle->getOrientation().y + 0.34, 2 * vehicle->getOrientation().z);
 						smokeParticlesObject.emitParticle(vehicle->getPosition() + smokeOffset, glm::vec3(1 * random.Float(), 1 * random.Float(), 1 * random.Float() * vehicle->getOrientation().z), 3, 0.2);
