@@ -38,7 +38,7 @@ namespace Rendering {
 
 	//Shadow maps.
 	FboInfo shadowMapFB;
-	int shadowMapResolution = 8000;
+	int shadowMapResolution = 10000;
 	float polygonFactor = 3.5f, polygonUnits = 1.0f;
 
 	//Audio
@@ -296,7 +296,7 @@ namespace Rendering {
 
 		// Params: field of view, perspective ratio, near clipping plane, far clipping plane.
 		glm::mat4 projection = glm::perspective(glm::radians(fov), (float)width / (float)height, nearPlane, farPlane);
-		glm::mat4 lightProjMatrix = glm::ortho(-70.f, 70.f, -70.f, 70.f, nearPlane, farPlane);
+		glm::mat4 lightProjMatrix = glm::ortho(-150.f, 150.f, -150.f, 150.f, nearPlane, farPlane);
 
 		// Params: Cam pos in World Space, where to look at, head up (0,-1,0) = upside down.
 		glm::mat4 view;
