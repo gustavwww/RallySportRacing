@@ -2,4 +2,4 @@
 
 ### Rally game created entirely in C++ and OpenGL.
 
-https://youtu.be/XMTyxZpKU84
+[![Rally Sport racing game youtube video](https://img.youtube.com/vi/XMTyxZpKU84/0.jpg)](https://www.youtube.com/watch?v=XMTyxZpKU84)
